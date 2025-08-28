@@ -1,0 +1,120 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #fff;
+  height: 100vh;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  margin: 3px 0 20px;
+}
+.logo {
+  padding: 10px;
+  border-radius: 12px;
+  margin-right: 12px;
+}
+.cartIcon {
+  width: 100px;
+  height: 100px;
+}
+.title h1 {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 700;
+  color: #154d2e;
+  line-height: 1;
+}
+
+.input {
+  width: 100%;
+  max-width: 35%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f1f1;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.continueBtn {
+  width: 100%;
+  max-width: 30%;
+  padding: 14px;
+  background: #1e7a32;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 10px;
+  cursor: pointer;
+}
+.continueBtn:hover {
+  background: #155c25;
+}
+
+.forgot {
+  margin: 12px 0;
+  color: #333;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 30%;
+  margin: 10px 0 14px;
+  color: #666;
+}
+.divider span {
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+.divider p {
+  margin: 0 8px;
+  font-size: 14px;
+}
+
+.googleBtn,
+.facebookBtn {
+  width: 100%;
+  max-width: 40%;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+.googleBtn img,
+.facebookBtn img {
+  width: 25px;
+  margin-right: 8px;
+}
+.facebookBtn {
+  background: #fff;
+}
+
+.signup {
+  margin-top: 16px;
+  font-size: 14px;
+}
+.signup a {
+  color: #155c25;
+  text-decoration: none;
+  font-weight: 600;
+}
