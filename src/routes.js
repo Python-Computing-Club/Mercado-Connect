@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Login from './pages/login';
-import Cadastro from "./pages/cadastro";
+import Cadastro from "./pages/cadastroUsuario";
 
 function AppRoutes() {
   return (

@@ -43,6 +43,12 @@ export default function Login() {
           Cadastre-se
         </Link>
       </p>
+      <p className={styles.signup}>
+        Quer se tornar um parceiro? {" "}
+        <Link to="cadastro-parceiro" className={styles.signupLink}>
+          Cadastre-se
+        </Link>
+      </p>
     </div>
   );
 }

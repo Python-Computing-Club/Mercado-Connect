@@ -5,7 +5,7 @@ import googleIcon from "../../assets/google.png";
 import facebookIcon from "../../assets/facebook.png";
 import Modal from "../../modal/modal.js";
 import styles from "./cadastro.module.css";
-import useCadastroForm from "../../components/CadastroForm";
+import useCadastroForm from "../../components/CadastroForm/index.js";
 
 export default function Cadastro() {
   const {
