@@ -7,7 +7,7 @@ import Modal from "../../modal/modal.js";
 import styles from "./cadastro.module.css";
 import useCadastroForm from "../../components/CadastroForm/index.js";
 
-export default function CadastroUsuario() {
+export default function CadastroMercado() {
   const {
     step,
     form,
@@ -19,6 +19,7 @@ export default function CadastroUsuario() {
     reenviarCodigo,
     validarCodigo,
     handleBack,
+    handleContinue,
     finalizarCadastro,
     pularTelefone,
     setAcceptedTerms,
@@ -41,32 +42,17 @@ export default function CadastroUsuario() {
       <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
         {step === 1 && (
           <>
-            <label>Email ou telefone</label>
+            <label>Email</label>
             <input
               type="text"
               name="contato"
               value={form.contato}
               onChange={handleChange}
-              placeholder="Digite e-mail ou telefone"
+              placeholder="Digite seu e-mail"
             />
             <button type="button" className={styles.submitBtn} onClick={enviarCodigoHandler}>
-              Enviar código
+              Continuar Cadastro
             </button>
-            <div className={styles.divider}>
-              <span></span>
-              <span>ou</span>
-              <span></span>
-            </div>
-            <div className={styles.socialLogin}>
-              <button type="button" className={styles.googleBtn}>
-                <img src={googleIcon} alt="Google" />
-                Entrar com Google
-              </button>
-              <button type="button" className={styles.facebookBtn}>
-                <img src={facebookIcon} alt="Facebook" />
-                Entrar com Facebook
-              </button>
-            </div>
           </>
         )}
 
@@ -125,13 +111,21 @@ export default function CadastroUsuario() {
               name="nome"
               value={form.nome}
               onChange={handleChange}
-              placeholder="Digite seu nome"
+              placeholder="Nome e Sobrenome"
+            />
+            <label>Celular</label>
+            <input
+              type="text"
+              name="celular"
+              value={form.celular}
+              onChange={handleChange}
+              placeholder="Insira seu número de celular"
             />
             <div className={styles.buttonGroup}>
               <button type="button" className={styles.backBtn} onClick={handleBack}>
                 Voltar
               </button>
-              <button type="button" className={styles.submitBtn} onClick={() => setForm((f) => ({ ...f, step: 4 }))}>
+              <button type="button" className={styles.submitBtn} onClick={handleContinue}>
                 Continuar
               </button>
             </div>
@@ -140,13 +134,59 @@ export default function CadastroUsuario() {
 
         {step === 4 && (
           <>
-            <label>Telefone (opcional)</label>
+            <label>CEP</label>
             <input
               type="text"
-              name="telefoneOpcional"
-              value={form.telefoneOpcional}
+              name="cep"
+              value={form.cep}
               onChange={handleChange}
-              placeholder="Digite seu telefone (opcional)"
+              placeholder="Insira o CEP da loja"
+            />
+            <label>Endereço</label>
+            <input
+              type="text"
+              name="endereco"
+              value={form.endereco}
+              onChange={handleChange}
+              placeholder="Insira o endereço de sua loja"
+            />
+            <label>Estado</label>
+            <input
+              type="text"
+              name="estado"
+              value={form.estado}
+              onChange={handleChange}
+              disabled={true}
+            />
+            <label>Cidade</label>
+            <input
+              type="text"
+              name="cidade"
+              value={form.cidade}
+              onChange={handleChange}
+              disabled={true}
+            />
+            <label>Bairro</label>
+            <input
+              type="text"
+              name="bairro"
+              value={form.bairro}
+              onChange={handleChange}
+            />
+            <label>Número</label>
+            <input
+              type="number"
+              name="numero"
+              value={form.numero}
+              onChange={handleChange}
+            />
+            <label>Complemento</label>
+            <input
+              type="text"
+              name="complemento"
+              value={form.complemento}
+              onChange={handleChange}
+              placeholder="Ex: Casa A"
             />
             <div className={styles.privacyContainer}>
               <input
@@ -169,9 +209,6 @@ export default function CadastroUsuario() {
             <div className={styles.buttonGroup}>
               <button type="button" className={styles.backBtn} onClick={handleBack}>
                 Voltar
-              </button>
-              <button type="button" className={styles.skipBtn} onClick={pularTelefone}>
-                Pular
               </button>
               <button type="button" className={styles.submitBtn} onClick={finalizarCadastro}>
                 Finalizar cadastro

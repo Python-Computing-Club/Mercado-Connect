@@ -1,11 +1,11 @@
-// src/components/CadastroForm.js
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useFormatTelefone from "../../hooks/useFormatTelefone";
 import useEmailCodigo from "../../hooks/useEmailCodigo";
+import useStepNavigation from "../../hooks/useStepNavigation";
+import useCodigoTimer from "../../hooks/useCodigoTimer";
 
 export default function CadastroForm() {
-  const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     contato: "",
     tipoContato: "",
@@ -14,6 +14,7 @@ export default function CadastroForm() {
     nome: "",
     telefoneOpcional: "",
   });
+
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [modal, setModal] = useState({ open: false, title: "", message: "" });
   const [tempoRestante, setTempoRestante] = useState(0);
@@ -21,6 +22,14 @@ export default function CadastroForm() {
   const navigate = useNavigate();
   const { enviarCodigo } = useEmailCodigo();
   const { formatTelefone } = useFormatTelefone();
+
+  const { step, setStep, handleBack, handleContinue } = useStepNavigation(1);
+  useCodigoTimer({
+    active: step === 2 && !!form.codigoGerado,
+    duration: 300,
+    onExpire: () => showAlert("Código expirado", "Seu código expirou. Reenvie para continuar."),
+    setTime: setTempoRestante,
+  });
 
   const showAlert = (title, message) => setModal({ open: true, title, message });
 
@@ -48,23 +57,6 @@ export default function CadastroForm() {
 
   const reenviarCodigo = () => enviarCodigoHandler();
 
-  useEffect(() => {
-    if (step !== 2 || !form.codigoGerado) return;
-
-    const timer = setInterval(() => {
-      setTempoRestante((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          showAlert("Código expirado", "Seu código expirou. Reenvie para continuar.");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [step, form.codigoGerado]);
-
   const validarCodigo = () => {
     if (tempoRestante === 0) return showAlert("Código expirado", "Reenvie o código para continuar.");
     if (form.codigo.length !== 6) return;
@@ -74,10 +66,6 @@ export default function CadastroForm() {
     } else {
       showAlert("Inválido", "Código incorreto.");
     }
-  };
-
-  const handleBack = () => {
-    if (step > 1) setStep((s) => s - 1);
   };
 
   const finalizarCadastro = () => {
@@ -103,6 +91,7 @@ export default function CadastroForm() {
     reenviarCodigo,
     validarCodigo,
     handleBack,
+    handleContinue,
     finalizarCadastro,
     pularTelefone,
     setAcceptedTerms,
