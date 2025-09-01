@@ -71,7 +71,8 @@ label {
 
 input[type="text"],
 input[type="email"],
-input[type="tel"] {
+input[type="tel"],
+input[type="number"] {
   width: 100%;
   padding: 12px;
   margin-bottom: 13px;
@@ -115,37 +116,6 @@ input:focus {
   gap: 10px;
   margin-top: 10px;
   width: 100%;
-}
-
-.googleBtn,
-.facebookBtn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  cursor: pointer;
-  background: #f9f9f9;
-  font-size: 14px;
-  transition: background 0.2s ease;
-}
-
-.googleBtn img,
-.facebookBtn img {
-  width: 20px;
-  height: 20px;
-}
-
-.googleBtn:hover {
-  background: #f0f0f0;
-}
-
-.facebookBtn:hover {
-  background: #e7f0ff;
-  border-color: #3b5998;
 }
 
 .submitBtn {

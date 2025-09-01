@@ -12,7 +12,7 @@ export default function CadastroForm() {
     codigo: "",
     codigoGerado: "",
     nome: "",
-    telefoneOpcional: "",
+    telefone: "",
   });
 
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -41,6 +41,9 @@ export default function CadastroForm() {
       } else {
         setForm({ ...form, contato: value, tipoContato: "email" });
       }
+    } else if (step === 3 && name === "contato"){
+      const apenasNumeros = value.replace(/\D/g, "");
+      setForm({ ...form, contato: formatTelefone(apenasNumeros), tipoContato: "telefone" });
     } else {
       setForm({ ...form, [name]: value });
     }

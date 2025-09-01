@@ -1,11 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import cartIcon from "../../assets/teste.png";
-import googleIcon from "../../assets/google.png";
-import facebookIcon from "../../assets/facebook.png";
 import Modal from "../../modal/modal.js";
 import styles from "./cadastro.module.css";
-import useCadastroForm from "../../components/CadastroForm/index.js";
+import useCadastroMercadoForm from "../../components/CadastroMercadoForm/index.js";
 
 export default function CadastroMercado() {
   const {
@@ -15,17 +13,16 @@ export default function CadastroMercado() {
     modal,
     tempoRestante,
     handleChange,
-    enviarCodigoHandler, // agora vem do hook, encapsula tudo
+    enviarCodigoHandler, 
     reenviarCodigo,
     validarCodigo,
     handleBack,
     handleContinue,
     finalizarCadastro,
-    pularTelefone,
     setAcceptedTerms,
     setModal,
     setForm,
-  } = useCadastroForm();
+  } = useCadastroMercadoForm();
 
   return (
     <div className={styles.container}>
@@ -45,8 +42,8 @@ export default function CadastroMercado() {
             <label>Email</label>
             <input
               type="text"
-              name="contato"
-              value={form.contato}
+              name="email"
+              value={form.email}
               onChange={handleChange}
               placeholder="Digite seu e-mail"
             />
@@ -116,8 +113,8 @@ export default function CadastroMercado() {
             <label>Celular</label>
             <input
               type="text"
-              name="celular"
-              value={form.celular}
+              name="telefone"
+              value={form.telefone}
               onChange={handleChange}
               placeholder="Insira seu número de celular"
             />
@@ -148,7 +145,7 @@ export default function CadastroMercado() {
               name="endereco"
               value={form.endereco}
               onChange={handleChange}
-              placeholder="Insira o endereço de sua loja"
+              disabled={true}
             />
             <label>Estado</label>
             <input
@@ -172,6 +169,7 @@ export default function CadastroMercado() {
               name="bairro"
               value={form.bairro}
               onChange={handleChange}
+              disabled={true}
             />
             <label>Número</label>
             <input
