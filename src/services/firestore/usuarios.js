@@ -2,6 +2,11 @@ import {collection, addDoc, getDocs, updateDoc, deleteDoc, doc} from "firebase/f
 
 const usuariosRef = collection(db, "usuario");
 
+//Campos de usuário:
+//- nome
+//- email
+//- telefone
+
 //criar um usuário
 export const criarUsuario = async (dados) => {
     try{

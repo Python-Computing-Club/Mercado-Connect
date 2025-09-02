@@ -3,6 +3,25 @@ import { db } from "../firebase";
 
 const mercadosRef = collection(db, "mercados");
 
+// Campos de mercado:
+
+// - nome
+// - email
+// - telefone
+// - endereco 
+//   - cep
+//   - logradouro
+//   - cidade
+//   - estado
+//   - bairro
+//   - numero
+//   - complemento
+// - proprietario
+// - cpf_proprietario
+// - cnpj
+// - estabelecimento
+
+
 //criar um mercado
 export const criarMercado = async (dados) => {
   try{
