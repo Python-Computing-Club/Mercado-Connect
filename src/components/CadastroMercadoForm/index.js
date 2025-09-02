@@ -7,10 +7,10 @@ import useCodigoTimer from "../../hooks/useCodigoTimer";
 import useValidarCodigo from "../../hooks/useValidarCodigo";
 import consultarCEP from "../../hooks/useValidarEndereco";
 import FormatCEP from "../../hooks/FormatCEP";
+import { criarMercado } from "../../services/firestore/mercados";
 
 export default function CadastroMercadoForm() {
     const [form, setForm] = useState({
-        tipoContato: "",
         codigo: "",
         codigoGerado: "",
         nome: "",
@@ -72,8 +72,7 @@ export default function CadastroMercadoForm() {
             const apenasNumeros = value.replace(/\D/g, "");
             setForm((prev) => ({
                 ...prev,
-                telefone: formatTelefone(apenasNumeros),
-                tipoContato: "telefone",
+                telefone: formatTelefone(apenasNumeros)
             }));
             return;
         } else if (step === 3 && name === "nome") {
@@ -157,11 +156,34 @@ export default function CadastroMercadoForm() {
             showAlert,
         });
 
-        const finalizarCadastro = () => {
+        const finalizarCadastro = async () => {
             if (!form.proprietario.trim() || !form.cpf.length === 14 || !form.cnpj.length === 18 || !form.loja.trim()) return showAlert("Campos Obrigatórios", "Preencha todos os campos!");
             if (!acceptedTerms) return showAlert("Termos não aceitos", "Aceite os termos para continuar.");
-            showAlert("Cadastro realizado", "Seu cadastro foi concluído com sucesso!");
-            setTimeout(() => navigate("/"), 1500);
+            console.log(form)
+            const cadastroMercado = await criarMercado({
+                nome: form.nome,
+                email: form.email,
+                telefone: form.telefone,
+                endereco:{
+                    cep: form.cep,
+                    logradouro: form.endereco,
+                    cidade: form.cidade,
+                    estado: form.estado,
+                    bairro: form.bairro,
+                    numero: form.numero,
+                    complemento: form.complemento ?? ""
+                },
+                proprietario: form.proprietario,
+                cpf_proprietario: form.cpf,
+                cnpj: form.cnpj,
+                estabelecimento: form.loja
+            });
+            if(cadastroMercado){
+                showAlert("Cadastro realizado", "Seu cadastro foi concluído com sucesso!");
+                setTimeout(() => navigate("/"), 1500);
+            }else{
+                showAlert("Erro no cadastro", "Verifique os dados e tente novamente.");
+            }
         };
 
         return {
