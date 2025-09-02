@@ -15,7 +15,7 @@ export default function CadastroUsuario() {
     modal,
     tempoRestante,
     handleChange,
-    enviarCodigoHandler, // agora vem do hook, encapsula tudo
+    enviarCodigoHandler, 
     reenviarCodigo,
     validarCodigo,
     handleBack,
