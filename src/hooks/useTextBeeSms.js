@@ -33,27 +33,25 @@ export function useTextBeeSms() {
       setResponse(res.data.data);
       return res.data.data;
     } catch (err) {
-      const errMsg =
-        err.response?.data?.message || 'Erro ao enviar SMS via TextBee.';
+      const errMsg = err.response?.data?.message || 'Erro ao enviar SMS via TextBee.';
       setError(errMsg);
-      console.error('TextBee SMS Error:', err);
       return null;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const sendVerificationCode = useCallback(
-    async (recipient) => {
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      setVerificationCode(code);
+  const sendVerificationCode = useCallback(async (recipient) => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setVerificationCode(code);
 
-      const message = `Seu código de verificação é ${code}. Ele expira em 5 minutos.`;
+    const message = `Seu código de verificação é ${code}. Ele expira em 5 minutos.`;
 
-      return await sendSms(recipient, message);
-    },
-    [sendSms]
-  );
+    const result = await sendSms(recipient, message);
+    if (!result) return null;
+
+    return code;
+  }, [sendSms]);
 
   return {
     sendSms,

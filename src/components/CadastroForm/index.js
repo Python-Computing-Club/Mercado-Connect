@@ -4,13 +4,9 @@ import useFormatTelefone from "../../hooks/useFormatTelefone";
 import useEmailCodigo from "../../hooks/useEmailCodigo";
 import useStepNavigation from "../../hooks/useStepNavigation";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
-import axios from "axios";
+import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 
 export default function CadastroForm() {
-  const BASE_URL = process.env.REACT_APP_BASE_URL;
-  const API_KEY = process.env.REACT_APP_API_KEY;
-  const DEVICE_ID = process.env.REACT_APP_DEVICE_ID;
-
   const [form, setForm] = useState({
     contato: "",
     tipoContato: "",
@@ -30,14 +26,15 @@ export default function CadastroForm() {
   const navigate = useNavigate();
   const { enviarCodigo } = useEmailCodigo();
   const { formatTelefone } = useFormatTelefone();
+  const { sendVerificationCode } = useTextBeeSms();
 
   const { step, setStep, handleBack, handleContinue: handleNextStep } = useStepNavigation(1, {
-  customBack: (currentStep) => {
-    if (currentStep === 3) return 1;
-    if (currentStep === 5 || currentStep === 6) return 4;
-    return null;
-  },
-});
+    customBack: (currentStep) => {
+      if (currentStep === 3) return 1;
+      if (currentStep === 5 || currentStep === 6) return 4;
+      return null;
+    },
+  });
 
   useCodigoTimer({
     active:
@@ -84,6 +81,7 @@ export default function CadastroForm() {
 
   const enviarCodigoHandler = async () => {
     let codigoGerado = "";
+
     if (form.tipoContato === "email") {
       codigoGerado = await enviarCodigo(
         form.contato,
@@ -92,22 +90,17 @@ export default function CadastroForm() {
         showAlert
       );
     } else if (form.tipoContato === "telefone") {
-      const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-      const message = `Seu código de verificação é: ${codigo}. Ele expira em 5 minutos.`;
-      try {
-        await axios.post(
-          `${BASE_URL}/gateway/devices/${DEVICE_ID}/send-sms`,
-          { recipients: [form.contato], message },
-          { headers: { "x-api-key": API_KEY } }
-        );
-        codigoGerado = codigo;
-      } catch (err) {
-        const errMsg = err.response?.data?.message || err.message;
-        showAlert("Erro ao enviar SMS", errMsg);
+      const result = await sendVerificationCode(form.contato);
+      if (!result) {
+        showAlert("Erro ao enviar SMS", "Falha ao enviar código.");
         return;
       }
+      codigoGerado = result;
+      showAlert("Código enviado", `Código enviado para: ${form.contato}`);
     }
+
     if (!codigoGerado) return;
+
     setForm((prev) => ({ ...prev, codigoGerado, codigo: "" }));
     setTempoRestante(300);
     setStep(2);
@@ -131,27 +124,22 @@ export default function CadastroForm() {
   const enviarCodigoOpcional = async () => {
     const numero = form.telefoneOpcional.replace(/\D/g, "");
     if (!numero) return;
-    const telefoneFormatado = form.telefoneOpcional;
-    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-    const message = `Código de verificação: ${codigo}. Ele expira em 5 minutos.`;
-    try {
-      await axios.post(
-        `${BASE_URL}/gateway/devices/${DEVICE_ID}/send-sms`,
-        { recipients: [telefoneFormatado], message },
-        { headers: { "x-api-key": API_KEY } }
-      );
-      setForm((prev) => ({
-        ...prev,
-        telefone: telefoneFormatado,
-        codigoGeradoOpcional: codigo,
-        codigoOpcional: "",
-      }));
-      setStep(5);
-      setTempoRestante(300);
-    } catch (err) {
-      const errMsg = err.response?.data?.message || err.message;
-      showAlert("Erro ao enviar SMS", errMsg);
+
+    const result = await sendVerificationCode(form.telefoneOpcional);
+    if (!result) {
+      showAlert("Erro ao enviar SMS", "Falha ao enviar código.");
+      return;
     }
+
+    setForm((prev) => ({
+      ...prev,
+      telefone: form.telefoneOpcional,
+      codigoGeradoOpcional: result,
+      codigoOpcional: "",
+    }));
+
+    setStep(5);
+    setTempoRestante(300);
   };
 
   const validarCodigoOpcional = () => {
