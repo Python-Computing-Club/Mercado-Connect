@@ -15,15 +15,14 @@ export default function CadastroUsuario() {
     modal,
     tempoRestante,
     handleChange,
-    enviarCodigoHandler, 
+    enviarCodigoHandler,
     reenviarCodigo,
     validarCodigo,
     handleBack,
+    handleContinue,
     finalizarCadastro,
-    pularTelefone,
     setAcceptedTerms,
     setModal,
-    setForm,
   } = useCadastroForm();
 
   return (
@@ -49,7 +48,11 @@ export default function CadastroUsuario() {
               onChange={handleChange}
               placeholder="Digite e-mail ou telefone"
             />
-            <button type="button" className={styles.submitBtn} onClick={enviarCodigoHandler}>
+            <button
+              type="button"
+              className={styles.submitBtn}
+              onClick={enviarCodigoHandler}
+            >
               Enviar código
             </button>
             <div className={styles.divider}>
@@ -78,7 +81,7 @@ export default function CadastroUsuario() {
               name="codigo"
               value={form.codigo}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, codigo: e.target.value.replace(/\D/g, "") }))
+                handleChange({ target: { name: "codigo", value: e.target.value } })
               }
               placeholder="Digite o código"
               maxLength={6}
@@ -100,7 +103,9 @@ export default function CadastroUsuario() {
                   backgroundColor:
                     form.codigo.length === 6 && tempoRestante > 0 ? "#006400" : "#ccc",
                   cursor:
-                    form.codigo.length === 6 && tempoRestante > 0 ? "pointer" : "not-allowed",
+                    form.codigo.length === 6 && tempoRestante > 0
+                      ? "pointer"
+                      : "not-allowed",
                 }}
               >
                 Confirmar código
@@ -131,7 +136,11 @@ export default function CadastroUsuario() {
               <button type="button" className={styles.backBtn} onClick={handleBack}>
                 Voltar
               </button>
-              <button type="button" className={styles.submitBtn} onClick={() => setForm((f) => ({ ...f, step: 4 }))}>
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleContinue}
+              >
                 Continuar
               </button>
             </div>
@@ -143,11 +152,70 @@ export default function CadastroUsuario() {
             <label>Telefone (opcional)</label>
             <input
               type="text"
-              name="telefone"
-              value={form.telefone}
+              name="telefoneOpcional"
+              value={form.telefoneOpcional}
               onChange={handleChange}
               placeholder="Digite seu telefone (opcional)"
             />
+            <div className={styles.buttonGroup}>
+              <button type="button" className={styles.backBtn} onClick={handleBack}>
+                Voltar
+              </button>
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleContinue}
+              >
+                Continuar
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 5 && (
+          <>
+            <label>Digite o código enviado para seu telefone opcional</label>
+            <input
+              type="text"
+              name="codigoOpcional"
+              value={form.codigoOpcional}
+              onChange={(e) =>
+                handleChange({ target: { name: "codigoOpcional", value: e.target.value } })
+              }
+              placeholder="Digite o código"
+              maxLength={6}
+            />
+            <p>
+              Tempo restante: {Math.floor(tempoRestante / 60)}:
+              {("0" + (tempoRestante % 60)).slice(-2)}
+            </p>
+            <div className={styles.buttonGroup}>
+              <button type="button" className={styles.backBtn} onClick={handleBack}>
+                Voltar
+              </button>
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleContinue}
+                disabled={form.codigoOpcional.length !== 6 || tempoRestante === 0}
+                style={{
+                  backgroundColor:
+                    form.codigoOpcional.length === 6 && tempoRestante > 0 ? "#006400" : "#ccc",
+                  cursor:
+                    form.codigoOpcional.length === 6 && tempoRestante > 0
+                      ? "pointer"
+                      : "not-allowed",
+                }}
+              >
+                Confirmar código
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 6 && (
+          <>
+            <p>Quase lá! Confirme abaixo para finalizar seu cadastro:</p>
             <div className={styles.privacyContainer}>
               <input
                 type="checkbox"
@@ -161,19 +229,25 @@ export default function CadastroUsuario() {
                   Termos de Uso
                 </a>{" "}
                 e a{" "}
-                <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer">
+                <a
+                  href="/politica-de-privacidade"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Política de Privacidade
-                </a>.
+                </a>
+                .
               </label>
             </div>
             <div className={styles.buttonGroup}>
               <button type="button" className={styles.backBtn} onClick={handleBack}>
                 Voltar
               </button>
-              <button type="button" className={styles.skipBtn} onClick={pularTelefone}>
-                Pular
-              </button>
-              <button type="button" className={styles.submitBtn} onClick={finalizarCadastro}>
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={finalizarCadastro}
+              >
                 Finalizar cadastro
               </button>
             </div>
