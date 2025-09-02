@@ -102,7 +102,7 @@ export default function CadastroMercado() {
 
         {step === 3 && (
           <>
-            <label>Nome completo</label>
+            <label>Nome completo *</label>
             <input
               type="text"
               name="nome"
@@ -110,7 +110,7 @@ export default function CadastroMercado() {
               onChange={handleChange}
               placeholder="Nome e Sobrenome"
             />
-            <label>Celular</label>
+            <label>Celular *</label>
             <input
               type="text"
               name="telefone"
@@ -122,7 +122,7 @@ export default function CadastroMercado() {
               <button type="button" className={styles.backBtn} onClick={handleBack}>
                 Voltar
               </button>
-              <button type="button" className={styles.submitBtn} onClick={handleContinue}>
+              <button type="button" className={styles.submitBtn} onClick={() => handleContinue(form)}>
                 Continuar
               </button>
             </div>
@@ -131,9 +131,10 @@ export default function CadastroMercado() {
 
         {step === 4 && (
           <>
-            <label>CEP</label>
+            <label>CEP *</label>
             <input
               type="text"
+              maxLength="9"
               name="cep"
               value={form.cep}
               onChange={handleChange}
@@ -171,7 +172,7 @@ export default function CadastroMercado() {
               onChange={handleChange}
               disabled={true}
             />
-            <label>Número</label>
+            <label>Número *</label>
             <input
               type="number"
               name="numero"
@@ -185,6 +186,53 @@ export default function CadastroMercado() {
               value={form.complemento}
               onChange={handleChange}
               placeholder="Ex: Casa A"
+            />
+            <div className={styles.buttonGroup}>
+              <button type="button" className={styles.backBtn} onClick={handleBack}>
+                Voltar
+              </button>
+              <button type="button" className={styles.submitBtn} onClick={() => handleContinue(form)}>
+                Continuar
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 5 && (
+          <>
+            <label>Nome do Proprietário *</label>
+            <input
+              type="text"
+              name="proprietario"
+              value={form.proprietario}
+              onChange={handleChange}
+              placeholder="Insira o nome do proprietário"
+            />
+            <label>CPF do Responsável *</label>
+            <input
+              type="text"
+              name="cpf"
+              maxLength="14"
+              value={form.cpf}
+              onChange={handleChange}
+              placeholder="Insira o CPF do responsável pelo estabelecimento"
+            />
+            <label>CNPJ *</label>
+            <input
+              type="text"
+              name="cnpj"
+              maxLength="18"
+              value={form.cnpj}
+              onChange={handleChange}
+              placeholder="Insira o CNPJ"
+            />
+            <label>Nome da Loja *</label>
+            <input
+              type="text"
+              name="loja"
+              value={form.loja}
+              onChange={handleChange}
+              placeholder="Insira o nome da loja"
             />
             <div className={styles.privacyContainer}>
               <input
