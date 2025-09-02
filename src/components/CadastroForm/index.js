@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useFormatTelefone from "../../hooks/useFormatTelefone";
 import useEmailCodigo from "../../hooks/useEmailCodigo";
 import useStepNavigation from "../../hooks/useStepNavigation";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
+import { criarUsuario } from "../../services/firestore/usuarios";
 
-export default function CadastroForm() {
+export default function useCadastroForm() {
   const [form, setForm] = useState({
     contato: "",
     tipoContato: "",
@@ -14,7 +14,6 @@ export default function CadastroForm() {
     codigoGerado: "",
     nome: "",
     telefone: "",
-    telefoneOpcional: "",
     codigoOpcional: "",
     codigoGeradoOpcional: "",
   });
@@ -25,56 +24,60 @@ export default function CadastroForm() {
 
   const navigate = useNavigate();
   const { enviarCodigo } = useEmailCodigo();
-  const { formatTelefone } = useFormatTelefone();
   const { sendVerificationCode } = useTextBeeSms();
 
-  const { step, setStep, handleBack, handleContinue: handleNextStep } = useStepNavigation(1, {
+  const { step, setStep, handleBack } = useStepNavigation(1, {
     customBack: (currentStep) => {
       if (currentStep === 3) return 1;
-      if (currentStep === 5 || currentStep === 6) return 4;
+      if (currentStep === 5 || currentStep === 6) return form.tipoContato === "email" ? 4 : 3;
       return null;
     },
   });
 
   useCodigoTimer({
-    active:
-      (step === 2 && !!form.codigoGerado) ||
-      (step === 5 && !!form.codigoGeradoOpcional),
+    active: (step === 2 && !!form.codigoGerado) || (step === 5 && !!form.codigoGeradoOpcional),
     duration: 300,
-    onExpire: () =>
-      showAlert("Código expirado", "Seu código expirou. Reenvie para continuar."),
+    onExpire: () => showAlert("Código expirado", "Seu código expirou. Reenvie para continuar."),
     setTime: setTempoRestante,
   });
 
-  const showAlert = (title, message) =>
-    setModal({ open: true, title, message });
+  const showAlert = (title, message) => setModal({ open: true, title, message });
 
   const handleChange = ({ target: { name, value } }) => {
     if (step === 1 && name === "contato") {
       const isEmail = value.includes("@");
       const onlyNumbers = value.replace(/\D/g, "");
+
       if (isEmail) {
         setForm({ ...form, contato: value, tipoContato: "email" });
         return;
       }
+
       if (onlyNumbers.length < 4) {
         setForm({ ...form, contato: value, tipoContato: "" });
         return;
       }
+
       let formatted = onlyNumbers;
       if (!onlyNumbers.startsWith("55")) {
         formatted = "55" + onlyNumbers;
       }
+
       const formattedPhone = "+" + formatted;
-      setForm({ ...form, contato: formattedPhone, tipoContato: "telefone" });
-    } else if (step === 4 && name === "telefoneOpcional") {
+      setForm({ ...form, contato: formattedPhone, tipoContato: "telefone", telefone: formattedPhone });
+    }
+
+    else if (step === 4 && name === "telefone") {
       const apenasNumeros = value.replace(/\D/g, "");
       let formatted = apenasNumeros;
       if (apenasNumeros.length >= 4 && !apenasNumeros.startsWith("55")) {
         formatted = "55" + apenasNumeros;
       }
-      setForm({ ...form, telefoneOpcional: "+" + formatted });
-    } else {
+      const telefoneFormatado = "+" + formatted;
+      setForm({ ...form, telefone: telefoneFormatado });
+    }
+
+    else {
       setForm({ ...form, [name]: value });
     }
   };
@@ -83,12 +86,7 @@ export default function CadastroForm() {
     let codigoGerado = "";
 
     if (form.tipoContato === "email") {
-      codigoGerado = await enviarCodigo(
-        form.contato,
-        form.tipoContato,
-        showAlert,
-        showAlert
-      );
+      codigoGerado = await enviarCodigo(form.contato, form.tipoContato, showAlert, showAlert);
     } else if (form.tipoContato === "telefone") {
       const result = await sendVerificationCode(form.contato);
       if (!result) {
@@ -113,6 +111,7 @@ export default function CadastroForm() {
       return showAlert("Código expirado", "Reenvie o código para continuar.");
     }
     if (form.codigo.length !== 6) return;
+
     if (form.codigo === form.codigoGerado) {
       setStep(3);
       setForm((prev) => ({ ...prev, codigo: "" }));
@@ -122,10 +121,19 @@ export default function CadastroForm() {
   };
 
   const enviarCodigoOpcional = async () => {
-    const numero = form.telefoneOpcional.replace(/\D/g, "");
-    if (!numero) return;
+    let numero = form.telefone.replace(/\D/g, "");
+    if (!numero || numero.length < 10) {
+      showAlert("Telefone inválido", "Digite um número válido com DDD.");
+      return;
+    }
 
-    const result = await sendVerificationCode(form.telefoneOpcional);
+    if (!numero.startsWith("55")) {
+      numero = "55" + numero;
+    }
+
+    const telefoneFormatado = "+" + numero;
+
+    const result = await sendVerificationCode(telefoneFormatado);
     if (!result) {
       showAlert("Erro ao enviar SMS", "Falha ao enviar código.");
       return;
@@ -133,7 +141,7 @@ export default function CadastroForm() {
 
     setForm((prev) => ({
       ...prev,
-      telefone: form.telefoneOpcional,
+      telefone: telefoneFormatado,
       codigoGeradoOpcional: result,
       codigoOpcional: "",
     }));
@@ -150,32 +158,55 @@ export default function CadastroForm() {
     }
   };
 
-  const finalizarCadastro = () => {
+  const finalizarCadastro = async () => {
     if (!form.nome.trim()) {
       return showAlert("Nome obrigatório", "Informe seu nome completo.");
     }
+
     if (!acceptedTerms) {
       return showAlert("Termos não aceitos", "Aceite os termos para continuar.");
     }
-    showAlert("Cadastro realizado", "Seu cadastro foi concluído com sucesso!");
-    setTimeout(() => navigate("/"), 1500);
+
+    const usuario = {
+      nome: form.nome,
+      email: form.tipoContato === "email" ? form.contato : "",
+      telefone: form.tipoContato === "telefone" ? form.contato : form.telefone,
+    };
+
+    const resultado = await criarUsuario(usuario);
+
+    if (resultado) {
+      showAlert("Cadastro realizado", "Seu cadastro foi concluído com sucesso!");
+      setTimeout(() => navigate("/"), 1500);
+    } else {
+      showAlert("Erro", "Não foi possível concluir o cadastro.");
+    }
   };
 
   const handleContinue = () => {
     if (step === 3) {
-      if (!form.nome.trim())
+      if (!form.nome.trim()) {
         return showAlert("Nome obrigatório", "Informe seu nome completo.");
-      setStep(4);
-    } else if (step === 4) {
-      const numero = form.telefoneOpcional.replace(/\D/g, "");
-      if (!numero) {
+      }
+
+      if (form.tipoContato === "email") {
+        setStep(4);
+      } else {
         setStep(6);
+      }
+
+    } else if (step === 4) {
+      const numero = form.telefone.replace(/\D/g, "");
+      if (!numero || numero.length < 10) {
         showAlert("Telefone não informado", "Você poderá adicioná-lo mais tarde.");
+        setStep(6);
       } else {
         enviarCodigoOpcional();
       }
+
     } else if (step === 5) {
       validarCodigoOpcional();
+
     } else if (step === 6) {
       finalizarCadastro();
     }

@@ -152,8 +152,8 @@ export default function CadastroUsuario() {
             <label>Telefone (opcional)</label>
             <input
               type="text"
-              name="telefoneOpcional"
-              value={form.telefoneOpcional}
+              name="telefone"
+              value={form.telefone} 
               onChange={handleChange}
               placeholder="Digite seu telefone (opcional)"
             />

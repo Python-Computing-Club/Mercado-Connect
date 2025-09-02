@@ -3,8 +3,21 @@ import { Link } from "react-router-dom";
 import cartIcon from "../../assets/teste.png";
 import googleIcon from "../../assets/google.png";
 import facebookIcon from "../../assets/facebook.png";
+import useLoginFormLogic from "../../components/LoginForm";
 
 export default function Login() {
+  const {
+    form,
+    step,
+    modal,
+    tempoRestante,
+    handleChange,
+    enviarCodigoHandler,
+    validarCodigo,
+    setForm,
+    setModal,
+  } = useLoginFormLogic();
+
   return (
     <div className={styles.container}>
       <Link to="/" className={styles.logoContainer}>
@@ -17,9 +30,44 @@ export default function Login() {
         </div>
       </Link>
 
-      <input type="email" placeholder="E-mail" className={styles.input} />
+      {modal.open && (
+        <div className={styles.modal}>
+          <h2>{modal.title}</h2>
+          <p>{modal.message}</p>
+          <button onClick={() => setModal({ ...modal, open: false })}>Fechar</button>
+        </div>
+      )}
 
-      <button className={styles.continueBtn}>Continue</button>
+      {step === 1 && (
+        <>
+          <input
+            type="text"
+            placeholder="E-mail ou telefone"
+            className={styles.input}
+            value={form.contato}
+            onChange={handleChange}
+          />
+          <button className={styles.continueBtn} onClick={enviarCodigoHandler}>
+            Continue
+          </button>
+        </>
+      )}
+
+      {step === 2 && (
+        <>
+          <input
+            type="text"
+            placeholder="Digite o código"
+            className={styles.input}
+            value={form.codigo}
+            onChange={(e) => setForm({ ...form, codigo: e.target.value })}
+          />
+          <p className={styles.timer}>Tempo restante: {tempoRestante}s</p>
+          <button className={styles.continueBtn} onClick={validarCodigo}>
+            Validar código
+          </button>
+        </>
+      )}
 
       <div className={styles.divider}>
         <span></span>
@@ -44,8 +92,8 @@ export default function Login() {
         </Link>
       </p>
       <p className={styles.signup}>
-        Quer se tornar um parceiro? {" "}
-        <Link to="cadastro-parceiro" className={styles.signupLink}>
+        Quer se tornar um parceiro?{" "}
+        <Link to="/cadastro-parceiro" className={styles.signupLink}>
           Cadastre-se
         </Link>
       </p>
