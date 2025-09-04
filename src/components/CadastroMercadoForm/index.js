@@ -8,6 +8,7 @@ import useValidarCodigo from "../../hooks/useValidarCodigo";
 import consultarCEP from "../../hooks/useValidarEndereco";
 import FormatCEP from "../../hooks/FormatCEP";
 import { criarMercado } from "../../services/firestore/mercados";
+import verificaCNPJ from "../../hooks/verificaCNPJ";
 
 export default function CadastroMercadoForm() {
     const [form, setForm] = useState({
@@ -88,7 +89,6 @@ export default function CadastroMercadoForm() {
             const cepLimpo = value.replace(/\D/g, "");
 
             if (cepLimpo.length === 8) {
-                console.log(cepLimpo)
                 const endereco = await consultarCEP(cepLimpo, showAlert);
                 if (endereco && !endereco.erro) {
                     setForm((prev) => ({
@@ -121,12 +121,12 @@ export default function CadastroMercadoForm() {
         } else if (step === 5 && name === "cpf") {
             const cpfLimpo = value.replace(/\D/g, "");
             const cpfFormatado = cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-            setForm((prev) => ({...prev, cpf: cpfFormatado}))
+            setForm((prev) => ({ ...prev, cpf: cpfFormatado }))
 
         } else if (step === 5 && name === "cnpj") {
             const cnpjLimpo = value.replace(/\D/g, "");
             const cnpjFormatado = cnpjLimpo.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
-            setForm((prev) => ({...prev, cnpj: cnpjFormatado}))
+            setForm((prev) => ({ ...prev, cnpj: cnpjFormatado }))
 
         } else {
             setForm((prev) => ({
@@ -134,74 +134,80 @@ export default function CadastroMercadoForm() {
                 [name]: value,
             }));
         }
-        };
+    };
 
 
-        const enviarCodigoHandler = async () => {
-            const codigoGerado = await enviarCodigo(form.email, "email", showAlert, showAlert);
-            if (!codigoGerado) return;
+    const enviarCodigoHandler = async () => {
+        const codigoGerado = await enviarCodigo(form.email, "email", showAlert, showAlert);
+        if (!codigoGerado) return;
 
-            setForm((prev) => ({ ...prev, codigoGerado, codigo: "" }));
-            setTempoRestante(300);
-            setStep(2);
-        };
+        setForm((prev) => ({ ...prev, codigoGerado, codigo: "" }));
+        setTempoRestante(300);
+        setStep(2);
+    };
 
-        const reenviarCodigo = () => enviarCodigoHandler();
+    const reenviarCodigo = () => enviarCodigoHandler();
 
-        const { validarCodigo } = useValidarCodigo({
-            form,
-            tempoRestante,
-            setStep,
-            setForm,
-            showAlert,
+    const { validarCodigo } = useValidarCodigo({
+        form,
+        tempoRestante,
+        setStep,
+        setForm,
+        showAlert,
+    });
+
+    const finalizarCadastro = async () => {
+        if (!form.proprietario.trim() || !form.cpf.length === 14 || !form.cnpj.length === 18 || !form.loja.trim()) return showAlert("Campos Obrigatórios", "Preencha todos os campos!");
+        const cnpjValido = await verificaCNPJ(
+            form.cnpj.replace(/\D/g, ""),
+            form.cpf.replace(/\D/g, ""),
+            form.proprietario,
+            showAlert
+        );
+        if (!cnpjValido) return;
+        if (!acceptedTerms) return showAlert("Termos não aceitos", "Aceite os termos para continuar.");
+        const cadastroMercado = await criarMercado({
+            nome: form.nome,
+            email: form.email,
+            telefone: form.telefone,
+            endereco: {
+                cep: form.cep,
+                logradouro: form.endereco,
+                cidade: form.cidade,
+                estado: form.estado,
+                bairro: form.bairro,
+                numero: form.numero,
+                complemento: form.complemento ?? ""
+            },
+            proprietario: form.proprietario,
+            cpf_proprietario: form.cpf,
+            cnpj: form.cnpj,
+            estabelecimento: form.loja
         });
+        if (cadastroMercado) {
+            showAlert("Cadastro realizado", "Seu cadastro foi concluído com sucesso!");
+            setTimeout(() => navigate("/"), 1500);
+        } else {
+            showAlert("Erro no cadastro", "Verifique os dados e tente novamente.");
+        }
+    };
 
-        const finalizarCadastro = async () => {
-            if (!form.proprietario.trim() || !form.cpf.length === 14 || !form.cnpj.length === 18 || !form.loja.trim()) return showAlert("Campos Obrigatórios", "Preencha todos os campos!");
-            if (!acceptedTerms) return showAlert("Termos não aceitos", "Aceite os termos para continuar.");
-            console.log(form)
-            const cadastroMercado = await criarMercado({
-                nome: form.nome,
-                email: form.email,
-                telefone: form.telefone,
-                endereco:{
-                    cep: form.cep,
-                    logradouro: form.endereco,
-                    cidade: form.cidade,
-                    estado: form.estado,
-                    bairro: form.bairro,
-                    numero: form.numero,
-                    complemento: form.complemento ?? ""
-                },
-                proprietario: form.proprietario,
-                cpf_proprietario: form.cpf,
-                cnpj: form.cnpj,
-                estabelecimento: form.loja
-            });
-            if(cadastroMercado){
-                showAlert("Cadastro realizado", "Seu cadastro foi concluído com sucesso!");
-                setTimeout(() => navigate("/"), 1500);
-            }else{
-                showAlert("Erro no cadastro", "Verifique os dados e tente novamente.");
-            }
-        };
-
-        return {
-            step,
-            form,
-            acceptedTerms,
-            modal,
-            tempoRestante,
-            handleChange,
-            enviarCodigoHandler,
-            reenviarCodigo,
-            validarCodigo,
-            handleBack,
-            handleContinue,
-            finalizarCadastro,
-            setAcceptedTerms,
-            setStep,
-            setForm,
-            setModal,
-        };
-    }
+    return {
+        step,
+        form,
+        acceptedTerms,
+        modal,
+        tempoRestante,
+        handleChange,
+        enviarCodigoHandler,
+        reenviarCodigo,
+        validarCodigo,
+        handleBack,
+        handleContinue,
+        finalizarCadastro,
+        setAcceptedTerms,
+        setStep,
+        setForm,
+        setModal,
+    };
+}
