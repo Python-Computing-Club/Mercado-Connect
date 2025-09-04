@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 
 const mercadosRef = collection(db, "mercados");
@@ -24,10 +24,17 @@ const mercadosRef = collection(db, "mercados");
 
 //criar um mercado
 export const criarMercado = async (dados) => {
-  try{
+  try {
+    const q = query(mercadosRef, where("cnpj", "==", dados.cnpj));
+    const resultado = await getDocs(q);
+
+    if (!resultado.empty) {
+      throw new Error("CNPJ já cadastrado");
+    }
+
     await addDoc(mercadosRef, dados);
     return true;
-  } catch(error){
+  } catch (error) {
     console.log("Erro ao criar o mercado", error);
     return false;
   }
@@ -36,19 +43,19 @@ export const criarMercado = async (dados) => {
 // Listar todos os mercados
 export const listarMercados = async () => {
   const snapshot = await getDocs(mercadosRef);
-  try{
-    return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-  } catch (error){
+  try {
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
     console.log("Erro ao listar os mercados", error);
   }
 };
 
 // Atualizar mercado
 export const atualizarMercado = async (id, dados) => {
-  try{
+  try {
     await updateDoc(doc(db, "mercados", id), dados);
     return true;
-  } catch(error){
+  } catch (error) {
     console.log("Erro ao atualizar informações", error);
     return false;
   }
@@ -56,10 +63,10 @@ export const atualizarMercado = async (id, dados) => {
 
 // Deletar mercado
 export const deletarMercado = async (id) => {
-  try{
+  try {
     await deleteDoc(doc(db, "mercados", id));
     return true;
-  } catch(error){
+  } catch (error) {
     console.log("Erro ao deletar mercado", error);
     return false;
   }
