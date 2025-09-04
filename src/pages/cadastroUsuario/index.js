@@ -25,33 +25,20 @@ export default function CadastroUsuario() {
     setAcceptedTerms,
     setModal,
     setForm,
+    loginComGoogle,
   } = useCadastroForm();
 
-  const loginComGoogle = (credentialResponse) => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const token = credentialResponse.credential;
       const userInfo = jwtDecode(token);
 
-      const nome = userInfo.name || "";
-      const email = userInfo.email || "";
-
-      setForm((prev) => ({
-        ...prev,
-        nome,
-        contato: email,
-        tipoContato: "email",
-      }));
-
-      setAcceptedTerms(false);
-      setModal({
-        open: true,
-        title: "Quase lá!",
-        message: "Confirme os termos para finalizar seu cadastro.",
+      await loginComGoogle({
+        usuario: {
+          displayName: userInfo.name,
+          email: userInfo.email,
+        },
       });
-
-      handleContinue(); // step 1 → 3
-      handleContinue(); // step 3 → 4
-      handleContinue(); // step 4 → 6
     } catch (error) {
       console.error("Erro no login com Google:", error);
       setModal({
@@ -100,7 +87,7 @@ export default function CadastroUsuario() {
             <div className={styles.socialLogin}>
               <div className={styles.googleBtn}>
                 <GoogleLogin
-                  onSuccess={loginComGoogle}
+                  onSuccess={handleGoogleSuccess}
                   onError={() =>
                     setModal({
                       open: true,
@@ -115,6 +102,16 @@ export default function CadastroUsuario() {
                 Entrar com Facebook
               </button>
             </div>
+            <p className={styles.termosGoogle}>
+              Ao entrar com Google, você concorda automaticamente com os{" "}
+              <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer">
+                Termos de Uso
+              </a>{" "}
+              e a{" "}
+              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer">
+                Política de Privacidade
+              </a>.
+            </p>
           </>
         )}
 
@@ -231,8 +228,7 @@ export default function CadastroUsuario() {
                   rel="noopener noreferrer"
                 >
                   Política de Privacidade
-                </a>
-                .
+                </a>.
               </label>
             </div>
             <div className={styles.buttonGroup}>

@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useEmailCodigo from "../../hooks/useEmailCodigo";
 import useStepNavigation from "../../hooks/useStepNavigation";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
-import { criarUsuario, buscarUsuario } from "../../services/firestore/usuarios";
-import { signInWithGoogle } from "../../services/firebase";
+import useGoogleLogin from "../../hooks/useGoogleLogin";
+import { criarUsuario } from "../../services/firestore/usuarios";
+import { buscarUsuario } from "../../services/authService";
 
 export default function useCadastroForm() {
   const [form, setForm] = useState({
@@ -24,10 +25,11 @@ export default function useCadastroForm() {
   const [tempoRestante, setTempoRestante] = useState(0);
 
   const navigate = useNavigate();
+  const showAlert = (title, message) => setModal({ open: true, title, message });
+
   const { enviarCodigo } = useEmailCodigo();
   const { sendVerificationCode } = useTextBeeSms();
-
-  const showAlert = (title, message) => setModal({ open: true, title, message });
+  const { loginComGoogle: autenticarGoogle, loading: googleLoading } = useGoogleLogin(showAlert);
 
   const { step, setStep, handleBack } = useStepNavigation(1, {
     customBack: (currentStep) => {
@@ -66,9 +68,7 @@ export default function useCadastroForm() {
 
       const formattedPhone = "+" + formatted;
       setForm({ ...form, contato: formattedPhone, tipoContato: "telefone", telefone: formattedPhone });
-    }
-
-    else if (step === 4 && name === "telefone") {
+    } else if (step === 4 && name === "telefone") {
       const apenasNumeros = value.replace(/\D/g, "");
       let formatted = apenasNumeros;
       if (apenasNumeros.length >= 4 && !apenasNumeros.startsWith("55")) {
@@ -76,14 +76,21 @@ export default function useCadastroForm() {
       }
       const telefoneFormatado = "+" + formatted;
       setForm({ ...form, telefone: telefoneFormatado });
-    }
-
-    else {
+    } else {
       setForm({ ...form, [name]: value });
     }
   };
 
   const enviarCodigoHandler = async () => {
+    if (!form.tipoContato) {
+      return showAlert("Formato inválido", "Informe um e‑mail ou telefone válido.");
+    }
+
+    const usuarioExistente = await buscarUsuario(form.contato, form.tipoContato);
+    if (usuarioExistente) {
+      return showAlert("Já existe", "Este e-mail ou telefone já está cadastrado.");
+    }
+
     let codigoGerado = "";
 
     if (form.tipoContato === "email") {
@@ -176,11 +183,9 @@ export default function useCadastroForm() {
 
     const resultado = await criarUsuario(usuario);
 
-    if (resultado?.sucesso) {
+    if (resultado?.sucesso || resultado?.motivo === "duplicado") {
       showAlert("Cadastro realizado", "Seu cadastro foi concluído com sucesso!");
       setTimeout(() => navigate("/home"), 1500);
-    } else if (resultado?.motivo === "duplicado") {
-      showAlert("Já existe", "Este e-mail ou telefone já está cadastrado.");
     } else {
       showAlert("Erro", "Não foi possível concluir o cadastro.");
     }
@@ -197,7 +202,6 @@ export default function useCadastroForm() {
       } else {
         setStep(6);
       }
-
     } else if (step === 4) {
       const numero = form.telefone?.replace(/\D/g, "");
       if (!numero || numero.length < 10) {
@@ -206,47 +210,30 @@ export default function useCadastroForm() {
       } else {
         enviarCodigoOpcional();
       }
-
     } else if (step === 5) {
       validarCodigoOpcional();
-
     } else if (step === 6) {
       finalizarCadastro();
     }
   };
 
-  const loginComGoogle = async () => {
-    try {
-      const result = await signInWithGoogle();
-      const user = result.user;
-
-      const nome = user.displayName || "";
-      const email = user.email || "";
-      const telefone = user.phoneNumber || "";
-
-      const existente = await buscarUsuario(email, "email");
-
-      if (!existente) {
-        await criarUsuario({ nome, email, telefone });
-      }
-
-      setForm((prev) => ({
-        ...prev,
-        nome,
-        contato: email,
-        tipoContato: "email",
-        telefone,
-      }));
-
-      setStep(6);
-      showAlert("Quase lá!", "Confirme os termos para finalizar seu cadastro.");
-    } catch (error) {
-      console.error("Erro no login com Google:", error);
-      showAlert("Erro", "Não foi possível fazer login com o Google.");
+  const loginComGoogle = async ({ usuario }) => {
+    if (!usuario?.email) {
+      showAlert("Erro no login", "Não foi possível autenticar com o Google.");
+      return;
     }
+
+    setForm((prev) => ({
+      ...prev,
+      nome: usuario.displayName || "Usuário Google",
+      contato: usuario.email,
+      tipoContato: "email",
+    }));
+
+    setStep(6);
   };
 
-return {
+  return {
     step,
     form,
     acceptedTerms,
@@ -264,5 +251,6 @@ return {
     setForm,
     setModal,
     loginComGoogle,
+    googleLoading,
   };
 }
