@@ -1,11 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import cartIcon from "../../assets/teste.png";
-import googleIcon from "../../assets/google.png";
 import facebookIcon from "../../assets/facebook.png";
 import Modal from "../../modal/modal.js";
 import styles from "./cadastro.module.css";
 import useCadastroForm from "../../components/CadastroForm/index.js";
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 
 export default function CadastroUsuario() {
   const {
@@ -23,7 +24,43 @@ export default function CadastroUsuario() {
     finalizarCadastro,
     setAcceptedTerms,
     setModal,
+    setForm,
   } = useCadastroForm();
+
+  const loginComGoogle = (credentialResponse) => {
+    try {
+      const token = credentialResponse.credential;
+      const userInfo = jwtDecode(token);
+
+      const nome = userInfo.name || "";
+      const email = userInfo.email || "";
+
+      setForm((prev) => ({
+        ...prev,
+        nome,
+        contato: email,
+        tipoContato: "email",
+      }));
+
+      setAcceptedTerms(false);
+      setModal({
+        open: true,
+        title: "Quase lá!",
+        message: "Confirme os termos para finalizar seu cadastro.",
+      });
+
+      handleContinue(); // step 1 → 3
+      handleContinue(); // step 3 → 4
+      handleContinue(); // step 4 → 6
+    } catch (error) {
+      console.error("Erro no login com Google:", error);
+      setModal({
+        open: true,
+        title: "Erro",
+        message: "Não foi possível fazer login com o Google.",
+      });
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -61,10 +98,18 @@ export default function CadastroUsuario() {
               <span></span>
             </div>
             <div className={styles.socialLogin}>
-              <button type="button" className={styles.googleBtn}>
-                <img src={googleIcon} alt="Google" />
-                Entrar com Google
-              </button>
+              <div className={styles.googleBtn}>
+                <GoogleLogin
+                  onSuccess={loginComGoogle}
+                  onError={() =>
+                    setModal({
+                      open: true,
+                      title: "Erro",
+                      message: "Não foi possível fazer login com o Google.",
+                    })
+                  }
+                />
+              </div>
               <button type="button" className={styles.facebookBtn}>
                 <img src={facebookIcon} alt="Facebook" />
                 Entrar com Facebook
@@ -99,14 +144,6 @@ export default function CadastroUsuario() {
                 className={styles.submitBtn}
                 onClick={validarCodigo}
                 disabled={form.codigo.length !== 6 || tempoRestante === 0}
-                style={{
-                  backgroundColor:
-                    form.codigo.length === 6 && tempoRestante > 0 ? "#006400" : "#ccc",
-                  cursor:
-                    form.codigo.length === 6 && tempoRestante > 0
-                      ? "pointer"
-                      : "not-allowed",
-                }}
               >
                 Confirmar código
               </button>
@@ -153,7 +190,7 @@ export default function CadastroUsuario() {
             <input
               type="text"
               name="telefone"
-              value={form.telefone} 
+              value={form.telefone}
               onChange={handleChange}
               placeholder="Digite seu telefone (opcional)"
             />
@@ -167,47 +204,6 @@ export default function CadastroUsuario() {
                 onClick={handleContinue}
               >
                 Continuar
-              </button>
-            </div>
-          </>
-        )}
-
-        {step === 5 && (
-          <>
-            <label>Digite o código enviado para seu telefone opcional</label>
-            <input
-              type="text"
-              name="codigoOpcional"
-              value={form.codigoOpcional}
-              onChange={(e) =>
-                handleChange({ target: { name: "codigoOpcional", value: e.target.value } })
-              }
-              placeholder="Digite o código"
-              maxLength={6}
-            />
-            <p>
-              Tempo restante: {Math.floor(tempoRestante / 60)}:
-              {("0" + (tempoRestante % 60)).slice(-2)}
-            </p>
-            <div className={styles.buttonGroup}>
-              <button type="button" className={styles.backBtn} onClick={handleBack}>
-                Voltar
-              </button>
-              <button
-                type="button"
-                className={styles.submitBtn}
-                onClick={handleContinue}
-                disabled={form.codigoOpcional.length !== 6 || tempoRestante === 0}
-                style={{
-                  backgroundColor:
-                    form.codigoOpcional.length === 6 && tempoRestante > 0 ? "#006400" : "#ccc",
-                  cursor:
-                    form.codigoOpcional.length === 6 && tempoRestante > 0
-                      ? "pointer"
-                      : "not-allowed",
-                }}
-              >
-                Confirmar código
               </button>
             </div>
           </>

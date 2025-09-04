@@ -87,6 +87,11 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(0, 100, 0, 0.15);
 }
 
+.inputErro {
+  border-color: red;
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2);
+}
+
 .divider {
   display: flex;
   align-items: center;
@@ -225,11 +230,25 @@ input:focus {
   border-radius: 4px;
   transition: border-color 0.3s ease, background-color 0.3s ease;
   margin-right: 10px;
+  position: relative;
 }
 
 .privacyContainer input[type="checkbox"]:checked {
   background-color: #006400;
   border-color: #006400;
+}
+
+.privacyContainer input[type="checkbox"]:checked::after {
+  content: "✔";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+  color: white;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .privacyContainer label a {
@@ -245,19 +264,25 @@ input:focus {
   .form {
     padding: 25px;
   }
+
   .title h1 {
     font-size: 32px;
   }
+
   input[type="text"],
   input[type="email"],
   input[type="tel"] {
     width: 100%;
   }
+
   .buttonGroup {
     flex-direction: column;
     gap: 8px;
   }
-  .submitBtn, .backBtn, .skipBtn {
+
+  .submitBtn,
+  .backBtn,
+  .skipBtn {
     width: 100%;
   }
 }

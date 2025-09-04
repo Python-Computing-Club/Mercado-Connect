@@ -1,9 +1,10 @@
 import styles from "./login.module.css";
 import { Link } from "react-router-dom";
 import cartIcon from "../../assets/teste.png";
-import googleIcon from "../../assets/google.png";
 import facebookIcon from "../../assets/facebook.png";
 import useLoginFormLogic from "../../components/LoginForm";
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 
 export default function Login() {
   const {
@@ -16,7 +17,22 @@ export default function Login() {
     validarCodigo,
     setForm,
     setModal,
+    loginComGoogle,
   } = useLoginFormLogic();
+
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
+    try {
+      const token = credentialResponse.credential;
+      const userInfo = jwtDecode(token);
+      await loginComGoogle(userInfo.email, userInfo.name, userInfo.phone_number || "");
+    } catch (error) {
+      setModal({
+        open: true,
+        title: "Erro no login",
+        message: "Não foi possível fazer login com o Google.",
+      });
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -75,15 +91,25 @@ export default function Login() {
         <span></span>
       </div>
 
-      <button className={styles.googleBtn}>
-        <img src={googleIcon} alt="Google" />
-        Continue com Google
-      </button>
+      <div className={styles.socialContainer}>
+        <div className={styles.googleBtn}>
+          <GoogleLogin
+            onSuccess={handleGoogleLoginSuccess}
+            onError={() =>
+              setModal({
+                open: true,
+                title: "Erro no login",
+                message: "Não foi possível fazer login com o Google.",
+              })
+            }
+          />
+        </div>
 
-      <button className={styles.facebookBtn}>
-        <img src={facebookIcon} alt="Facebook" />
-        Continue com Facebook
-      </button>
+        <button className={styles.facebookBtn}>
+          <img src={facebookIcon} alt="Facebook" />
+          Continue com Facebook
+        </button>
+      </div>
 
       <p className={styles.signup}>
         Não tem uma conta?{" "}

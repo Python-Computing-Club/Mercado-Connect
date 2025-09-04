@@ -4,7 +4,8 @@ import useEmailCodigo from "../../hooks/useEmailCodigo";
 import useStepNavigation from "../../hooks/useStepNavigation";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
-import { criarUsuario } from "../../services/firestore/usuarios";
+import { criarUsuario, buscarUsuario } from "../../services/firestore/usuarios";
+import { signInWithGoogle } from "../../services/firebase";
 
 export default function useCadastroForm() {
   const [form, setForm] = useState({
@@ -26,6 +27,8 @@ export default function useCadastroForm() {
   const { enviarCodigo } = useEmailCodigo();
   const { sendVerificationCode } = useTextBeeSms();
 
+  const showAlert = (title, message) => setModal({ open: true, title, message });
+
   const { step, setStep, handleBack } = useStepNavigation(1, {
     customBack: (currentStep) => {
       if (currentStep === 3) return 1;
@@ -40,8 +43,6 @@ export default function useCadastroForm() {
     onExpire: () => showAlert("Código expirado", "Seu código expirou. Reenvie para continuar."),
     setTime: setTempoRestante,
   });
-
-  const showAlert = (title, message) => setModal({ open: true, title, message });
 
   const handleChange = ({ target: { name, value } }) => {
     if (step === 1 && name === "contato") {
@@ -110,7 +111,7 @@ export default function useCadastroForm() {
     if (tempoRestante === 0) {
       return showAlert("Código expirado", "Reenvie o código para continuar.");
     }
-    if (form.codigo.length !== 6) return;
+    if (form.codigo?.length !== 6) return;
 
     if (form.codigo === form.codigoGerado) {
       setStep(3);
@@ -121,7 +122,7 @@ export default function useCadastroForm() {
   };
 
   const enviarCodigoOpcional = async () => {
-    let numero = form.telefone.replace(/\D/g, "");
+    let numero = form.telefone?.replace(/\D/g, "");
     if (!numero || numero.length < 10) {
       showAlert("Telefone inválido", "Digite um número válido com DDD.");
       return;
@@ -159,7 +160,7 @@ export default function useCadastroForm() {
   };
 
   const finalizarCadastro = async () => {
-    if (!form.nome.trim()) {
+    if (!form.nome?.trim()) {
       return showAlert("Nome obrigatório", "Informe seu nome completo.");
     }
 
@@ -175,9 +176,11 @@ export default function useCadastroForm() {
 
     const resultado = await criarUsuario(usuario);
 
-    if (resultado) {
+    if (resultado?.sucesso) {
       showAlert("Cadastro realizado", "Seu cadastro foi concluído com sucesso!");
-      setTimeout(() => navigate("/"), 1500);
+      setTimeout(() => navigate("/home"), 1500);
+    } else if (resultado?.motivo === "duplicado") {
+      showAlert("Já existe", "Este e-mail ou telefone já está cadastrado.");
     } else {
       showAlert("Erro", "Não foi possível concluir o cadastro.");
     }
@@ -185,7 +188,7 @@ export default function useCadastroForm() {
 
   const handleContinue = () => {
     if (step === 3) {
-      if (!form.nome.trim()) {
+      if (!form.nome?.trim()) {
         return showAlert("Nome obrigatório", "Informe seu nome completo.");
       }
 
@@ -196,7 +199,7 @@ export default function useCadastroForm() {
       }
 
     } else if (step === 4) {
-      const numero = form.telefone.replace(/\D/g, "");
+      const numero = form.telefone?.replace(/\D/g, "");
       if (!numero || numero.length < 10) {
         showAlert("Telefone não informado", "Você poderá adicioná-lo mais tarde.");
         setStep(6);
@@ -212,7 +215,38 @@ export default function useCadastroForm() {
     }
   };
 
-  return {
+  const loginComGoogle = async () => {
+    try {
+      const result = await signInWithGoogle();
+      const user = result.user;
+
+      const nome = user.displayName || "";
+      const email = user.email || "";
+      const telefone = user.phoneNumber || "";
+
+      const existente = await buscarUsuario(email, "email");
+
+      if (!existente) {
+        await criarUsuario({ nome, email, telefone });
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        nome,
+        contato: email,
+        tipoContato: "email",
+        telefone,
+      }));
+
+      setStep(6);
+      showAlert("Quase lá!", "Confirme os termos para finalizar seu cadastro.");
+    } catch (error) {
+      console.error("Erro no login com Google:", error);
+      showAlert("Erro", "Não foi possível fazer login com o Google.");
+    }
+  };
+
+return {
     step,
     form,
     acceptedTerms,
@@ -229,5 +263,6 @@ export default function useCadastroForm() {
     setStep,
     setForm,
     setModal,
+    loginComGoogle,
   };
 }

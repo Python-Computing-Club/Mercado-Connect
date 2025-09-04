@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { buscarUsuario } from "../../services/authService";
 import useEmailCodigo from "../../hooks/useEmailCodigo";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
+import { buscarUsuario } from "../../services/authService";
 
 export default function useLoginFormLogic() {
   const [form, setForm] = useState({
@@ -87,6 +87,15 @@ export default function useLoginFormLogic() {
     }
   };
 
+  const loginComGoogle = async (email, nome, telefone) => {
+    const user = await buscarUsuario(email, "email");
+    if (user) {
+      navigate("/home");
+    } else {
+      showAlert("Conta não encontrada", "Cadastre-se antes de fazer login com o Google.");
+    }
+  };
+
   return {
     form,
     step,
@@ -98,5 +107,6 @@ export default function useLoginFormLogic() {
     setForm,
     setStep,
     setModal,
+    loginComGoogle,
   };
 }
