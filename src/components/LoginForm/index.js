@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useEmailCodigo from "../../hooks/useEmailCodigo";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
-import { buscarUsuario } from "../../services/authService";
+import { autenticar } from "../../services/authService";
 
 export default function useLoginFormLogic() {
   const [form, setForm] = useState({
@@ -11,6 +11,9 @@ export default function useLoginFormLogic() {
     tipoContato: "",
     codigo: "",
     codigoGerado: "",
+    tipoLogin: "",
+    entidadeId: "",
+    entidadeDados: null
   });
 
   const [step, setStep] = useState(1);
@@ -47,20 +50,32 @@ export default function useLoginFormLogic() {
     }
   };
 
-  const enviarCodigoHandler = async () => {
+  const handlerLogin = async () => {
     if (!form.tipoContato) {
       return showAlert("Formato inválido", "Informe um e‑mail ou telefone válido.");
     }
 
-    const user = await buscarUsuario(form.contato, form.tipoContato);
-    if (!user) {
-      return showAlert("Não encontrado", "Usuário não cadastrado.");
+    let usuario = null;
+    let mercado = null;
+
+    if (form.tipoContato === "email") {
+      usuario = await autenticar("usuario", form.contato, form.tipoContato);
+      mercado = await autenticar("mercados", form.contato, form.tipoContato);
+    } else {
+      usuario = await autenticar("usuario", form.contato, form.tipoContato);
+    }
+
+    const entidade = usuario || mercado;
+    const tipoLogin = mercado ? "mercado" : "usuario";
+
+    if (!entidade) {
+      return showAlert("Conta não encontrada", "Nenhum cadastro vinculado a este contato.");
     }
 
     let codigo = "";
 
     if (form.tipoContato === "email") {
-      codigo = await enviarCodigo(form.contato, "login", showAlert, showAlert);
+      codigo = await enviarCodigo(form.contato, form.tipoContato, showAlert, showAlert);
     } else {
       const result = await sendVerificationCode(form.contato);
       if (!result) return showAlert("Erro", "Falha ao enviar SMS.");
@@ -70,7 +85,14 @@ export default function useLoginFormLogic() {
     if (!codigo) return;
 
     showAlert("Código enviado", `Enviado para ${form.contato}`);
-    setForm((prev) => ({ ...prev, codigoGerado: codigo, codigo: "" }));
+    setForm((prev) => ({
+      ...prev,
+      codigoGerado: codigo,
+      codigo: "",
+      tipoLogin,
+      entidadeId: entidade.id,
+      entidadeDados: entidade
+    }));
     setTempoRestante(300);
     setStep(2);
   };
@@ -81,14 +103,20 @@ export default function useLoginFormLogic() {
     }
 
     if (form.codigo === form.codigoGerado) {
-      navigate("/home");
+      localStorage.setItem("tipoLogin", form.tipoLogin);
+      localStorage.setItem("entidade", JSON.stringify(form.entidadeDados));
+      if (form.tipoLogin === "mercado") {
+        navigate("/painel-mercado");
+      } else {
+        navigate("/painel-usuario");
+      }
     } else {
       showAlert("Inválido", "Código incorreto.");
     }
   };
 
   const loginComGoogle = async (email, nome, telefone) => {
-    const user = await buscarUsuario(email, "email");
+    const user = await autenticar(email, "email");
     if (user) {
       navigate("/home");
     } else {
@@ -102,7 +130,7 @@ export default function useLoginFormLogic() {
     modal,
     tempoRestante,
     handleChange,
-    enviarCodigoHandler,
+    handlerLogin,
     validarCodigo,
     setForm,
     setStep,
