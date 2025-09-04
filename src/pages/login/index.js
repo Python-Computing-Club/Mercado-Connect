@@ -82,6 +82,13 @@ export default function Login() {
           <button className={styles.continueBtn} onClick={validarCodigo}>
             Validar código
           </button>
+          <button
+            className={styles.continueBtn}
+            style={{ marginTop: "10px" }}
+            onClick={enviarCodigoHandler}
+          >
+            Reenviar código
+          </button>
         </>
       )}
 

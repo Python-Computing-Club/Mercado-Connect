@@ -21,16 +21,16 @@ export default function useLoginFormLogic() {
   const { enviarCodigo } = useEmailCodigo();
   const { sendVerificationCode } = useTextBeeSms();
 
+  const showAlert = (title, message) => {
+    setModal({ open: true, title, message });
+  };
+
   useCodigoTimer({
     active: step === 2 && !!form.codigoGerado,
     duration: 300,
     onExpire: () => showAlert("Código expirado", "Reenvie o código para continuar."),
     setTime: setTempoRestante,
   });
-
-  const showAlert = (title, message) => {
-    setModal({ open: true, title, message });
-  };
 
   const handleChange = (e) => {
     const { value } = e.target;
@@ -60,7 +60,7 @@ export default function useLoginFormLogic() {
     let codigo = "";
 
     if (form.tipoContato === "email") {
-      codigo = await enviarCodigo(form.contato, "login", showAlert, showAlert);
+      codigo = await enviarCodigo(form.contato, form.tipoContato, showAlert, showAlert);
     } else {
       const result = await sendVerificationCode(form.contato);
       if (!result) return showAlert("Erro", "Falha ao enviar SMS.");
