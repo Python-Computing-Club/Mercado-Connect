@@ -119,6 +119,24 @@
   flex-direction: column;
 }
 
+.formVerificacao{
+  display: flex;
+  flex-direction: column;
+}
+
+.formVerificacao label{
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.formVerificacao input{
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
 .formGroup label {
   font-weight: 600;
   margin-bottom: 0.5rem;

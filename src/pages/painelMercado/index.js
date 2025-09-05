@@ -9,17 +9,21 @@ import Modal from '../../modal/modal'
 import useEmailCodigo from '../../hooks/useEmailCodigo';
 import { useTextBeeSms } from '../../hooks/useTextBeeSms';
 import { Toast, ToastContainer } from 'react-bootstrap';
-import { atualizarMercado } from '../../services/firestore/mercados';
+import { atualizarMercado, deletarMercado } from '../../services/firestore/mercados';
 import { autenticar } from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 let usuario = JSON.parse(localStorage.getItem("entidade"));
 
 export default function PainelMercado() {
 
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
+    const navigate = useNavigate();
     const [modal, setModal] = useState({ open: false, title: "", message: "" });
     const [dadosMercado, setDadosMercado] = useState(usuario);
     const [showToast, setShowToast] = useState(false);
+    const [deleteMercado, setDeleteMercado] = useState(false);
+    const toggleDeleteMercado = () => setDeleteMercado(!deleteMercado)
     const toggleShowToast = () => setShowToast(!showToast);
     const showAlert = (title, message) => setModal({ open: true, title, message });
     const { formatTelefone } = useFormatTelefone();
@@ -27,6 +31,8 @@ export default function PainelMercado() {
     const { sendVerificationCode } = useTextBeeSms();
 
     const handleMostrarFormulario = async () => {
+        usuario = await autenticar("mercados", usuario.email, "email")
+        setDadosMercado(usuario)
         setMostrarFormulario(true);
     }
 
@@ -122,12 +128,48 @@ export default function PainelMercado() {
         }
     }
 
+    const handleDelete = async () => {
+        showAlert("Esta ação irá deletar todos os dados do mercado!", "Serão enviados códigos de confirmação para seu email e telefone");
+        toggleDeleteMercado();
+        const codigoEmail = await enviarCodigo(dadosMercado.email, "email", showAlert, showAlert);
+        const codigoSMS = await sendVerificationCode(dadosMercado.telefone);
+
+        if (!codigoEmail || !codigoSMS) {
+            return showAlert("Erro", "Não foi possível enviar os códigos de verificação")
+        }
+
+        setDadosMercado((prev) => ({
+            ...prev,
+            codigoEmailGerado: codigoEmail,
+            codigoSMSGerado: codigoSMS,
+            etapaVerificacao: true,
+            codigoEmail: "",
+            codigoSMS: ""
+        }));
+
+        setMostrarFormulario(false);
+        toggleShowToast();
+    }
+
     const validarCodigos = async () => {
         if (
             dadosMercado.codigoEmail === dadosMercado.codigoEmailGerado &&
             dadosMercado.codigoSMS === dadosMercado.codigoSMSGerado
         ) {
             showAlert("Verificação concluída", "Seus dados foram confirmados com sucesso.");
+            if (deleteMercado) {
+                console.log(dadosMercado.id)
+                const exclusao = await deletarMercado(dadosMercado.id);
+                if (exclusao) {
+                    showAlert("Mercado deletado", "Seus dados foram deletados com sucesso. Saindo...")
+                    setTimeout(() => {
+                        navigate("/")
+                    }, 10000)
+                } else {
+                    console.log("Erro", "Erro ao deletar mercado")
+                    navigate("/painel-mercado")
+                }
+            }
             const updateMercado = await atualizarMercado(usuario.id, {
                 estabelecimento: dadosMercado.estabelecimento,
                 email: dadosMercado.email,
@@ -142,10 +184,14 @@ export default function PainelMercado() {
             })
             if (updateMercado) {
                 showAlert("Dados atualizados", "Seus dados foram atualizados com sucesso")
-                setTimeout(() => 1500)
-                usuario = await autenticar("mercados", usuario.email, "email")
-                setDadosMercado(usuario)
-                dadosMercado.etapaVerificacao = false
+                setTimeout(() => {
+                    (async () => {
+                        usuario = await autenticar("mercados", usuario.email, "email");
+                        setDadosMercado(usuario);
+                        dadosMercado.etapaVerificacao = false;
+                    })();
+                }, 1500);
+
             } else {
                 showAlert("Erro na atualização", "Erro ao atualizar os dados cadastrais")
                 return
@@ -174,7 +220,7 @@ export default function PainelMercado() {
                 <div className={styles.verificacaoContainer}>
                     <h3>Confirme seus dados</h3>
 
-                    <div className={styles.formGroup}>
+                    <div className={styles.formVerificacao}>
                         <label>Código enviado por Email</label>
                         <input
                             type="text"
@@ -185,7 +231,7 @@ export default function PainelMercado() {
                         />
                     </div>
 
-                    <div className={styles.formGroup}>
+                    <div className={styles.formVerificacao}>
                         <label>Código enviado por SMS</label>
                         <input
                             type="text"
@@ -315,7 +361,7 @@ export default function PainelMercado() {
                         <Container className='d-flex justify-content-end gap-3 pb-3'>
                             <button type="button" className={styles.submitButton} onClick={handleSubmit}>Salvar Alterações</button>
                             <button type="button" className={styles.cancelButton} onClick={resetarPainel}>Cancelar</button>
-                            <button type="button" className={styles.deleteButton} onClick={resetarPainel}>Deletar</button>
+                            <button type="button" className={styles.deleteButton} onClick={handleDelete}>Deletar</button>
                         </Container>
                     </form>
                 </Container>
