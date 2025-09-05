@@ -165,6 +165,7 @@ export default function PainelMercado() {
                     setTimeout(() => {
                         navigate("/")
                     }, 10000)
+                    return;
                 } else {
                     console.log("Erro", "Erro ao deletar mercado")
                     navigate("/painel-mercado")
@@ -191,7 +192,6 @@ export default function PainelMercado() {
                         dadosMercado.etapaVerificacao = false;
                     })();
                 }, 1500);
-
             } else {
                 showAlert("Erro na atualização", "Erro ao atualizar os dados cadastrais")
                 return
