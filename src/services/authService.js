@@ -6,11 +6,16 @@ export const autenticar = async (colecao, contato, tipo) => {
     const ref = collection(db, colecao);
     const q = query(ref, where(tipo, "==", contato));
     const snapshot = await getDocs(q);
-    if(snapshot.empty){
-      console.log("Resultado:", snapshot.empty ? "Nenhum documento encontrado" : snapshot.docs[0].data());
-      return null;
+    if(!snapshot.empty){
+      const doc = snapshot.docs[0]
+      const entidade = {
+        id: doc.id,
+        ...doc.data()
+      }
+      return entidade
     }else{
-      return snapshot.docs[0].data();
+      console.log("Resultado:", snapshot.empty, "Nenhum documento encontrado")
+      return null
     }
   } catch (error) {
     console.log(`Erro ao buscar ${colecao}:`, error);
