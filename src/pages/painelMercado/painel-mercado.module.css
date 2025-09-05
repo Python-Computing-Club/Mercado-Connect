@@ -1,0 +1,91 @@
+.banner {
+  height: 50vh; /* metade da altura da tela */
+  background-image: url('./banner.jpg'); /* ajuste o caminho conforme sua imagem */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* escurece a imagem para destacar o texto */
+  z-index: 0;
+}
+
+.bannerTitle {
+  color: white;
+  font-size: 3rem;
+  text-align: center;
+  z-index: 1;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.titles{
+    text-align: center;
+    padding-top: 50px;
+    color: #012E0D;
+}
+
+.cardContainer{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.cardTitle{
+    color: #012E0D;
+    font-weight: bold;;
+}
+
+.cardSubtitle{
+    color: #012E0D;
+}
+
+.buttonCard{
+    border-radius: 10px;
+    color: white;
+    background-color: #012E0D;
+    font-weight: bold;
+    font-size: 15px;
+    border: none;
+    padding: 5px;
+}
+
+.submitButton{
+    border-radius: 10px;
+    color: white;
+    background-color: #012E0D;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    padding: 10px;
+}
+
+.cancelButton{
+    border-radius: 10px;
+    color: white;
+    background-color: red;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    padding: 10px;
+}
+
+.deleteButton{
+    border-radius: 10px;
+    color: white;
+    background-color: black;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    padding: 10px;
+}
