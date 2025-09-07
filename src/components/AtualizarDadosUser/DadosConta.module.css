@@ -1,0 +1,144 @@
+.container {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 16px;
+  width: 360px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #154d2e;
+  margin-bottom: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #154d2e;
+  width: 100%;
+  display: block;
+}
+
+.input {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f1f1;
+  margin-bottom: 16px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.botoes {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.continueBtn {
+  flex: 1;
+  padding: 14px;
+  background: #1e7a32;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.continueBtn:hover:not(:disabled) {
+  background: #155c25;
+}
+
+.continueBtn:disabled {
+  background: #7ab376;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 14px;
+  background: #ddd;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #bbb;
+}
+
+.cancelBtn:disabled {
+  background: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.status {
+  color: green;
+  margin-top: 12px;
+}
+
+.error {
+  color: red;
+  margin-top: 12px;
+}
+
+.sucesso {
+  color: green;
+  margin-top: 12px;
+}
+
+.dadosResumo {
+  width: 100%;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  color: #154d2e;
+  font-size: 16px;
+}
+
+.dadosResumo p {
+  margin: 6px 0;
+}
+.confirmCpfMessage {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 4px;
+  color: #856404;
+}
+
+.confirmBtn {
+  background-color: #856404;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  margin-top: 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.confirmBtn:disabled {
+  background-color: #c3b299;
+  cursor: not-allowed;
+}

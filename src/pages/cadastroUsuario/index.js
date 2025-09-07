@@ -24,8 +24,8 @@ export default function CadastroUsuario() {
     finalizarCadastro,
     setAcceptedTerms,
     setModal,
-    setForm,
     loginComGoogle,
+    pularTelefone,  // Importante adicionar aqui
   } = useCadastroForm();
 
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -202,7 +202,55 @@ export default function CadastroUsuario() {
               >
                 Continuar
               </button>
+              <button
+                type="button"
+                className={styles.skipBtn}
+                onClick={pularTelefone}
+              >
+                Pular
+              </button>
             </div>
+          </>
+        )}
+
+        {step === 5 && (
+          <>
+            <label>Código enviado para telefone opcional</label>
+            <input
+              type="text"
+              name="codigoOpcional"
+              value={form.codigoOpcional}
+              onChange={(e) =>
+                handleChange({ target: { name: "codigoOpcional", value: e.target.value } })
+              }
+              placeholder="Digite o código SMS"
+              maxLength={6}
+            />
+            <p>
+              Tempo restante: {Math.floor(tempoRestante / 60)}:
+              {("0" + (tempoRestante % 60)).slice(-2)}
+            </p>
+            <div className={styles.buttonGroup}>
+              <button type="button" className={styles.backBtn} onClick={handleBack}>
+                Voltar
+              </button>
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleContinue}
+                disabled={form.codigoOpcional.length !== 6 || tempoRestante === 0}
+              >
+                Confirmar código
+              </button>
+            </div>
+            <button
+              type="button"
+              className={styles.submitBtn}
+              style={{ marginTop: "10px" }}
+              onClick={reenviarCodigo}
+            >
+              Reenviar código
+            </button>
           </>
         )}
 

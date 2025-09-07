@@ -1,0 +1,35 @@
+.section {
+  margin-bottom: 32px;
+  padding: 0 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.verMais {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  gap: 10px;
+  background: none;
+  border: none;
+  color: #00060b;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.circle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #000000;
+  color: white;
+  font-size: 14px;
+}

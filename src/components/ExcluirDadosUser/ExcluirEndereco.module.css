@@ -1,0 +1,150 @@
+/* Fundo escuro com overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  animation: fadeInOverlay 0.3s ease forwards;
+}
+
+/* Painel centralizado com animação */
+.painel {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90vw;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: slideInPanel 0.3s ease forwards;
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+/* Animação do painel ao abrir */
+@keyframes slideInPanel {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Animação do overlay */
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.error {
+  color: #d8000c;
+  margin-top: 8px;
+}
+
+.status {
+  color: #155c25;
+  margin-top: 8px;
+}
+
+/* Lista de endereços */
+.listaEnderecos {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+/* Card de cada endereço */
+.cardEndereco {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Texto do endereço */
+.infoEndereco {
+  max-width: 75%;
+  word-wrap: break-word;
+}
+
+/* Botão excluir vermelho */
+.botaoExcluir {
+  padding: 10px 16px;
+  background-color: #d8000c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 6px rgba(216, 0, 12, 0.4);
+}
+
+.botaoExcluir:hover:not(:disabled) {
+  background-color: #a60008;
+  box-shadow: 0 4px 10px rgba(166, 0, 8, 0.6);
+}
+
+.botaoExcluir:disabled {
+  background-color: #f2a3a5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Botões de paginação */
+.botaoPagina {
+  background: #1e7a32;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+  user-select: none;
+}
+
+.botaoPagina:disabled {
+  background: #9ccc9b;
+  cursor: not-allowed;
+}
+
+.botaoPagina:not(:disabled):hover {
+  background: #155c25;
+}
+
+/* Botão cancelar */
+.botaoCancelar {
+  width: 100%;
+  padding: 14px;
+  background: #ddd;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.botaoCancelar:hover {
+  background: #bbb;
+}
