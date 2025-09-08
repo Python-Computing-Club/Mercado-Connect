@@ -14,8 +14,11 @@ export default function ExcluirConta({ onClose }) {
   const [status, setStatus] = useState(null);
   const [error, setError] = useState(null);
   const [usuarioContato, setUsuarioContato] = useState("");
-  const [docId, setDocId] = useState(null);
   const [tipoContato, setTipoContato] = useState(null);
+  const [docId, setDocId] = useState(null);
+  const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [botaoBloqueado, setBotaoBloqueado] = useState(false);
 
   const { enviarCodigo } = useEmailCodigo();
   const {
@@ -32,57 +35,45 @@ export default function ExcluirConta({ onClose }) {
       return;
     }
 
-    const contato = usuario.email || usuario.telefone;
-
-    if (!contato) {
-      setError("❌ Usuário não possui email ou telefone.");
-      return;
-    }
-
-    setUsuarioContato(contato);
-
-    const tipo = contato.includes("@") ? "email" : "telefone";
-    setTipoContato(tipo);
-
-    async function fetchUserDoc() {
-      try {
-        const userFromDb = await buscarUsuario(contato, tipo);
-        if (userFromDb) {
-          setDocId(userFromDb.id);
-        } else {
-          setError("❌ Usuário não encontrado no banco.");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("❌ Erro ao buscar usuário.");
-      }
-    }
-
-    fetchUserDoc();
+    setEmail(usuario.email || "");
+    setTelefone(usuario.telefone || "");
   }, [usuario]);
 
-  const handleEnviarCodigo = async () => {
+  const handleEnviarCodigo = async (contatoSelecionado, tipoSelecionado) => {
     setError(null);
     setStatus(null);
 
-    if (!usuarioContato || !tipoContato) {
+    setBotaoBloqueado(true);
+    setTimeout(() => setBotaoBloqueado(false), 5000);
+
+    if (!contatoSelecionado || !tipoSelecionado) {
       setError("❌ Contato do usuário não disponível.");
       return;
     }
 
     try {
-      if (tipoContato === "telefone") {
-        const codigoSms = await sendVerificationCode(usuarioContato);
+      const userFromDb = await buscarUsuario(contatoSelecionado, tipoSelecionado);
+      if (!userFromDb) {
+        setError("❌ Usuário não encontrado no banco.");
+        return;
+      }
+
+      setDocId(userFromDb.id);
+      setUsuarioContato(contatoSelecionado);
+      setTipoContato(tipoSelecionado);
+
+      if (tipoSelecionado === "telefone") {
+        const codigoSms = await sendVerificationCode(contatoSelecionado);
         if (!codigoSms) {
           setError(smsError || "❌ Falha ao enviar SMS.");
           return;
         }
-        setCodigoGerado(codigoSms); // Para comparar depois
-        setStatus(`Código enviado para: ${usuarioContato}`);
+        setCodigoGerado(codigoSms);
+        setStatus(`Código enviado para: ${contatoSelecionado}`);
         setStep(2);
       } else {
         const codigoEmail = await enviarCodigo(
-          usuarioContato,
+          contatoSelecionado,
           "email",
           (titulo, msg) => setStatus(`${titulo}: ${msg}`),
           (titulo, msg) => setError(`${titulo}: ${msg}`)
@@ -94,7 +85,7 @@ export default function ExcluirConta({ onClose }) {
         }
 
         setCodigoGerado(codigoEmail);
-        setStatus(`Código enviado para: ${usuarioContato}`);
+        setStatus(`Código enviado para: ${contatoSelecionado}`);
         setStep(2);
       }
     } catch (err) {
@@ -148,12 +139,31 @@ export default function ExcluirConta({ onClose }) {
       {step === 1 && (
         <>
           <p>Tem certeza que deseja excluir sua conta? Essa ação é irreversível.</p>
-          <button className={styles.continueBtn} onClick={handleEnviarCodigo}>
-            Enviar código para {usuarioContato}
-          </button>
+
+          {email && (
+            <button
+              disabled={botaoBloqueado}
+              className={`${styles.continueBtn} ${botaoBloqueado ? styles.bloqueado : ""}`}
+              onClick={() => handleEnviarCodigo(email, "email")}
+            >
+              Enviar código por E-mail <br></br> {email}
+            </button>
+          )}
+
+          {telefone && (
+            <button
+              disabled={botaoBloqueado}
+              className={`${styles.continueBtn} ${botaoBloqueado ? styles.bloqueado : ""}`}
+              onClick={() => handleEnviarCodigo(telefone, "telefone")}
+            >
+              Enviar código por SMS <br></br> {telefone}
+            </button>
+          )}
+
           <button className={styles.botaoCancelar} onClick={onClose}>
             Cancelar
           </button>
+
           {error && <p className={styles.error}>{error}</p>}
           {status && <p className={styles.status}>{status}</p>}
         </>

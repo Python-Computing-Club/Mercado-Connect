@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import useEmailCodigo from "../../hooks/useEmailCodigo";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
-import { autenticar } from "../../services/firestore/usuarios";
+import { autenticar } from "../../services/authService";
+import { buscarUsuario } from "../../services/firestore/usuarios";
 import { useAuth } from "../../Context/AuthContext";
 
 function formatarTelefoneVisual(telefone) {
@@ -32,7 +33,7 @@ export default function useLoginFormLogic() {
     codigoGerado: "",
     tipoLogin: "",
     entidadeId: "",
-    entidadeDados: null
+    entidadeDados: null,
   });
 
   const [step, setStep] = useState(1);
@@ -92,10 +93,10 @@ export default function useLoginFormLogic() {
     let mercado = null;
 
     if (form.tipoContato === "email") {
-      usuario = await autenticar("usuario", form.contato, form.tipoContato);
-      mercado = await autenticar("mercados", form.contato, form.tipoContato);
+      usuario = await autenticar("usuario", form.contato, "email");
+      mercado = await autenticar("mercados", form.contato, "email");
     } else {
-      usuario = await autenticar("usuario", contatoParaBusca, form.tipoContato);
+      usuario = await autenticar("usuario", contatoParaBusca, "telefone");
     }
 
     const entidade = usuario || mercado;
@@ -124,7 +125,7 @@ export default function useLoginFormLogic() {
       codigo: "",
       tipoLogin,
       entidadeId: entidade.id,
-      entidadeDados: entidade
+      entidadeDados: entidade,
     }));
     setTempoRestante(300);
     setStep(2);
@@ -160,12 +161,12 @@ export default function useLoginFormLogic() {
       const sucesso = await login(sessionData);
       if (sucesso !== false) {
         localStorage.setItem("tipoLogin", form.tipoLogin);
-      localStorage.setItem("entidade", JSON.stringify(form.entidadeDados));
-      if (form.tipoLogin === "mercado") {
-        navigate("/painel-mercado");
-      } else {
-        navigate("/painel-usuario");
-      }
+        localStorage.setItem("entidade", JSON.stringify(form.entidadeDados));
+        if (form.tipoLogin === "mercado") {
+          navigate("/painel-mercado");
+        } else {
+          navigate("/painel-usuario");
+        }
       } else {
         showAlert("Erro", "Falha ao realizar login.");
       }
@@ -178,23 +179,32 @@ export default function useLoginFormLogic() {
     if (buttonsDisabled) return;
     bloquearBotoesTemporariamente();
 
-    const user = await autenticar(email, "email");
-    if (user) {
-      const sessionData = {
-        nome: user.nome || nome,
-        email: user.email,
-        telefone: user.telefone || telefone,
-        id: user.id,
-        loginTime: Date.now(),
-      };
-      const sucesso = await login(sessionData);
-      if (sucesso !== false) {
-        navigate("/home");
+    try {
+      const user = await autenticar("usuario", email, "email");
+
+      if (user) {
+        const sessionData = {
+          nome: user.nome || nome,
+          email: user.email,
+          telefone: user.telefone || telefone,
+          id: user.id,
+          loginTime: Date.now(),
+        };
+
+        const sucesso = await login(sessionData);
+        if (sucesso !== false) {
+          localStorage.setItem("tipoLogin", "usuario");
+          localStorage.setItem("entidade", JSON.stringify(user));
+          navigate("/painel-usuario");
+        } else {
+          showAlert("Erro", "Falha ao realizar login.");
+        }
       } else {
-        showAlert("Erro", "Falha ao realizar login.");
+        showAlert("Conta não encontrada", "Cadastre-se antes de fazer login com o Google.");
       }
-    } else {
-      showAlert("Conta não encontrada", "Cadastre-se antes de fazer login com o Google.");
+    } catch (error) {
+      console.error("Erro ao autenticar com Google:", error);
+      showAlert("Erro", "Ocorreu um erro inesperado.");
     }
   };
 
@@ -205,7 +215,7 @@ export default function useLoginFormLogic() {
     tempoRestante,
     buttonsDisabled,
     handleChange,
-    handlerLogin,
+    enviarCodigoHandler,
     validarCodigo,
     setForm,
     setStep,

@@ -85,7 +85,7 @@ export default function Login() {
           <button
             className={styles.continueBtn}
             style={{ marginTop: "10px" }}
-            onClick={enviarCodigoHandler}
+            onClick={validarCodigo}
           >
             Reenviar código
           </button>

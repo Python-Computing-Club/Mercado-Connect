@@ -25,20 +25,6 @@
   animation: slideIn 0.3s forwards;
 }
 
-.modalContent {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  max-width: 500px;
-  width: 90%;
-  position: relative;
-
-  opacity: 0;
-  transform: translateY(-20px);
-  animation: slideIn 0.3s forwards;
-}
-
 .botaoPrincipal {
   width: 100%;
   padding: 12px;
