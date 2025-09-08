@@ -3,7 +3,26 @@ import { useNavigate } from "react-router-dom";
 import useEmailCodigo from "../../hooks/useEmailCodigo";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
-import { autenticar } from "../../services/authService";
+import { autenticar } from "../../services/firestore/usuarios";
+import { useAuth } from "../../Context/AuthContext";
+
+function formatarTelefoneVisual(telefone) {
+  const onlyNumbers = telefone.replace(/\D/g, "");
+  if (onlyNumbers.length < 7) return telefone;
+
+  if (onlyNumbers.length === 11) {
+    return `(${onlyNumbers.slice(0, 2)}) ${onlyNumbers.slice(2, 7)}-${onlyNumbers.slice(7)}`;
+  }
+  if (onlyNumbers.length === 10) {
+    return `(${onlyNumbers.slice(0, 2)}) ${onlyNumbers.slice(2, 6)}-${onlyNumbers.slice(6)}`;
+  }
+  return telefone;
+}
+
+function normalizarTelefone(telefoneFormatado) {
+  const onlyNumbers = telefoneFormatado.replace(/\D/g, "");
+  return onlyNumbers.startsWith("55") ? "+" + onlyNumbers : "+55" + onlyNumbers;
+}
 
 export default function useLoginFormLogic() {
   const [form, setForm] = useState({
@@ -19,10 +38,16 @@ export default function useLoginFormLogic() {
   const [step, setStep] = useState(1);
   const [modal, setModal] = useState({ open: false, title: "", message: "" });
   const [tempoRestante, setTempoRestante] = useState(0);
+  const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
   const navigate = useNavigate();
   const { enviarCodigo } = useEmailCodigo();
   const { sendVerificationCode } = useTextBeeSms();
+  const { login } = useAuth();
+
+  const showAlert = (title, message) => {
+    setModal({ open: true, title, message });
+  };
 
   useCodigoTimer({
     active: step === 2 && !!form.codigoGerado,
@@ -31,28 +56,36 @@ export default function useLoginFormLogic() {
     setTime: setTempoRestante,
   });
 
-  const showAlert = (title, message) => {
-    setModal({ open: true, title, message });
+  const bloquearBotoesTemporariamente = () => {
+    setButtonsDisabled(true);
+    setTimeout(() => setButtonsDisabled(false), 8000);
   };
 
   const handleChange = (e) => {
-    const { value } = e.target;
+    let { value } = e.target;
     const isEmail = value.includes("@");
-    const onlyNumbers = value.replace(/\D/g, "");
 
     if (isEmail) {
       setForm({ ...form, contato: value, tipoContato: "email" });
-    } else if (onlyNumbers.length >= 4) {
-      const formatted = "+" + (onlyNumbers.startsWith("55") ? onlyNumbers : "55" + onlyNumbers);
-      setForm({ ...form, contato: formatted, tipoContato: "telefone" });
     } else {
-      setForm({ ...form, contato: value, tipoContato: "" });
+      const onlyNumbers = value.replace(/\D/g, "");
+      if (onlyNumbers.length >= 7) {
+        const formatted = formatarTelefoneVisual(onlyNumbers);
+        setForm({ ...form, contato: formatted, tipoContato: "telefone" });
+      } else {
+        setForm({ ...form, contato: value, tipoContato: "" });
+      }
     }
   };
 
-  const handlerLogin = async () => {
+  const enviarCodigoHandler = async () => {
     if (!form.tipoContato) {
       return showAlert("Formato inválido", "Informe um e‑mail ou telefone válido.");
+    }
+
+    let contatoParaBusca = form.contato;
+    if (form.tipoContato === "telefone") {
+      contatoParaBusca = normalizarTelefone(form.contato);
     }
 
     let usuario = null;
@@ -62,7 +95,7 @@ export default function useLoginFormLogic() {
       usuario = await autenticar("usuario", form.contato, form.tipoContato);
       mercado = await autenticar("mercados", form.contato, form.tipoContato);
     } else {
-      usuario = await autenticar("usuario", form.contato, form.tipoContato);
+      usuario = await autenticar("usuario", contatoParaBusca, form.tipoContato);
     }
 
     const entidade = usuario || mercado;
@@ -75,9 +108,9 @@ export default function useLoginFormLogic() {
     let codigo = "";
 
     if (form.tipoContato === "email") {
-      codigo = await enviarCodigo(form.contato, form.tipoContato, showAlert, showAlert);
+      codigo = await enviarCodigo(form.contato, "login", showAlert, showAlert);
     } else {
-      const result = await sendVerificationCode(form.contato);
+      const result = await sendVerificationCode(contatoParaBusca);
       if (!result) return showAlert("Erro", "Falha ao enviar SMS.");
       codigo = result;
     }
@@ -97,18 +130,44 @@ export default function useLoginFormLogic() {
     setStep(2);
   };
 
-  const validarCodigo = () => {
+  const validarCodigo = async () => {
+    if (buttonsDisabled) return;
+    bloquearBotoesTemporariamente();
+
     if (tempoRestante === 0) {
       return showAlert("Código expirado", "Reenvie o código para continuar.");
     }
 
     if (form.codigo === form.codigoGerado) {
-      localStorage.setItem("tipoLogin", form.tipoLogin);
+      let contatoParaBusca = form.contato;
+      if (form.tipoContato === "telefone") {
+        contatoParaBusca = normalizarTelefone(form.contato);
+      }
+
+      const user = await buscarUsuario(contatoParaBusca, form.tipoContato);
+      if (!user) {
+        return showAlert("Erro", "Usuário não encontrado no banco.");
+      }
+
+      const sessionData = {
+        nome: user.nome,
+        email: user.email,
+        telefone: user.telefone,
+        id: user.id,
+        loginTime: Date.now(),
+      };
+
+      const sucesso = await login(sessionData);
+      if (sucesso !== false) {
+        localStorage.setItem("tipoLogin", form.tipoLogin);
       localStorage.setItem("entidade", JSON.stringify(form.entidadeDados));
       if (form.tipoLogin === "mercado") {
         navigate("/painel-mercado");
       } else {
         navigate("/painel-usuario");
+      }
+      } else {
+        showAlert("Erro", "Falha ao realizar login.");
       }
     } else {
       showAlert("Inválido", "Código incorreto.");
@@ -116,9 +175,24 @@ export default function useLoginFormLogic() {
   };
 
   const loginComGoogle = async (email, nome, telefone) => {
+    if (buttonsDisabled) return;
+    bloquearBotoesTemporariamente();
+
     const user = await autenticar(email, "email");
     if (user) {
-      navigate("/home");
+      const sessionData = {
+        nome: user.nome || nome,
+        email: user.email,
+        telefone: user.telefone || telefone,
+        id: user.id,
+        loginTime: Date.now(),
+      };
+      const sucesso = await login(sessionData);
+      if (sucesso !== false) {
+        navigate("/home");
+      } else {
+        showAlert("Erro", "Falha ao realizar login.");
+      }
     } else {
       showAlert("Conta não encontrada", "Cadastre-se antes de fazer login com o Google.");
     }
@@ -129,6 +203,7 @@ export default function useLoginFormLogic() {
     step,
     modal,
     tempoRestante,
+    buttonsDisabled,
     handleChange,
     handlerLogin,
     validarCodigo,

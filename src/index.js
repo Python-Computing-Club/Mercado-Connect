@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import AppRoutes from './routes.js';
+import AppRoutes from './Routes/AppRoutes';
 import './index.css';
 import TesteCNPJ from './pages/testeCNPJ.jsx';
 import PainelMercado from './pages/painelMercado/index.js';

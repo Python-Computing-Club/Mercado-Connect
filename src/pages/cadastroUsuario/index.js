@@ -24,34 +24,21 @@ export default function CadastroUsuario() {
     finalizarCadastro,
     setAcceptedTerms,
     setModal,
-    setForm,
+    loginComGoogle,
+    pularTelefone,  // Importante adicionar aqui
   } = useCadastroForm();
 
-  const loginComGoogle = (credentialResponse) => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const token = credentialResponse.credential;
       const userInfo = jwtDecode(token);
 
-      const nome = userInfo.name || "";
-      const email = userInfo.email || "";
-
-      setForm((prev) => ({
-        ...prev,
-        nome,
-        contato: email,
-        tipoContato: "email",
-      }));
-
-      setAcceptedTerms(false);
-      setModal({
-        open: true,
-        title: "Quase lá!",
-        message: "Confirme os termos para finalizar seu cadastro.",
+      await loginComGoogle({
+        usuario: {
+          displayName: userInfo.name,
+          email: userInfo.email,
+        },
       });
-
-      handleContinue(); // step 1 → 3
-      handleContinue(); // step 3 → 4
-      handleContinue(); // step 4 → 6
     } catch (error) {
       console.error("Erro no login com Google:", error);
       setModal({
@@ -100,7 +87,7 @@ export default function CadastroUsuario() {
             <div className={styles.socialLogin}>
               <div className={styles.googleBtn}>
                 <GoogleLogin
-                  onSuccess={loginComGoogle}
+                  onSuccess={handleGoogleSuccess}
                   onError={() =>
                     setModal({
                       open: true,
@@ -115,6 +102,16 @@ export default function CadastroUsuario() {
                 Entrar com Facebook
               </button>
             </div>
+            <p className={styles.termosGoogle}>
+              Ao entrar com Google, você concorda automaticamente com os{" "}
+              <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer">
+                Termos de Uso
+              </a>{" "}
+              e a{" "}
+              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer">
+                Política de Privacidade
+              </a>.
+            </p>
           </>
         )}
 
@@ -205,7 +202,55 @@ export default function CadastroUsuario() {
               >
                 Continuar
               </button>
+              <button
+                type="button"
+                className={styles.skipBtn}
+                onClick={pularTelefone}
+              >
+                Pular
+              </button>
             </div>
+          </>
+        )}
+
+        {step === 5 && (
+          <>
+            <label>Código enviado para telefone opcional</label>
+            <input
+              type="text"
+              name="codigoOpcional"
+              value={form.codigoOpcional}
+              onChange={(e) =>
+                handleChange({ target: { name: "codigoOpcional", value: e.target.value } })
+              }
+              placeholder="Digite o código SMS"
+              maxLength={6}
+            />
+            <p>
+              Tempo restante: {Math.floor(tempoRestante / 60)}:
+              {("0" + (tempoRestante % 60)).slice(-2)}
+            </p>
+            <div className={styles.buttonGroup}>
+              <button type="button" className={styles.backBtn} onClick={handleBack}>
+                Voltar
+              </button>
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleContinue}
+                disabled={form.codigoOpcional.length !== 6 || tempoRestante === 0}
+              >
+                Confirmar código
+              </button>
+            </div>
+            <button
+              type="button"
+              className={styles.submitBtn}
+              style={{ marginTop: "10px" }}
+              onClick={reenviarCodigo}
+            >
+              Reenviar código
+            </button>
           </>
         )}
 
@@ -231,8 +276,7 @@ export default function CadastroUsuario() {
                   rel="noopener noreferrer"
                 >
                   Política de Privacidade
-                </a>
-                .
+                </a>.
               </label>
             </div>
             <div className={styles.buttonGroup}>

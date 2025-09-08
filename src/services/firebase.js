@@ -1,8 +1,13 @@
-// firebase.js
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -15,8 +20,18 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export const provider = new GoogleAuthProvider();
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const provider = new GoogleAuthProvider();
+
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("Persistência definida como localStorage.");
+  })
+  .catch((error) => {
+    console.error("Erro ao definir persistência do Firebase Auth:", error);
+  });
+
+export { auth, db, storage, provider };
 export const signInWithGoogle = () => signInWithPopup(auth, provider);

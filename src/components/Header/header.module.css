@@ -1,0 +1,102 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+  padding: 0 8px 0 8px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+
+.logoArea {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.marketName {
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 1.2;
+  color: rgb(1, 100, 1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  white-space: nowrap;
+}
+
+.userArea {
+  font-size: 20px;
+  color: #333;
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: 16px;
+}
+
+.contentArea {
+  padding-top: 72px;
+  flex: 1;
+}
+
+@media (max-width: 767px) {
+  .header {
+    padding: 8px 16px;
+    justify-content: center;
+  }
+
+  .logoArea {
+    justify-content: center;
+    gap: 8px;
+    flex-basis: 100%;
+    margin-bottom: 8px;
+  }
+
+  .logo {
+    width: 70px;
+  }
+
+  .marketName {
+    font-size: 20px;
+  }
+
+  .userArea {
+    font-size: 16px;
+    margin-left: 0;
+    flex-basis: 100%;
+    text-align: center;
+  }
+
+  .contentArea {
+    padding-top: 56px;
+  }
+}
