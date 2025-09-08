@@ -13,7 +13,7 @@ export default function Login() {
     modal,
     tempoRestante,
     handleChange,
-    enviarCodigoHandler,
+    handlerLogin,
     validarCodigo,
     setForm,
     setModal,
@@ -63,7 +63,7 @@ export default function Login() {
             value={form.contato}
             onChange={handleChange}
           />
-          <button className={styles.continueBtn} onClick={enviarCodigoHandler}>
+          <button className={styles.continueBtn} onClick={handlerLogin}>
             Continue
           </button>
         </>

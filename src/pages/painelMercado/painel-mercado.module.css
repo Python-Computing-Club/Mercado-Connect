@@ -1,0 +1,151 @@
+.banner {
+  height: 50vh; /* metade da altura da tela */
+  background-image: url('./banner.jpg'); /* ajuste o caminho conforme sua imagem */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* escurece a imagem para destacar o texto */
+  z-index: 0;
+}
+
+.bannerTitle {
+  color: white;
+  font-size: 3rem;
+  text-align: center;
+  z-index: 1;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.titles{
+    text-align: center;
+    padding-top: 50px;
+    color: #012E0D;
+}
+
+.cardContainer{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.cardTitle{
+    color: #012E0D;
+    font-weight: bold;;
+}
+
+.cardSubtitle{
+    color: #012E0D;
+}
+
+.buttonCard{
+    border-radius: 10px;
+    color: white;
+    background-color: #012E0D;
+    font-weight: bold;
+    font-size: 15px;
+    border: none;
+    padding: 5px;
+}
+
+.submitButton{
+    border-radius: 10px;
+    color: white;
+    background-color: #012E0D;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    padding: 10px;
+}
+
+.cancelButton{
+    border-radius: 10px;
+    color: white;
+    background-color: red;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    padding: 10px;
+}
+
+.deleteButton{
+    border-radius: 10px;
+    color: white;
+    background-color: black;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    padding: 10px;
+}
+
+.verificacaoContainer {
+  margin: 2rem auto;
+  padding: 2rem;
+  max-width: 600px;
+  background-color: #012E0D;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.verificacaoContainer .submitButton{
+    background-color: white;
+    color: #012E0D;
+}
+
+.verificacaoContainer h3 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formVerificacao{
+  display: flex;
+  flex-direction: column;
+}
+
+.formVerificacao label{
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.formVerificacao input{
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.formGroup label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: black;
+}
+
+.formGroup input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}

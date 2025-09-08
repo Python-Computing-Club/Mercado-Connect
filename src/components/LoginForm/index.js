@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useEmailCodigo from "../../hooks/useEmailCodigo";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
-import { buscarUsuario } from "../../services/firestore/usuarios";
+import { autenticar } from "../../services/firestore/usuarios";
 import { useAuth } from "../../Context/AuthContext";
 
 function formatarTelefoneVisual(telefone) {
@@ -30,6 +30,9 @@ export default function useLoginFormLogic() {
     tipoContato: "",
     codigo: "",
     codigoGerado: "",
+    tipoLogin: "",
+    entidadeId: "",
+    entidadeDados: null
   });
 
   const [step, setStep] = useState(1);
@@ -76,9 +79,6 @@ export default function useLoginFormLogic() {
   };
 
   const enviarCodigoHandler = async () => {
-    if (buttonsDisabled) return;
-    bloquearBotoesTemporariamente();
-
     if (!form.tipoContato) {
       return showAlert("Formato inválido", "Informe um e‑mail ou telefone válido.");
     }
@@ -88,15 +88,27 @@ export default function useLoginFormLogic() {
       contatoParaBusca = normalizarTelefone(form.contato);
     }
 
-    const user = await buscarUsuario(contatoParaBusca, form.tipoContato);
-    if (!user) {
-      return showAlert("Não encontrado", "Usuário não cadastrado.");
+    let usuario = null;
+    let mercado = null;
+
+    if (form.tipoContato === "email") {
+      usuario = await autenticar("usuario", form.contato, form.tipoContato);
+      mercado = await autenticar("mercados", form.contato, form.tipoContato);
+    } else {
+      usuario = await autenticar("usuario", contatoParaBusca, form.tipoContato);
+    }
+
+    const entidade = usuario || mercado;
+    const tipoLogin = mercado ? "mercado" : "usuario";
+
+    if (!entidade) {
+      return showAlert("Conta não encontrada", "Nenhum cadastro vinculado a este contato.");
     }
 
     let codigo = "";
 
     if (form.tipoContato === "email") {
-      codigo = await enviarCodigo(contatoParaBusca, form.tipoContato, showAlert, showAlert);
+      codigo = await enviarCodigo(form.contato, "login", showAlert, showAlert);
     } else {
       const result = await sendVerificationCode(contatoParaBusca);
       if (!result) return showAlert("Erro", "Falha ao enviar SMS.");
@@ -106,7 +118,14 @@ export default function useLoginFormLogic() {
     if (!codigo) return;
 
     showAlert("Código enviado", `Enviado para ${form.contato}`);
-    setForm((prev) => ({ ...prev, codigoGerado: codigo, codigo: "" }));
+    setForm((prev) => ({
+      ...prev,
+      codigoGerado: codigo,
+      codigo: "",
+      tipoLogin,
+      entidadeId: entidade.id,
+      entidadeDados: entidade
+    }));
     setTempoRestante(300);
     setStep(2);
   };
@@ -140,7 +159,13 @@ export default function useLoginFormLogic() {
 
       const sucesso = await login(sessionData);
       if (sucesso !== false) {
-        navigate("/home");
+        localStorage.setItem("tipoLogin", form.tipoLogin);
+      localStorage.setItem("entidade", JSON.stringify(form.entidadeDados));
+      if (form.tipoLogin === "mercado") {
+        navigate("/painel-mercado");
+      } else {
+        navigate("/painel-usuario");
+      }
       } else {
         showAlert("Erro", "Falha ao realizar login.");
       }
@@ -153,7 +178,7 @@ export default function useLoginFormLogic() {
     if (buttonsDisabled) return;
     bloquearBotoesTemporariamente();
 
-    const user = await buscarUsuario(email, "email");
+    const user = await autenticar(email, "email");
     if (user) {
       const sessionData = {
         nome: user.nome || nome,
@@ -180,7 +205,7 @@ export default function useLoginFormLogic() {
     tempoRestante,
     buttonsDisabled,
     handleChange,
-    enviarCodigoHandler,
+    handlerLogin,
     validarCodigo,
     setForm,
     setStep,
