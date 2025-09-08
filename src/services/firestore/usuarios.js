@@ -2,6 +2,7 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -12,13 +13,13 @@ import { db } from "../firebase";
 
 const usuariosRef = collection(db, "usuario");
 
-// Criar um usuário com verificação de duplicidade
 export const criarUsuario = async (dados) => {
   try {
     const filtros = [];
 
     if (dados.email) filtros.push(where("email", "==", dados.email));
     if (dados.telefone) filtros.push(where("telefone", "==", dados.telefone));
+    if (dados.cpf) filtros.push(where("cpf", "==", dados.cpf));
 
     let q;
     if (filtros.length > 1) {
@@ -30,20 +31,19 @@ export const criarUsuario = async (dados) => {
     if (q) {
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
-        console.log("Usuário já existe com este email ou telefone.");
+        console.log("Usuário já existe com este email, telefone ou CPF.");
         return { sucesso: false, motivo: "duplicado" };
       }
     }
 
-    await addDoc(usuariosRef, dados);
-    return { sucesso: true };
+    const docRef = await addDoc(usuariosRef, dados);
+    return { sucesso: true, id: docRef.id };
   } catch (error) {
     console.log("Erro ao criar usuário", error);
     return { sucesso: false, motivo: "erro" };
   }
 };
 
-// Listar todos os usuários
 export const listarUsuarios = async () => {
   try {
     const snapshot = await getDocs(usuariosRef);
@@ -54,10 +54,17 @@ export const listarUsuarios = async () => {
   }
 };
 
-// Atualizar dados de um usuário
 export const atualizarUsuario = async (id, dados) => {
   try {
-    await updateDoc(doc(db, "usuario", id), dados);
+    const ref = doc(db, "usuario", id);
+    const snapshot = await getDoc(ref);
+    const atual = snapshot.data();
+
+    if (atual?.cpf?.length > 0) {
+      delete dados.cpf; 
+    }
+
+    await updateDoc(ref, dados);
     return true;
   } catch (error) {
     console.log("Erro ao atualizar informações", error);
@@ -65,7 +72,6 @@ export const atualizarUsuario = async (id, dados) => {
   }
 };
 
-// Deletar um usuário
 export const deletarUsuario = async (id) => {
   try {
     await deleteDoc(doc(db, "usuario", id));
@@ -76,7 +82,6 @@ export const deletarUsuario = async (id) => {
   }
 };
 
-// Buscar usuário por email ou telefone
 export const buscarUsuario = async (valor, tipo) => {
   try {
     let filtro;
@@ -85,6 +90,8 @@ export const buscarUsuario = async (valor, tipo) => {
       filtro = where("email", "==", valor);
     } else if (tipo === "telefone") {
       filtro = where("telefone", "==", valor);
+    } else if (tipo === "cpf") {
+      filtro = where("cpf", "==", valor);
     } else {
       return null;
     }

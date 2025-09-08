@@ -220,6 +220,7 @@ input:focus {
   user-select: none;
   margin-bottom: 15px;
   width: 100%;
+  position: relative;
 }
 
 .privacyContainer input[type="checkbox"] {
@@ -231,6 +232,9 @@ input:focus {
   transition: border-color 0.3s ease, background-color 0.3s ease;
   margin-right: 10px;
   position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
 }
 
 .privacyContainer input[type="checkbox"]:checked {
@@ -249,6 +253,11 @@ input:focus {
   color: white;
   font-size: 12px;
   line-height: 18px;
+  user-select: none;
+}
+
+.privacyContainer label {
+  cursor: pointer;
 }
 
 .privacyContainer label a {
