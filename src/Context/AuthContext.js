@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { buscarUsuario } from "../services/firestore/usuarios";
+import { buscarMercadoPorContato } from "../services/firestore/mercados";
 
 const AuthContext = createContext();
 
@@ -15,9 +16,16 @@ export function AuthProvider({ children }) {
         setUsuario(usuarioLocal);
 
         try {
-          const dadosAtualizados = await buscarUsuario(usuarioLocal.email || usuarioLocal.contato, "email");
+          const tipo = usuarioLocal.tipoLogin || "usuario";
+          const contato = usuarioLocal.email || usuarioLocal.telefone;
+
+          const dadosAtualizados =
+            tipo === "mercado"
+              ? await buscarMercadoPorContato(contato, "email")
+              : await buscarUsuario(contato, "email");
+
           if (dadosAtualizados) {
-            const usuarioAtualizado = { ...dadosAtualizados };
+            const usuarioAtualizado = { ...dadosAtualizados, tipoLogin: tipo };
             setUsuario(usuarioAtualizado);
             localStorage.setItem("userSession", JSON.stringify(usuarioAtualizado));
           }
@@ -33,17 +41,20 @@ export function AuthProvider({ children }) {
 
   const login = async (dadosUsuario) => {
     try {
-      const dadosFirestore = await buscarUsuario(dadosUsuario.email || dadosUsuario.contato, "email");
+      const contato = dadosUsuario.email || dadosUsuario.telefone || dadosUsuario.contato;
+      const tipo = dadosUsuario.tipoLogin || "usuario";
+
+      const dadosFirestore =
+        tipo === "mercado"
+          ? await buscarMercadoPorContato(contato, "email")
+          : await buscarUsuario(contato, "email");
 
       if (!dadosFirestore) {
         console.warn("Usuário não encontrado no Firestore durante login.");
         return false;
       }
 
-      const dadosCompletos = {
-        ...dadosFirestore,
-        ...dadosUsuario,
-      };
+      const dadosCompletos = { ...dadosFirestore, ...dadosUsuario, tipoLogin: tipo };
 
       setUsuario(dadosCompletos);
       localStorage.setItem("userSession", JSON.stringify(dadosCompletos));

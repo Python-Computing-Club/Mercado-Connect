@@ -1,25 +1,41 @@
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../Context/AuthContext";
 import styles from "./login.module.css";
-import { Link } from "react-router-dom";
 import cartIcon from "../../assets/teste.png";
 import facebookIcon from "../../assets/facebook.png";
 import useLoginFormLogic from "../../components/LoginForm";
-import { GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
+import { GoogleLogin } from "@react-oauth/google";
+import {jwtDecode} from "jwt-decode";
 
 export default function Login() {
+  const { usuario } = useAuth();
+  const navigate = useNavigate();
+
   const {
     form,
     step,
     modal,
     tempoRestante,
+    buttonsDisabled,
     handleChange,
-    handlerLogin,
+    enviarCodigoHandler,
     validarCodigo,
     setForm,
     setModal,
     loginComGoogle,
   } = useLoginFormLogic();
 
+  // Redireciona se já estiver logado
+  useEffect(() => {
+    if (usuario) {
+      const tipoLogin = localStorage.getItem("tipoLogin");
+      if (tipoLogin === "mercado") navigate("/painel-mercado", { replace: true });
+      else navigate("/home", { replace: true });
+    }
+  }, [usuario, navigate]);
+
+  // Sucesso no login Google
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     try {
       const token = credentialResponse.credential;
@@ -63,8 +79,12 @@ export default function Login() {
             value={form.contato}
             onChange={handleChange}
           />
-          <button className={styles.continueBtn} onClick={handlerLogin}>
-            Continue
+          <button
+            className={styles.continueBtn}
+            onClick={enviarCodigoHandler}
+            disabled={buttonsDisabled}
+          >
+            Continuar
           </button>
         </>
       )}
@@ -79,13 +99,18 @@ export default function Login() {
             onChange={(e) => setForm({ ...form, codigo: e.target.value })}
           />
           <p className={styles.timer}>Tempo restante: {tempoRestante}s</p>
-          <button className={styles.continueBtn} onClick={validarCodigo}>
+          <button
+            className={styles.continueBtn}
+            onClick={validarCodigo}
+            disabled={buttonsDisabled}
+          >
             Validar código
           </button>
           <button
             className={styles.continueBtn}
             style={{ marginTop: "10px" }}
-            onClick={validarCodigo}
+            onClick={enviarCodigoHandler}
+            disabled={buttonsDisabled}
           >
             Reenviar código
           </button>
@@ -114,7 +139,7 @@ export default function Login() {
 
         <button className={styles.facebookBtn}>
           <img src={facebookIcon} alt="Facebook" />
-          Continue com Facebook
+          Continuar com Facebook
         </button>
       </div>
 

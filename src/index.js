@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import AppRoutes from './Routes/AppRoutes';
 import './index.css';
-import TesteCNPJ from './pages/testeCNPJ.jsx';
+import testeCNPJ from '../src/pages/testeCNPJ.jsx';
 import PainelMercado from './pages/painelMercado/index.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 

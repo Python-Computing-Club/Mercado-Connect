@@ -1,6 +1,5 @@
-// src/pages/TesteCNPJ.jsx
 import React, { useState } from 'react';
-import verificaCNPJ from '../hooks/verificaCNPJ'; // ajuste o caminho conforme sua estrutura
+import verificaCNPJ from '../hooks/verificaCNPJ';
 
 export default function TesteCNPJ() {
   const [cnpj, setCnpj] = useState('');
@@ -18,7 +17,7 @@ export default function TesteCNPJ() {
       cpf,
       (titulo, msg) => setMensagem(`${titulo}: ${msg}`),
       (titulo, msg) => setErro(`${titulo}: ${msg}`),
-      nome // ← passa o nome como parâmetro extra
+      nome
     );
 
     if (resultado === true) {

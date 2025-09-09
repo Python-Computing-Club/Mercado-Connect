@@ -67,7 +67,7 @@ export default function useLoginFormLogic() {
     const isEmail = value.includes("@");
 
     if (isEmail) {
-      setForm({ ...form, contato: value, tipoContato: "email" });
+      setForm({ ...form, contato: value.trim().toLowerCase(), tipoContato: "email" });
     } else {
       const onlyNumbers = value.replace(/\D/g, "");
       if (onlyNumbers.length >= 7) {
@@ -79,28 +79,40 @@ export default function useLoginFormLogic() {
     }
   };
 
+  const buscarEntidade = async (contato, tipoContato) => {
+    const telefoneNormalizado =
+      tipoContato === "telefone" ? normalizarTelefone(contato) : contato.trim().toLowerCase();
+
+    const usuarioEmail =
+      tipoContato === "email" ? await autenticar("usuario", contato.trim().toLowerCase(), "email") : null;
+    const usuarioTelefone =
+      tipoContato === "telefone" ? await autenticar("usuario", telefoneNormalizado, "telefone") : null;
+
+    const mercadoEmail =
+      tipoContato === "email" ? await autenticar("mercados", contato.trim().toLowerCase(), "email") : null;
+    const mercadoTelefone =
+      tipoContato === "telefone" ? await autenticar("mercados", telefoneNormalizado, "telefone") : null;
+
+    const usuario = usuarioEmail || usuarioTelefone;
+    const mercado = mercadoEmail || mercadoTelefone;
+
+    const entidade = usuario || mercado;
+    const tipoLogin = mercado ? "mercado" : "usuario";
+
+    return { entidade, tipoLogin };
+  };
+
   const enviarCodigoHandler = async () => {
     if (!form.tipoContato) {
       return showAlert("Formato inválido", "Informe um e‑mail ou telefone válido.");
     }
 
-    let contatoParaBusca = form.contato;
-    if (form.tipoContato === "telefone") {
-      contatoParaBusca = normalizarTelefone(form.contato);
-    }
+    const contatoParaBusca =
+      form.tipoContato === "telefone"
+        ? normalizarTelefone(form.contato)
+        : form.contato.trim().toLowerCase();
 
-    let usuario = null;
-    let mercado = null;
-
-    if (form.tipoContato === "email") {
-      usuario = await autenticar("usuario", form.contato, "email");
-      mercado = await autenticar("mercados", form.contato, "email");
-    } else {
-      usuario = await autenticar("usuario", contatoParaBusca, "telefone");
-    }
-
-    const entidade = usuario || mercado;
-    const tipoLogin = mercado ? "mercado" : "usuario";
+    const { entidade, tipoLogin } = await buscarEntidade(form.contato, form.tipoContato);
 
     if (!entidade) {
       return showAlert("Conta não encontrada", "Nenhum cadastro vinculado a este contato.");
@@ -109,14 +121,16 @@ export default function useLoginFormLogic() {
     let codigo = "";
 
     if (form.tipoContato === "email") {
-      codigo = await enviarCodigo(form.contato, "login", showAlert, showAlert);
+      codigo = await enviarCodigo(form.contato.trim().toLowerCase(), "email", showAlert, showAlert);
+      if (!codigo) return;
     } else {
       const result = await sendVerificationCode(contatoParaBusca);
-      if (!result) return showAlert("Erro", "Falha ao enviar SMS.");
+      if (!result) {
+        showAlert("Erro", "Falha ao enviar SMS.");
+        return;
+      }
       codigo = result;
     }
-
-    if (!codigo) return;
 
     showAlert("Código enviado", `Enviado para ${form.contato}`);
     setForm((prev) => ({
@@ -124,6 +138,7 @@ export default function useLoginFormLogic() {
       codigoGerado: codigo,
       codigo: "",
       tipoLogin,
+      tipoContato: form.tipoContato,
       entidadeId: entidade.id,
       entidadeDados: entidade,
     }));
@@ -140,33 +155,36 @@ export default function useLoginFormLogic() {
     }
 
     if (form.codigo === form.codigoGerado) {
-      let contatoParaBusca = form.contato;
-      if (form.tipoContato === "telefone") {
-        contatoParaBusca = normalizarTelefone(form.contato);
+      let contatoParaBusca = form.tipoContato === "telefone"
+        ? normalizarTelefone(form.contato)
+        : form.contato.trim().toLowerCase();
+
+      let entidade = null;
+      if (form.tipoLogin === "mercado") {
+        entidade = await autenticar("mercados", contatoParaBusca, form.tipoContato);
+      } else {
+        entidade = await buscarUsuario(contatoParaBusca, form.tipoContato);
       }
 
-      const user = await buscarUsuario(contatoParaBusca, form.tipoContato);
-      if (!user) {
+      if (!entidade) {
         return showAlert("Erro", "Usuário não encontrado no banco.");
       }
 
       const sessionData = {
-        nome: user.nome,
-        email: user.email,
-        telefone: user.telefone,
-        id: user.id,
+        nome: entidade.nome,
+        email: entidade.email,
+        telefone: entidade.telefone,
+        id: entidade.id,
         loginTime: Date.now(),
+        tipoLogin: form.tipoLogin,
+        tipoContato: form.tipoContato,
       };
 
       const sucesso = await login(sessionData);
       if (sucesso !== false) {
         localStorage.setItem("tipoLogin", form.tipoLogin);
         localStorage.setItem("entidade", JSON.stringify(form.entidadeDados));
-        if (form.tipoLogin === "mercado") {
-          navigate("/painel-mercado");
-        } else {
-          navigate("/painel-usuario");
-        }
+        navigate(form.tipoLogin === "mercado" ? "/painel-mercado" : "/home");
       } else {
         showAlert("Erro", "Falha ao realizar login.");
       }
@@ -180,22 +198,37 @@ export default function useLoginFormLogic() {
     bloquearBotoesTemporariamente();
 
     try {
-      const user = await autenticar("usuario", email, "email");
+      const mercado = await autenticar("mercados", email.trim().toLowerCase(), "email");
+      if (mercado) {
+        return showAlert(
+          "Login não permitido",
+          "Por medidas de segurança, mercados devem fazer login utilizando e-mail ou telefone, não com o Google."
+        );
+      }
 
-      if (user) {
+      const user = await autenticar("usuario", email.trim().toLowerCase(), "email");
+      const userTelefone = telefone
+        ? await autenticar("usuario", normalizarTelefone(telefone), "telefone")
+        : null;
+
+      const finalUser = user || userTelefone;
+
+      if (finalUser) {
         const sessionData = {
-          nome: user.nome || nome,
-          email: user.email,
-          telefone: user.telefone || telefone,
-          id: user.id,
+          nome: finalUser.nome || nome,
+          email: finalUser.email || email,
+          telefone: finalUser.telefone || telefone,
+          id: finalUser.id,
           loginTime: Date.now(),
+          tipoLogin: "usuario",
+          tipoContato: "email",
         };
 
         const sucesso = await login(sessionData);
         if (sucesso !== false) {
           localStorage.setItem("tipoLogin", "usuario");
-          localStorage.setItem("entidade", JSON.stringify(user));
-          navigate("/painel-usuario");
+          localStorage.setItem("entidade", JSON.stringify(finalUser));
+          navigate("/home");
         } else {
           showAlert("Erro", "Falha ao realizar login.");
         }

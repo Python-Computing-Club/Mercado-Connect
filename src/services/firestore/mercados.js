@@ -71,3 +71,19 @@ export const deletarMercado = async (id) => {
     return false;
   }
 };
+
+export const buscarMercadoPorContato = async (valor, tipo = "email") => {
+  try {
+    const campo = tipo === "telefone" ? "telefone" : "email";
+    const q = query(mercadosRef, where(campo, "==", valor));
+    const resultado = await getDocs(q);
+
+    if (resultado.empty) return null;
+
+    const docSnap = resultado.docs[0];
+    return { id: docSnap.id, ...docSnap.data() };
+  } catch (error) {
+    console.error("Erro ao buscar mercado:", error);
+    return null;
+  }
+};
