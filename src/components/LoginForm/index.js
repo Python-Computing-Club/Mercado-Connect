@@ -6,6 +6,7 @@ import useCodigoTimer from "../../hooks/useCodigoTimer";
 import { autenticar } from "../../services/authService";
 import { buscarUsuario } from "../../services/firestore/usuarios";
 import { useAuth } from "../../Context/AuthContext";
+import useFacebookLogin from "../../hooks/useFacebookLogin";
 
 function formatarTelefoneVisual(telefone) {
   const onlyNumbers = telefone.replace(/\D/g, "");
@@ -45,6 +46,8 @@ export default function useLoginFormLogic() {
   const { enviarCodigo } = useEmailCodigo();
   const { sendVerificationCode } = useTextBeeSms();
   const { login } = useAuth();
+
+  const { loginComFacebook } = useFacebookLogin(setModal, () => {}, () => {}, () => {}, "login"); // <- USO DO HOOK FB
 
   const showAlert = (title, message) => {
     setModal({ open: true, title, message });
@@ -254,5 +257,6 @@ export default function useLoginFormLogic() {
     setStep,
     setModal,
     loginComGoogle,
+    loginComFacebook,
   };
 }

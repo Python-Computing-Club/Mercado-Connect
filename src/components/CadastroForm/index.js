@@ -6,6 +6,7 @@ import useStepNavigation from "../../hooks/useStepNavigation";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import useGoogleLogin from "../../hooks/useGoogleLogin";
+import useFacebookLogin from "../../hooks/useFacebookLogin";  // <-- Importa hook do Facebook
 import { criarUsuario, buscarUsuario } from "../../services/firestore/usuarios";
 
 function formatarTelefoneVisual(telefone) {
@@ -72,13 +73,15 @@ export default function useCadastroForm() {
     useGoogleLogin(showAlert);
 
   const { step, setStep, handleBack } = useStepNavigation(1, {
-    customBack: (currentStep) => {
-      if (currentStep === 3) return 1;
-      if (currentStep === 5 || currentStep === 6)
-        return form.tipoContato === "email" ? 4 : 3;
-      return null;
-    },
-  });
+  customBack: (currentStep) => {
+    if (currentStep === 3) return 1;
+    if (currentStep === 5 || currentStep === 6)
+      return form.tipoContato === "email" ? 4 : 3;
+    return null;
+  },
+});
+
+const { loginComFacebook: autenticarFacebook } = useFacebookLogin(setModal, setForm, setStep);
 
   useCodigoTimer({
     active:
@@ -387,6 +390,12 @@ export default function useCadastroForm() {
     setStep(3);
   };
 
+  // *** função nova para login facebook, pode usar o autenticarFacebook internamente ***
+  const loginComFacebook = async () => {
+    // O hook useFacebookLogin já atualiza o form e o step, aqui só podemos chamar autenticarFacebook
+    autenticarFacebook();
+  };
+
   return {
     step,
     form: { ...form, telefone: telefoneFormatadoParaExibir },
@@ -404,6 +413,7 @@ export default function useCadastroForm() {
     setStep,
     setForm,
     loginComGoogle,
+    loginComFacebook,   // <-- expõe para uso externo
     googleLoading,
     setModal,
     bloquearEnvio,

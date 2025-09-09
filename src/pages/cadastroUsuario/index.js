@@ -7,6 +7,7 @@ import styles from "./cadastro.module.css";
 import useCadastroForm from "../../components/CadastroForm/index.js";
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
+import useFacebookLogin from "../../hooks/useFacebookLogin";
 
 export default function CadastroUsuario() {
   const {
@@ -25,8 +26,12 @@ export default function CadastroUsuario() {
     setAcceptedTerms,
     setModal,
     loginComGoogle,
-    pularTelefone,  // Importante adicionar aqui
+    pularTelefone,
+    setForm,
+    setStep,
   } = useCadastroForm();
+
+  const { loginComFacebook } = useFacebookLogin(setModal, setForm, setStep);
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -97,7 +102,11 @@ export default function CadastroUsuario() {
                   }
                 />
               </div>
-              <button type="button" className={styles.facebookBtn}>
+              <button
+                type="button"
+                className={styles.facebookBtn}
+                onClick={loginComFacebook}
+              >
                 <img src={facebookIcon} alt="Facebook" />
                 Entrar com Facebook
               </button>

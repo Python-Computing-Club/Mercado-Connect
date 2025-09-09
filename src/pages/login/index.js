@@ -6,7 +6,7 @@ import cartIcon from "../../assets/teste.png";
 import facebookIcon from "../../assets/facebook.png";
 import useLoginFormLogic from "../../components/LoginForm";
 import { GoogleLogin } from "@react-oauth/google";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
   const { usuario } = useAuth();
@@ -24,9 +24,9 @@ export default function Login() {
     setForm,
     setModal,
     loginComGoogle,
+    loginComFacebook,
   } = useLoginFormLogic();
 
-  // Redireciona se já estiver logado
   useEffect(() => {
     if (usuario) {
       const tipoLogin = localStorage.getItem("tipoLogin");
@@ -35,7 +35,6 @@ export default function Login() {
     }
   }, [usuario, navigate]);
 
-  // Sucesso no login Google
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     try {
       const token = credentialResponse.credential;
@@ -137,7 +136,11 @@ export default function Login() {
           />
         </div>
 
-        <button className={styles.facebookBtn}>
+        <button
+          className={styles.facebookBtn}
+          onClick={loginComFacebook}
+          disabled={buttonsDisabled}
+        >
           <img src={facebookIcon} alt="Facebook" />
           Continuar com Facebook
         </button>

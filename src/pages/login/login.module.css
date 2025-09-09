@@ -121,6 +121,12 @@
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
+.cadastro_googleBtn__fTQwa {
+  height: 48px;
+  width: 280px;
+  overflow: hidden;
+}
+
 .facebookBtn img {
   width: 25px;
   margin-right: 8px;
@@ -145,8 +151,6 @@
 }
 
 .modal {
-  background: #ffecec;
-  border: 1px solid #f5c2c2;
   padding: 16px;
   border-radius: 8px;
   max-width: 400px;
@@ -154,13 +158,33 @@
   text-align: center;
 }
 
-.modal h2 {
+.modal.error {
+  background: #ffecec;
+  border: 1px solid #f5c2c2;
+}
+
+.modal.error h2 {
   color: #d8000c;
-  margin-bottom: 8px;
+}
+
+.modal.error button {
+  background: #d8000c;
+}
+
+.modal.success {
+  background: #e6ffed;
+  border: 1px solid #b2f2bb;
+}
+
+.modal.success h2 {
+  color: #1e7a32;
+}
+
+.modal.success button {
+  background: #1e7a32;
 }
 
 .modal button {
-  background: #d8000c;
   color: white;
   border: none;
   padding: 10px 16px;
