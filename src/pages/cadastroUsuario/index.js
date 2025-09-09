@@ -111,16 +111,6 @@ export default function CadastroUsuario() {
                 Entrar com Facebook
               </button>
             </div>
-            <p className={styles.termosGoogle}>
-              Ao entrar com Google, você concorda automaticamente com os{" "}
-              <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer">
-                Termos de Uso
-              </a>{" "}
-              e a{" "}
-              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer">
-                Política de Privacidade
-              </a>.
-            </p>
           </>
         )}
 
