@@ -1,35 +1,50 @@
 .section {
+  width: 100%;
   margin-bottom: 32px;
-  padding: 0 16px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+}
+
+.header h2 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
 }
 
 .verMais {
   display: flex;
   align-items: center;
-  font-size: 16px;
-  gap: 10px;
+  gap: 4px;
   background: none;
   border: none;
-  color: #00060b;
-  font-weight: bold;
+  font-size: 14px;
   cursor: pointer;
+  color: #e53935;
 }
 
-.circle {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: #000000;
-  color: white;
-  font-size: 14px;
+.sliderWrapper {
+  position: relative;
+}
+
+.cardWrapper {
+  padding: 0 8px;
+}
+
+@media (max-width: 767px) {
+  .header h2 {
+    font-size: 18px;
+  }
+
+  .verMais {
+    font-size: 12px;
+  }
+
+  .cardWrapper {
+    padding: 0 4px;
+  }
 }

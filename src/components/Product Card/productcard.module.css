@@ -1,40 +1,129 @@
+/* Container geral para os cards */
+.marketsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  padding: 0 12px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Card individual */
 .card {
   background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  padding: 20px 16px 24px;
   text-align: center;
-  transition: transform 0.2s ease;
   cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
+/* Imagem do produto */
 .image {
-  width: 100px;
-  height: 100px;
+  width: 70%;
+  max-width: 140px;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 50%;
-  margin: 0 auto 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  display: block;
+  transition: box-shadow 0.3s ease;
 }
 
+.card:hover .image {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Informações do produto */
 .info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  width: 100%;
 }
 
+/* Nome do produto */
 .name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2f2f2f;
+  margin: 0;
+  letter-spacing: 0.03em;
 }
 
+/* Preço */
 .price {
-  font-size: 17px;
-  color: #717104;
+  font-size: 19px;
+  font-weight: 600;
+  color: #556b2f; /* Verde escuro */
+  margin-top: 4px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  align-items: baseline;
+}
+
+/* Preço antigo riscado */
+.oldPrice {
+  color: #999;
+  text-decoration: line-through;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+/* Preço com desconto */
+.discountedPrice {
+  color: #e53935; /* vermelho/alarme */
+  font-weight: 700;
+  font-size: 20px;
+}
+
+/* Responsividade */
+@media (max-width: 767px) {
+  .marketsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
+    padding: 0 8px;
+  }
+
+  .card {
+    padding: 16px 12px 20px;
+  }
+
+  .image {
+    width: 80%;
+    max-width: 120px;
+    margin-bottom: 12px;
+  }
+
+  .name {
+    font-size: 16px;
+  }
+
+  .price {
+    font-size: 17px;
+  }
+}
+
+.marca {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 4px 0 8px 0;
+}
+
+.volumeUnidade {
+  font-size: 0.85rem;
+  color: #444;
+  margin-left: 8px;
   font-weight: 500;
 }

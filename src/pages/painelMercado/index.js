@@ -387,7 +387,13 @@ export default function PainelMercado() {
                                 <Card.Text>
                                     Gerencie seu estoque de produtos, adicione novos itens e mantenha o controle de disponibilidade.
                                 </Card.Text>
-                                <Card.Link className={styles.buttonCard} as="button" href="#">Gerenciar Estoque</Card.Link>
+                                <Card.Link
+                                as="button"
+                                className={styles.buttonCard}
+                                onClick={() => navigate("/painel-mercado/estoque")}
+                                >
+                                    Gerenciar Estoque
+                                </Card.Link>
                             </Card.Body>
                         </Card>
 

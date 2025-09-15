@@ -1,0 +1,153 @@
+.cartContainer {
+  max-width: 800px;
+  margin: 20px auto 80px;
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.cartContainer h2 {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.cartItems {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cartItem {
+  display: flex;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 15px;
+  align-items: center;
+}
+
+.cartItemImg img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.cartItemInfo {
+  flex-grow: 1;
+  margin-left: 15px;
+}
+
+.cartItemInfo h4 {
+  margin: 0 0 8px 0;
+}
+
+.cartQty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.cartQty label {
+  font-weight: bold;
+}
+
+.cartQty input {
+  width: 60px;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.removeBtn {
+  background-color: #e53935;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.removeBtn:hover {
+  background-color: #b71c1c;
+}
+
+.cartFooter {
+  margin-top: 40px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.cartFooter h3 {
+  font-weight: bold;
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.cartFooterButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.checkoutBtn, .voltarHomeBtn {
+  background-color: #004d00;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+  transition: background-color 0.3s ease;
+}
+
+.checkoutBtn:hover, .voltarHomeBtn:hover {
+  background-color: #003300;
+}
+
+.cartContainerEmpty {
+  max-width: 800px;
+  margin: 50px auto 80px;
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.cartEmpty {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 16px;
+  margin: 6px 0;
+}
+
+.oldPrice {
+  text-decoration: line-through;
+  color: #888;
+  font-size: 15px;
+}
+
+.discountedPrice {
+  color: #e53935;
+  font-weight: 600;
+  font-size: 18px;
+}
