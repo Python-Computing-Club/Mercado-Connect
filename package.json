@@ -31,12 +31,16 @@
     "slick-carousel": "^1.8.1",
     "web-vitals": "^2.1.4"
   },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "concurrently \"npm run start:react\" \"npm run start:server\"",
+    "start:react": "react-scripts start",
+    "start:server": "node server/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "server": "node server.js"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [

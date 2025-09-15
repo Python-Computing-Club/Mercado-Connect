@@ -1,73 +1,47 @@
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 const mercadosRef = collection(db, "mercados");
 
-// Campos de mercado:
-
-// - nome
-// - email
-// - telefone
-// - endereco 
-//   - cep
-//   - logradouro
-//   - cidade
-//   - estado
-//   - bairro
-//   - numero
-//   - complemento
-// - proprietario
-// - cpf_proprietario
-// - cnpj
-// - estabelecimento
-
-
-//criar um mercado
 export const criarMercado = async (dados) => {
   try {
     const q = query(mercadosRef, where("cnpj", "==", dados.cnpj));
     const resultado = await getDocs(q);
-
-    if (!resultado.empty) {
-      throw new Error("CNPJ já cadastrado");
-    }
-
+    if (!resultado.empty) throw new Error("CNPJ já cadastrado");
     await addDoc(mercadosRef, dados);
     return true;
   } catch (error) {
-    console.log("Erro ao criar o mercado", error);
+    console.error("Erro ao criar mercado", error);
     return false;
   }
 };
 
-// Listar todos os mercados
 export const listarMercados = async () => {
-  const snapshot = await getDocs(mercadosRef);
   try {
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const snapshot = await getDocs(mercadosRef);
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (error) {
-    console.log("Erro ao listar os mercados", error);
+    console.error("Erro ao listar mercados", error);
+    return [];
   }
 };
 
-// Atualizar mercado
 export const atualizarMercado = async (id, dados) => {
   try {
     await updateDoc(doc(db, "mercados", id), dados);
     return true;
   } catch (error) {
-    console.log("Erro ao atualizar informações", error);
+    console.error("Erro ao atualizar mercado", error);
     return false;
   }
 };
 
-// Deletar mercado
 export const deletarMercado = async (id) => {
   try {
     await deleteDoc(doc(db, "mercados", id));
     return true;
   } catch (error) {
-    console.log("Erro ao deletar mercado", error);
+    console.error("Erro ao deletar mercado", error);
     return false;
   }
 };
@@ -77,13 +51,22 @@ export const buscarMercadoPorContato = async (valor, tipo = "email") => {
     const campo = tipo === "telefone" ? "telefone" : "email";
     const q = query(mercadosRef, where(campo, "==", valor));
     const resultado = await getDocs(q);
-
     if (resultado.empty) return null;
-
     const docSnap = resultado.docs[0];
     return { id: docSnap.id, ...docSnap.data() };
   } catch (error) {
     console.error("Erro ao buscar mercado:", error);
+    return null;
+  }
+};
+
+export const buscarMercadoPorId = async (id) => {
+  try {
+    const snap = await getDoc(doc(db, "mercados", id));
+    if (!snap.exists()) return null;
+    return { id: snap.id, ...snap.data() };
+  } catch (error) {
+    console.error("Erro ao buscar mercado por id:", error);
     return null;
   }
 };

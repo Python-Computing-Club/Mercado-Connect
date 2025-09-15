@@ -3,48 +3,54 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #f5f5f5;
-  box-sizing: border-box;
-  padding: 16px 4px;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-@media (max-width: 767px) {
-  .pageWrapper {
-    padding: 16px 4px 80px 4px;
-  }
-}
-
-@media (min-width: 768px) {
-  .pageWrapper {
-    padding-top: 80px;
-  }
-}
-
-.topBar {
-  position: relative;
-  z-index: 10;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  padding-top: 112px;
+  padding-bottom: 60px;
 }
 
 .contentArea {
-  padding: 24px;
-  z-index: 1;
-  flex: 1;
-  box-sizing: border-box;
-  overflow-y: auto;
-  width: 100%;
-  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 0 12px;
+}
+
+.emptyMessage {
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+  margin: 16px 0;
+}
+
+.marketsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.marketsSection h2 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.marketsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
 }
 
 @media (max-width: 767px) {
+  .pageWrapper {
+    padding-top: 88px;
+    padding-bottom: 60px;
+  }
+
   .contentArea {
-    padding: 16px 12px;
+    gap: 24px;
+    padding: 0 8px;
+  }
+
+  .marketsGrid {
+    gap: 12px;
   }
 }

@@ -1,15 +1,31 @@
+import { useEffect, useState } from "react";
+import { escutarProdutosPorMercado } from "../services/firestore/produtos";
+import { useMarket } from "../Context/MarketContext";
+
 export default function useProdutos() {
-  const produtos = {
-    destaque: [
-      { id: 1, nome: "Arroz", preco: 30.0 },
-      { id: 2, nome: "Feijão", preco: 8.0 },
-      { id: 3, nome: "Leite", preco: 4.0 },
-    ],
-    popular: [
-      { id: 4, nome: "Pão", preco: 3.0 },
-      { id: 5, nome: "Café", preco: 10.0 },
-    ],
-  };
+  const { marketId, loading } = useMarket();
+  const [produtos, setProdutos] = useState({
+    destaque: [],
+    popular: [],
+  });
+
+  useEffect(() => {
+    if (loading || !marketId) return;
+
+    const unsubscribe = escutarProdutosPorMercado(marketId, (todos) => {
+      if (!todos || todos.length === 0) {
+        setProdutos({ destaque: [], popular: [] });
+        return;
+      }
+
+      const destaque = todos.filter(p => p.disponivel).slice(0, 10);
+      const popular = todos.filter(p => p.disponivel).slice(0, 10);
+
+      setProdutos({ destaque, popular });
+    });
+
+    return () => unsubscribe();
+  }, [marketId, loading]);
 
   return produtos;
 }

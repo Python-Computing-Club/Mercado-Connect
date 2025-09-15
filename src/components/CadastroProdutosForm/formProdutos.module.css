@@ -1,0 +1,217 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 80vh;
+  overflow: auto;
+  padding-right: 8px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.col,
+.colFile {
+  flex: 1 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.colInline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+label {
+  font-weight: 700;
+  color: #012e0d;
+  font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  font-size: 0.95rem;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.novaCat {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.novaCat input {
+  flex: 1;
+}
+
+.novaCat button {
+  background: #012e0d;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.novaCat button:hover {
+  background: #014f1a;
+}
+
+.preview {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(1, 46, 13, 0.08);
+  align-self: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.submit,
+.cancel {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.submit {
+  background: #012e0d;
+  color: white;
+}
+
+.submit:hover {
+  background: #014f1a;
+}
+
+.cancel {
+  background: #ccc;
+  color: #222;
+}
+
+.cancel:hover {
+  background: #b3b3b3;
+}
+
+.precoAntigo {
+  text-decoration: line-through;
+  color: #888;
+  margin-right: 8px;
+}
+
+.descontoField {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.descontoField button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #03962a;
+  color: white;
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease-in-out;
+}
+
+.descontoField button:hover {
+  background-color: #014f1a;
+}
+
+.descontoField input {
+  width: 60px;
+  text-align: right;
+  padding-right: 8px;
+  border-radius: 6px;
+}
+
+.descontoField .percent {
+  font-size: 0.95rem;
+  margin-left: 4px;
+  font-weight: bold;
+  color: #012e0d;
+}
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .col,
+  .colFile {
+    flex: 1 1 100%;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .submit,
+  .cancel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 0.85rem;
+    padding: 8px;
+  }
+
+  label {
+    font-size: 0.85rem;
+  }
+
+  .preview {
+    width: 100px;
+    height: 100px;
+  }
+
+  .descontoField button {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+
+  .descontoField input {
+    width: 50px;
+  }
+}

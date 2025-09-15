@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "../Context/AuthContext";
+import { MarketProvider } from "../Context/MarketContext";
+import { CartProvider } from "../Context/CartContext";
+
 import PrivateRoute from "./PrivateRoute";
 import { publicRoutes, privateRoutes } from "./routes";
 
@@ -7,21 +10,25 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {publicRoutes.map(({ path, element }) => (
-            <Route key={path} path={path} element={element} />
-          ))}
+        <MarketProvider>
+          <CartProvider>
+            <Routes>
+              {publicRoutes.map(({ path, element }) => (
+                <Route key={path} path={path} element={element} />
+              ))}
 
-          {privateRoutes.map(({ path, element }) => (
-            <Route
-              key={path}
-              path={path}
-              element={<PrivateRoute>{element}</PrivateRoute>}
-            />
-          ))}
+              {privateRoutes.map(({ path, element }) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={<PrivateRoute>{element}</PrivateRoute>}
+                />
+              ))}
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </CartProvider>
+        </MarketProvider>
       </AuthProvider>
     </BrowserRouter>
   );

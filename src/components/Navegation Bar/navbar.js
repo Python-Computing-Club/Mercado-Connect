@@ -4,13 +4,14 @@ import styles from "./navbar.module.css";
 import {
   FaHome,
   FaSearch,
-  FaPlusSquare,
+  FaShoppingCart,
   FaHeart,
   FaUserCircle,
 } from "react-icons/fa";
 import { useAuth } from "../../Context/AuthContext";
 import PainelDadosCadastrais from "../PainelUser/PainelDadosCadastrais";
 import PainelEnderecos from "../PainelUser/PainelEnderecos";
+import { useCart } from "../../Context/CartContext";
 
 export default function NavBar({ usuario }) {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ export default function NavBar({ usuario }) {
   const [showMenu, setShowMenu] = useState(false);
   const [mostrarPainelDados, setMostrarPainelDados] = useState(false);
   const [mostrarPainelEnderecos, setMostrarPainelEnderecos] = useState(false);
+
+  const { getQuantidadeTotal, getTotal } = useCart();
 
   const toggleMenu = () => setShowMenu((prev) => !prev);
   const handleOptionClick = (path) => {
@@ -45,12 +48,22 @@ export default function NavBar({ usuario }) {
         <button onClick={() => navigate("/")} className={styles.icon}>
           <FaHome />
         </button>
+
         <button onClick={() => navigate("/buscar")} className={styles.icon}>
           <FaSearch />
         </button>
-        <button onClick={() => navigate("/novo")} className={styles.icon}>
-          <FaPlusSquare />
-        </button>
+
+        <div className={styles.cartWrapper}>
+          <button onClick={() => navigate("/carrinho")} className={styles.icon}>
+            <FaShoppingCart />
+            {getQuantidadeTotal() > 0 && (
+              <div className={styles.badge}>
+                {getQuantidadeTotal()}
+              </div>
+            )}
+          </button>
+        </div>
+
         <button onClick={() => navigate("/favoritos")} className={styles.icon}>
           <FaHeart />
         </button>

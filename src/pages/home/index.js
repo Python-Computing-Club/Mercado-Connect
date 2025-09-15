@@ -1,4 +1,4 @@
-import Header from "../../components/Header/header";
+import Header from "../../components/Header/header"; 
 import NavBar from "../../components/Navegation Bar/navbar";
 import ProductCarousel from "../../components/Product Carousel/ProductCarousel";
 import styles from "./home.module.css";
@@ -9,21 +9,19 @@ export default function Home() {
 
   return (
     <div className={styles.pageWrapper}>
-      <div className={styles.topBar}>
-        <Header />
-        <NavBar />
-      </div>
+      <Header />
+      <NavBar />
 
       <div className={styles.contentArea}>
         <ProductCarousel
           title="Ofertas em Destaque"
-          products={produtos.destaque}
+          products={produtos.destaque.length ? produtos.destaque : [{ nome: "Nenhum produto disponível", preco: 0, imagemUrl: "" }]}
           sectionPath="/produtos/destaque"
         />
 
         <ProductCarousel
           title="Produtos Populares"
-          products={produtos.popular}
+          products={produtos.popular.length ? produtos.popular : [{ nome: "Nenhum produto disponível", preco: 0, imagemUrl: "" }]}
           sectionPath="/produtos/popular"
         />
       </div>
