@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { listarCategoriasGlobais } from "../../services/firestore/categorias";
 import styles from "./formProdutos.module.css";
 import { useMarket } from "../../Context/MarketContext";
-import { criarProduto, atualizarProduto } from "../../services/firestore/produtos";
 
-export default function FormProduto({ onCancel, produto }) {
+export default function FormProduto({ onCancel, onSubmit, produto }) {
   const { marketId } = useMarket();
 
   const [form, setForm] = useState({
+    id: produto?.id || "",
     id_produto: produto?.id_produto || "",
     nome: produto?.nome || "",
     categoria: produto?.categoria || "",
@@ -18,7 +18,7 @@ export default function FormProduto({ onCancel, produto }) {
     disponivel: produto?.disponivel ?? true,
     unidade_de_medida: produto?.unidade_de_medida || "un",
     imagemFile: null,
-    volume: produto?.volume ?? "",
+    volume: produto?.volume ?? 1,
     imagemUrl: produto?.imagemUrl || null,
     marca: produto?.marca || "",
   });
@@ -28,11 +28,7 @@ export default function FormProduto({ onCancel, produto }) {
   const unidadesPadrao = ["kg", "un", "L", "ml", "g"];
   const [loading, setLoading] = useState(false);
 
-  const [notification, setNotification] = useState({
-    visible: false,
-    message: "",
-  });
-
+  const [notification, setNotification] = useState({ visible: false, message: "" });
   const [modalDica, setModalDica] = useState({ visible: false, message: "" });
 
   const MiniDica = ({ msg }) => (
@@ -60,6 +56,7 @@ export default function FormProduto({ onCancel, produto }) {
   useEffect(() => {
     if (produto) {
       setForm({
+        id: produto.id || "",
         id_produto: produto.id_produto,
         nome: produto.nome,
         categoria: produto.categoria,
@@ -70,7 +67,7 @@ export default function FormProduto({ onCancel, produto }) {
         disponivel: produto.disponivel,
         unidade_de_medida: produto.unidade_de_medida || "un",
         imagemFile: null,
-        volume: produto.volume ?? "",
+        volume: produto.volume ?? 1,
         imagemUrl: produto.imagemUrl || null,
         marca: produto?.marca || "",
       });
@@ -81,7 +78,10 @@ export default function FormProduto({ onCancel, produto }) {
   useEffect(() => {
     const loadCats = async () => {
       const cats = await listarCategoriasGlobais();
-      setCategorias(cats.map((c) => c.nome));
+      const nomes = (cats || [])
+        .map((c) => (typeof c === "string" ? c : c?.nome))
+        .filter(Boolean);
+      setCategorias(nomes);
     };
     loadCats();
   }, []);
@@ -106,14 +106,9 @@ export default function FormProduto({ onCancel, produto }) {
       un: { min: 1, max: 999 },
     };
 
-    const limite = limites[unidade];
-    if (!limite) return { valido: true, valorCorrigido: volume, mensagem: "" };
+    const limite = limites[unidade] || { min: 1, max: 999999 };
 
-    if (isNaN(volume)) {
-      return { valido: false, valorCorrigido: "", mensagem: `Volume deve ser um número.` };
-    }
-
-    if (volume < limite.min) {
+    if (isNaN(volume) || volume < limite.min) {
       return {
         valido: false,
         valorCorrigido: limite.min,
@@ -139,9 +134,15 @@ export default function FormProduto({ onCancel, produto }) {
       const numeric = value.replace(/\D/g, "").replace(/^0+/, "");
       const float = (Number(numeric) / 100).toFixed(2);
       setForm((s) => ({ ...s, preco: isNaN(float) ? "" : float }));
-    } else if (type === "checkbox") {
+      return;
+    }
+
+    if (type === "checkbox") {
       setForm((s) => ({ ...s, [name]: checked }));
-    } else if (name === "volume") {
+      return;
+    }
+
+    if (name === "volume") {
       const unidade = form.unidade_de_medida;
       const { valido, valorCorrigido, mensagem } = validarVolume(value, unidade);
 
@@ -151,9 +152,10 @@ export default function FormProduto({ onCancel, produto }) {
       }
 
       setForm((s) => ({ ...s, [name]: valorCorrigido }));
-    } else {
-      setForm((s) => ({ ...s, [name]: value }));
+      return;
     }
+
+    setForm((s) => ({ ...s, [name]: value }));
   };
 
   const handleDescontoChange = (delta) => {
@@ -191,7 +193,10 @@ export default function FormProduto({ onCancel, produto }) {
       return;
     }
 
-    const { valido, valorCorrigido, mensagem } = validarVolume(form.volume, form.unidade_de_medida);
+    const { valido, valorCorrigido, mensagem } = validarVolume(
+      form.volume,
+      form.unidade_de_medida
+    );
     if (!valido) {
       setNotification({ visible: true, message: mensagem });
       setForm((s) => ({ ...s, volume: valorCorrigido }));
@@ -218,25 +223,25 @@ export default function FormProduto({ onCancel, produto }) {
         id_mercado: marketId,
       };
 
-      if (form.id_produto) {
-        await atualizarProduto(produto.id, payload, imagemFile);
-        setNotification({ visible: true, message: "Produto atualizado com sucesso!" });
-      } else {
-        await criarProduto(payload, imagemFile);
-        setNotification({ visible: true, message: "Produto criado com sucesso!" });
-      }
+      await onSubmit(payload, imagemFile);
+
+      setNotification({
+        visible: true,
+        message: form.id ? "Produto atualizado!" : "Produto criado!",
+      });
 
       setTimeout(() => {
         setNotification({ visible: false, message: "" });
-        onCancel();
+        onCancel?.();
         window.location.reload();
-      }, 2000);
+      }, 1000);
     } catch (err) {
       console.error("Erro ao salvar produto:", err);
       setNotification({ visible: true, message: "Erro ao salvar produto." });
       setTimeout(() => setNotification({ visible: false, message: "" }), 2000);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -274,6 +279,7 @@ export default function FormProduto({ onCancel, produto }) {
               onChange={handleChange}
               required
               disabled={loading}
+              translate="no"
             >
               <option value="">— selecione —</option>
               {categorias.map((c) => (
@@ -347,7 +353,7 @@ export default function FormProduto({ onCancel, produto }) {
               name="volume"
               value={form.volume}
               onChange={handleChange}
-              min={0}
+              min={1}
               disabled={loading}
               style={{ width: "80px" }}
             />
@@ -448,12 +454,17 @@ export default function FormProduto({ onCancel, produto }) {
 
         <div className={styles.actions}>
           <button type="submit" className={styles.submit} disabled={loading}>
-            {loading ? "Salvando..." : produto ? "Atualizar" : "Criar"}
+            {loading ? "Salvando..." : form.id ? "Atualizar" : "Criar"}
           </button>
           <button
             type="button"
             className={styles.cancel}
-            onClick={onCancel}
+            onClick={() => {
+              onCancel?.();
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            }}
             disabled={loading}
           >
             Cancelar

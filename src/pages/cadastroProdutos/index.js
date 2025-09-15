@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./gerenciar-estoque.module.css";
 import FormProduto from "../../components/CadastroProdutosForm/index";
-import {
-  listarProdutosPorMercado,
-  criarProduto,
-  atualizarProduto,
-  atualizarStatusProduto,
-  excluirProduto,
+import {criarProduto,atualizarProduto,atualizarStatusProduto,excluirProduto,escutarProdutosPorMercado,
 } from "../../services/firestore/produtos";
 import { useMarket } from "../../Context/MarketContext";
 import { useNavigate } from "react-router-dom";
@@ -23,19 +18,14 @@ export default function GerenciarEstoquePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && marketId) {
-      load();
-    }
-  }, [marketId, loading]);
-
-  const load = async () => {
-    try {
-      const lista = await listarProdutosPorMercado(marketId);
+  if (!loading && marketId) {
+    const unsubscribe = escutarProdutosPorMercado(marketId, (lista) => {
       setProdutos(lista);
-    } catch (error) {
-      console.error("Erro ao carregar produtos:", error);
-    }
-  };
+    });
+    return () => unsubscribe();
+  }
+}, [marketId, loading]);
+
 
   const handleSubmit = async (dados, imagemFile, isToggleDisponivel = false) => {
     try {
@@ -50,7 +40,6 @@ export default function GerenciarEstoquePage() {
       }
       setOpenForm(false);
       setEdit(null);
-      await load();
     } catch (error) {
       console.error("Erro ao salvar produto:", error);
       alert("Erro ao salvar produto. Veja console para mais detalhes.");
@@ -60,7 +49,6 @@ export default function GerenciarEstoquePage() {
   const handleToggleDisponivel = async (produto) => {
     try {
       await atualizarStatusProduto(produto.id, !produto.disponivel);
-      await load();
     } catch (error) {
       console.error("Erro ao alterar status do produto:", error);
       alert("Erro ao atualizar status do produto.");
@@ -78,7 +66,6 @@ export default function GerenciarEstoquePage() {
     ) {
       try {
         await Promise.all(selecionados.map((id) => excluirProduto(id)));
-        await load();
         setSelecionados([]);
         setModoExclusao(false);
       } catch (err) {
@@ -130,7 +117,6 @@ export default function GerenciarEstoquePage() {
         </div>
 
         <div className={styles.headerRight}>
-          {/* BOTÃO DE VOLTAR AO PAINEL */}
           <button
             className={styles.backButton}
             onClick={() => navigate("/painel-mercado")}
@@ -308,9 +294,12 @@ export default function GerenciarEstoquePage() {
               ✕
             </button>
             <FormProduto
-              marketId={marketId}
+              produto={edit}
               onSubmit={handleSubmit}
-              edit={edit}
+              onCancel={() => {
+                setOpenForm(false);
+                setEdit(null);
+              }}
             />
           </div>
         </div>
