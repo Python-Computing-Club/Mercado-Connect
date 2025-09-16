@@ -1,4 +1,4 @@
-import Header from "../../components/Header/header"; 
+import Header from "../../components/Header/header";  
 import NavBar from "../../components/Navegation Bar/navbar";
 import ProductCarousel from "../../components/Product Carousel/ProductCarousel";
 import styles from "./home.module.css";
@@ -24,6 +24,16 @@ export default function Home() {
           products={produtos.popular.length ? produtos.popular : [{ nome: "Nenhum produto disponível", preco: 0, imagemUrl: "" }]}
           sectionPath="/produtos/popular"
         />
+
+        {produtos.categorias &&
+          Object.entries(produtos.categorias).map(([grupo, lista]) => (
+            <ProductCarousel
+              key={grupo}
+              title={grupo}
+              products={lista.length ? lista : [{ nome: "Nenhum produto disponível", preco: 0, imagemUrl: "" }]}
+              sectionPath={`/produtos/${grupo.toLowerCase().replace(/\s+/g, "-")}`}
+            />
+          ))}
       </div>
     </div>
   );

@@ -1,14 +1,13 @@
 import HeaderMercado from '../../components/HeaderMercado';
-import { Card, Container } from 'react-bootstrap';
+import { Card, Container, Toast, ToastContainer } from 'react-bootstrap';
 import { useState } from 'react';
 import styles from './painel-mercado.module.css';
 import FormatCEP from '../../hooks/FormatCEP';
 import consultarCEP from '../../hooks/useValidarEndereco';
 import useFormatTelefone from '../../hooks/useFormatTelefone';
-import Modal from '../../modal/modal'
+import Modal from '../../modal/modal';
 import useEmailCodigo from '../../hooks/useEmailCodigo';
 import { useTextBeeSms } from '../../hooks/useTextBeeSms';
-import { Toast, ToastContainer } from 'react-bootstrap';
 import { atualizarMercado, deletarMercado } from '../../services/firestore/mercados';
 import { autenticar } from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
@@ -16,31 +15,52 @@ import { useNavigate } from 'react-router-dom';
 let usuario = JSON.parse(localStorage.getItem("entidade"));
 
 export default function PainelMercado() {
+    const navigate = useNavigate();
+
+    // Estado inicial seguro (mesmo se localStorage estiver vazio)
+    const [dadosMercado, setDadosMercado] = useState(
+        usuario || {
+            estabelecimento: "",
+            email: "",
+            telefone: "",
+            endereco: {
+                cep: "",
+                logradouro: "",
+                bairro: "",
+                cidade: "",
+                estado: "",
+                numero: "",
+                complemento: ""
+            }
+        }
+    );
 
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
-    const navigate = useNavigate();
     const [modal, setModal] = useState({ open: false, title: "", message: "" });
-    const [dadosMercado, setDadosMercado] = useState(usuario);
     const [showToast, setShowToast] = useState(false);
     const [deleteMercado, setDeleteMercado] = useState(false);
-    const toggleDeleteMercado = () => setDeleteMercado(!deleteMercado)
+
+    const toggleDeleteMercado = () => setDeleteMercado(!deleteMercado);
     const toggleShowToast = () => setShowToast(!showToast);
     const showAlert = (title, message) => setModal({ open: true, title, message });
+
     const { formatTelefone } = useFormatTelefone();
     const { enviarCodigo } = useEmailCodigo();
     const { sendVerificationCode } = useTextBeeSms();
 
     const handleMostrarFormulario = async () => {
-        usuario = await autenticar("mercados", usuario.email, "email")
-        setDadosMercado(usuario)
+        if (!usuario?.email) return;
+        usuario = await autenticar("mercados", usuario.email, "email");
+        setDadosMercado(usuario);
         setMostrarFormulario(true);
-    }
+    };
 
     const resetarPainel = async () => {
-        usuario = await autenticar("mercados", usuario.email, "email")
-        setDadosMercado(usuario)
+        if (!usuario?.email) return;
+        usuario = await autenticar("mercados", usuario.email, "email");
+        setDadosMercado(usuario);
         setMostrarFormulario(false);
-    }
+    };
 
     const handleChange = async ({ target: { name, value } }) => {
         const [grupo, campo] = name.includes('.') ? name.split('.') : [null, name];
@@ -57,7 +77,6 @@ export default function PainelMercado() {
         if (campo === "cep") {
             const cepFormatado = FormatCEP(value);
             const cepLimpo = value.replace(/\D/g, "");
-
             const novoEndereco = { ...dadosMercado.endereco, cep: cepFormatado };
 
             if (cepLimpo.length === 8) {
@@ -81,7 +100,6 @@ export default function PainelMercado() {
 
             setDadosMercado((prev) => ({
                 ...prev,
-                [name]: value,
                 endereco: novoEndereco
             }));
             return;
@@ -104,14 +122,20 @@ export default function PainelMercado() {
     };
 
     const handleSubmit = async () => {
-        if (!dadosMercado.telefone?.length > 0 || !dadosMercado.estabelecimento.trim().length > 0 || !dadosMercado.endereco.cep.trim() || !dadosMercado.endereco.numero || !dadosMercado.email) {
-            showAlert("Preencha todos os campos!", "Preencha todos os campos obrigatórios!!");
+        if (
+            !dadosMercado.telefone?.length ||
+            !dadosMercado.estabelecimento?.trim().length ||
+            !dadosMercado.endereco?.cep?.trim() ||
+            !dadosMercado.endereco?.numero ||
+            !dadosMercado.email
+        ) {
+            showAlert("Preencha todos os campos!", "Preencha todos os campos obrigatórios!");
         } else {
             const codigoEmail = await enviarCodigo(dadosMercado.email, "email", showAlert, showAlert);
             const codigoSMS = await sendVerificationCode(dadosMercado.telefone);
 
             if (!codigoEmail || !codigoSMS) {
-                return showAlert("Erro", "Não foi possível enviar os códigos de verificação")
+                return showAlert("Erro", "Não foi possível enviar os códigos de verificação");
             }
 
             setDadosMercado((prev) => ({
@@ -126,16 +150,17 @@ export default function PainelMercado() {
             setMostrarFormulario(false);
             toggleShowToast();
         }
-    }
+    };
 
     const handleDelete = async () => {
         showAlert("Esta ação irá deletar todos os dados do mercado!", "Serão enviados códigos de confirmação para seu email e telefone");
         toggleDeleteMercado();
+
         const codigoEmail = await enviarCodigo(dadosMercado.email, "email", showAlert, showAlert);
         const codigoSMS = await sendVerificationCode(dadosMercado.telefone);
 
         if (!codigoEmail || !codigoSMS) {
-            return showAlert("Erro", "Não foi possível enviar os códigos de verificação")
+            return showAlert("Erro", "Não foi possível enviar os códigos de verificação");
         }
 
         setDadosMercado((prev) => ({
@@ -149,7 +174,7 @@ export default function PainelMercado() {
 
         setMostrarFormulario(false);
         toggleShowToast();
-    }
+    };
 
     const validarCodigos = async () => {
         if (
@@ -158,17 +183,15 @@ export default function PainelMercado() {
         ) {
             showAlert("Verificação concluída", "Seus dados foram confirmados com sucesso.");
             if (deleteMercado) {
-                console.log(dadosMercado.id)
                 const exclusao = await deletarMercado(dadosMercado.id);
                 if (exclusao) {
-                    showAlert("Mercado deletado", "Seus dados foram deletados com sucesso. Saindo...")
+                    showAlert("Mercado deletado", "Seus dados foram deletados com sucesso. Saindo...");
                     setTimeout(() => {
-                        navigate("/")
-                    }, 10000)
+                        navigate("/");
+                    }, 3000);
                     return;
                 } else {
-                    console.log("Erro", "Erro ao deletar mercado")
-                    navigate("/painel-mercado")
+                    navigate("/painel-mercado");
                 }
             }
             const updateMercado = await atualizarMercado(usuario.id, {
@@ -182,19 +205,16 @@ export default function PainelMercado() {
                 "endereco.bairro": dadosMercado.endereco.bairro,
                 "endereco.numero": dadosMercado.endereco.numero,
                 "endereco.complemento": dadosMercado.endereco.complemento ?? ""
-            })
+            });
             if (updateMercado) {
-                showAlert("Dados atualizados", "Seus dados foram atualizados com sucesso")
-                setTimeout(() => {
-                    (async () => {
-                        usuario = await autenticar("mercados", usuario.email, "email");
-                        setDadosMercado(usuario);
-                        dadosMercado.etapaVerificacao = false;
-                    })();
+                showAlert("Dados atualizados", "Seus dados foram atualizados com sucesso");
+                setTimeout(async () => {
+                    usuario = await autenticar("mercados", usuario.email, "email");
+                    setDadosMercado(usuario);
+                    dadosMercado.etapaVerificacao = false;
                 }, 1500);
             } else {
-                showAlert("Erro na atualização", "Erro ao atualizar os dados cadastrais")
-                return
+                showAlert("Erro na atualização", "Erro ao atualizar os dados cadastrais");
             }
         } else {
             showAlert("Código inválido", "Verifique os códigos digitados e tente novamente.");
@@ -205,7 +225,9 @@ export default function PainelMercado() {
         <>
             <HeaderMercado onResetar={resetarPainel} />
             <div className={styles.banner}>
-                <h1 className={styles.bannerTitle}>Bem-vindo, {dadosMercado.estabelecimento}</h1>
+                <h1 className={styles.bannerTitle}>
+                    Bem-vindo, {dadosMercado?.estabelecimento || "Mercado"}
+                </h1>
             </div>
 
             {modal.open && (
@@ -225,7 +247,7 @@ export default function PainelMercado() {
                         <input
                             type="text"
                             name="codigoEmail"
-                            value={dadosMercado.codigoEmail}
+                            value={dadosMercado?.codigoEmail || ""}
                             onChange={handleChange}
                             placeholder="Digite o código do email"
                         />
@@ -236,7 +258,7 @@ export default function PainelMercado() {
                         <input
                             type="text"
                             name="codigoSMS"
-                            value={dadosMercado.codigoSMS}
+                            value={dadosMercado?.codigoSMS || ""}
                             onChange={handleChange}
                             placeholder="Digite o código do SMS"
                         />
@@ -256,7 +278,6 @@ export default function PainelMercado() {
                 </div>
             )}
 
-
             {mostrarFormulario && !dadosMercado.etapaVerificacao ? (
                 <Container className={styles.formContainer}>
                     <h2 className={styles.titles}>Informações da Loja</h2>
@@ -266,9 +287,9 @@ export default function PainelMercado() {
                             <input
                                 type="text"
                                 name="estabelecimento"
-                                value={dadosMercado.estabelecimento}
+                                value={dadosMercado?.estabelecimento || ""}
                                 onChange={handleChange}
-                                placeholder='Nome do Mercado'
+                                placeholder="Nome do Mercado"
                             />
                         </div>
                         <div className={styles.formGroup}>
@@ -277,18 +298,17 @@ export default function PainelMercado() {
                                 type="text"
                                 name="endereco.cep"
                                 maxLength="9"
-                                value={dadosMercado.endereco.cep}
+                                value={dadosMercado?.endereco?.cep || ""}
                                 onChange={handleChange}
-                                placeholder='CEP'
+                                placeholder="CEP"
                             />
                         </div>
                         <div className={styles.formGroup}>
                             <label>Logradouro</label>
                             <input
                                 type="text"
-                                name='endereco.logradouro'
-                                onChange={handleChange}
-                                value={dadosMercado.endereco.logradouro}
+                                name="endereco.logradouro"
+                                value={dadosMercado?.endereco?.logradouro || ""}
                                 disabled
                             />
                         </div>
@@ -296,9 +316,8 @@ export default function PainelMercado() {
                             <label>Bairro</label>
                             <input
                                 type="text"
-                                name='endereco.bairro'
-                                onChange={handleChange}
-                                value={dadosMercado.endereco.bairro}
+                                name="endereco.bairro"
+                                value={dadosMercado?.endereco?.bairro || ""}
                                 disabled
                             />
                         </div>
@@ -306,9 +325,8 @@ export default function PainelMercado() {
                             <label>Cidade</label>
                             <input
                                 type="text"
-                                name='endereco.cidade'
-                                onChange={handleChange}
-                                value={dadosMercado.endereco.cidade}
+                                name="endereco.cidade"
+                                value={dadosMercado?.endereco?.cidade || ""}
                                 disabled
                             />
                         </div>
@@ -316,9 +334,8 @@ export default function PainelMercado() {
                             <label>Estado</label>
                             <input
                                 type="text"
-                                name='endereco.estado'
-                                onChange={handleChange}
-                                value={dadosMercado.endereco.estado}
+                                name="endereco.estado"
+                                value={dadosMercado?.endereco?.estado || ""}
                                 disabled
                             />
                         </div>
@@ -326,42 +343,48 @@ export default function PainelMercado() {
                             <label>Número</label>
                             <input
                                 type="number"
-                                name='endereco.numero'
+                                name="endereco.numero"
+                                value={dadosMercado?.endereco?.numero || ""}
                                 onChange={handleChange}
-                                value={dadosMercado.endereco.numero}
                             />
                         </div>
                         <div className={styles.formGroup}>
                             <label>Complemento</label>
                             <input
                                 type="text"
-                                name='endereco.complemento'
+                                name="endereco.complemento"
+                                value={dadosMercado?.endereco?.complemento || ""}
                                 onChange={handleChange}
-                                value={dadosMercado.endereco.complemento}
                             />
                         </div>
                         <div className={styles.formGroup}>
                             <label>Telefone</label>
                             <input
                                 type="text"
-                                name='telefone'
+                                name="telefone"
+                                value={dadosMercado?.telefone || ""}
                                 onChange={handleChange}
-                                value={dadosMercado.telefone}
                             />
                         </div>
                         <div className={styles.formGroup}>
                             <label>E-mail</label>
                             <input
                                 type="email"
-                                name='email'
-                                value={dadosMercado.email}
+                                name="email"
+                                value={dadosMercado?.email || ""}
                                 onChange={handleChange}
                             />
                         </div>
-                        <Container className='d-flex justify-content-end gap-3 pb-3'>
-                            <button type="button" className={styles.submitButton} onClick={handleSubmit}>Salvar Alterações</button>
-                            <button type="button" className={styles.cancelButton} onClick={resetarPainel}>Cancelar</button>
-                            <button type="button" className={styles.deleteButton} onClick={handleDelete}>Deletar</button>
+                        <Container className="d-flex justify-content-end gap-3 pb-3">
+                            <button type="button" className={styles.submitButton} onClick={handleSubmit}>
+                                Salvar Alterações
+                            </button>
+                            <button type="button" className={styles.cancelButton} onClick={resetarPainel}>
+                                Cancelar
+                            </button>
+                            <button type="button" className={styles.deleteButton} onClick={handleDelete}>
+                                Deletar
+                            </button>
                         </Container>
                     </form>
                 </Container>
@@ -372,25 +395,31 @@ export default function PainelMercado() {
                         <Card style={{ width: '18rem' }}>
                             <Card.Body>
                                 <Card.Title className={styles.cardTitle}>Acompanhar Pedidos</Card.Title>
-                                <Card.Subtitle className={`mb-2 text-muted ${styles.cardSubtitle}`}>Acompanhe todos seus pedidos</Card.Subtitle>
+                                <Card.Subtitle className={`mb-2 text-muted ${styles.cardSubtitle}`}>
+                                    Acompanhe todos seus pedidos
+                                </Card.Subtitle>
                                 <Card.Text>
                                     Gerencie seus pedidos em tempo real, veja o status de cada um e mantenha seus clientes informados.
                                 </Card.Text>
-                                <Card.Link className={styles.buttonCard} as="button" href="#">Gerenciar Pedidos</Card.Link>
+                                <Card.Link className={styles.buttonCard} as="button" href="#">
+                                    Gerenciar Pedidos
+                                </Card.Link>
                             </Card.Body>
                         </Card>
 
                         <Card style={{ width: '18rem' }}>
                             <Card.Body>
                                 <Card.Title className={styles.cardTitle}>Estoque</Card.Title>
-                                <Card.Subtitle className={`mb-2 text-muted ${styles.cardSubtitle}`}>Gerencie seus produtos</Card.Subtitle>
+                                <Card.Subtitle className={`mb-2 text-muted ${styles.cardSubtitle}`}>
+                                    Gerencie seus produtos
+                                </Card.Subtitle>
                                 <Card.Text>
                                     Gerencie seu estoque de produtos, adicione novos itens e mantenha o controle de disponibilidade.
                                 </Card.Text>
                                 <Card.Link
-                                as="button"
-                                className={styles.buttonCard}
-                                onClick={() => navigate("/painel-mercado/estoque")}
+                                    as="button"
+                                    className={styles.buttonCard}
+                                    onClick={() => navigate("/painel-mercado/estoque")}
                                 >
                                     Gerenciar Estoque
                                 </Card.Link>
@@ -400,11 +429,19 @@ export default function PainelMercado() {
                         <Card style={{ width: '18rem' }}>
                             <Card.Body>
                                 <Card.Title className={styles.cardTitle}>Minha Loja</Card.Title>
-                                <Card.Subtitle className={`mb-2 text-muted ${styles.cardSubtitle}`}>Gerencie sua loja</Card.Subtitle>
+                                <Card.Subtitle className={`mb-2 text-muted ${styles.cardSubtitle}`}>
+                                    Gerencie sua loja
+                                </Card.Subtitle>
                                 <Card.Text>
                                     Edite suas informações e mantenha seu cadastro sempre atualizado.
                                 </Card.Text>
-                                <Card.Link className={styles.buttonCard} as="button" onClick={handleMostrarFormulario}>Gerenciar Loja</Card.Link>
+                                <Card.Link
+                                    className={styles.buttonCard}
+                                    as="button"
+                                    onClick={handleMostrarFormulario}
+                                >
+                                    Gerenciar Loja
+                                </Card.Link>
                             </Card.Body>
                         </Card>
                     </Container>

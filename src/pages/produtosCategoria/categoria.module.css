@@ -1,0 +1,63 @@
+.pageWrapper {
+  padding: 20px;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border: none;
+  background: #006400;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.backButtonWrapper {
+  margin-bottom: 1rem;
+}
+
+.backButton {
+  display: inline-block;
+  padding: 8px 14px;
+  background-color: #006400;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: #006400;
+}
+
+@media (max-width: 600px) {
+  .backButton {
+    width: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}

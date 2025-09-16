@@ -14,7 +14,7 @@ import {
 import { db } from "../firebase";
 import { uploadParaCloudinary, excluirImagemCloudinary } from "../../hooks/cloudinaryUpload";
 
-const produtosRef = collection(db, "produtos");
+export const produtosRef = collection(db, "produtos");
 
 export const listarCategoriasGlobais = async () => {
   try {
@@ -26,10 +26,17 @@ export const listarCategoriasGlobais = async () => {
   }
 };
 
+export const escutarTodosProdutos = (callback) => {
+  return onSnapshot(produtosRef, (snapshot) => {
+    const produtos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback(produtos);
+  });
+};
+
 export const escutarProdutosPorMercado = (id_mercado, callback) => {
   const q = query(produtosRef, where("id_mercado", "==", id_mercado));
   return onSnapshot(q, (snapshot) => {
-    const produtos = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const produtos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     callback(produtos);
   });
 };
@@ -43,15 +50,11 @@ export const criarProduto = async (dados, imagemFile) => {
     if (!Number.isInteger(Number(dados.quantidade)) || Number(dados.quantidade) < 0) throw new Error("Quantidade inválida");
     if (isNaN(Number(dados.preco)) || Number(dados.preco) <= 0) throw new Error("Preço inválido");
     if (!dados.unidade_de_medida || dados.unidade_de_medida.length > 20) throw new Error("Unidade inválida");
-    if (!Number.isInteger(Number(dados.volume)) || Number(dados.volume) < 1) throw new Error("Volume inválido (mínimo 1)");
+    if (dados.volume && (!Number.isInteger(Number(dados.volume)) || Number(dados.volume) <= 0)) throw new Error("Volume inválido");
 
     const id_produto = Date.now();
 
-    const q = query(
-      produtosRef,
-      where("id_mercado", "==", dados.id_mercado),
-      where("id_produto", "==", id_produto)
-    );
+    const q = query(produtosRef, where("id_mercado", "==", dados.id_mercado), where("id_produto", "==", id_produto));
     const res = await getDocs(q);
     if (!res.empty) throw new Error("Conflito de id_produto, tente novamente");
 
@@ -80,7 +83,7 @@ export const criarProduto = async (dados, imagemFile) => {
       unidade_de_medida: dados.unidade_de_medida,
       imagemUrl,
       imagemId,
-      volume: Math.max(1, Number(dados.volume)),
+      volume: dados.volume ? Number(dados.volume) : null,
       id_mercado: dados.id_mercado,
       marca: dados.marca || "",
       createdAt: serverTimestamp(),
@@ -99,7 +102,7 @@ export const listarProdutosPorMercado = async (id_mercado) => {
   try {
     const q = query(produtosRef, where("id_mercado", "==", id_mercado));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (error) {
     console.error("Erro ao listar produtos:", error);
     return [];
@@ -138,7 +141,7 @@ export const atualizarProduto = async (docId, dados, imagemFile) => {
       unidade_de_medida: dados.unidade_de_medida,
       imagemUrl,
       imagemId,
-      volume: Math.max(1, Number(dados.volume)),
+      volume: dados.volume ? Number(dados.volume) : null,
       marca: dados.marca || "",
       updatedAt: serverTimestamp(),
     };
