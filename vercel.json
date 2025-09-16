@@ -6,6 +6,8 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "server/index.js" },
+    { "src": "/manifest.json", "dest": "/manifest.json" },
+    { "src": "/favicon.png", "dest": "/favicon.png" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
