@@ -20,8 +20,7 @@ export default function NavBar({ usuario }) {
   const [showMenu, setShowMenu] = useState(false);
   const [mostrarPainelDados, setMostrarPainelDados] = useState(false);
   const [mostrarPainelEnderecos, setMostrarPainelEnderecos] = useState(false);
-
-  const { getQuantidadeTotal, getTotal } = useCart();
+  const { getQuantidadeTotal } = useCart();
 
   const toggleMenu = () => setShowMenu((prev) => !prev);
   const handleOptionClick = (path) => {

@@ -5,14 +5,14 @@ import AppRoutes from './Routes/AppRoutes';
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId={clientId}>
-      <AppRoutes/>
+      <AppRoutes />
     </GoogleOAuthProvider>
   </React.StrictMode>
 );
