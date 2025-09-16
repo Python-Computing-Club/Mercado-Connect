@@ -1,4 +1,4 @@
-import emailjs from "emailjs-com";
+import emailjs from "@emailjs/browser";
 
 export default function useEmailCodigo() {
   const gerarCodigo = () => Math.floor(100000 + Math.random() * 900000).toString();
