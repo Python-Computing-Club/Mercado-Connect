@@ -6,7 +6,7 @@ import useStepNavigation from "../../hooks/useStepNavigation";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import useGoogleLogin from "../../hooks/useGoogleLogin";
-import useFacebookLogin from "../../hooks/useFacebookLogin";  // <-- Importa hook do Facebook
+import useFacebookLogin from "../../hooks/useFacebookLogin";
 import { criarUsuario, buscarUsuario } from "../../services/firestore/usuarios";
 
 function formatarTelefoneVisual(telefone) {
@@ -73,15 +73,19 @@ export default function useCadastroForm() {
     useGoogleLogin(showAlert);
 
   const { step, setStep, handleBack } = useStepNavigation(1, {
-  customBack: (currentStep) => {
-    if (currentStep === 3) return 1;
-    if (currentStep === 5 || currentStep === 6)
-      return form.tipoContato === "email" ? 4 : 3;
-    return null;
-  },
-});
+    customBack: (currentStep) => {
+      if (currentStep === 3) return 1;
+      if (currentStep === 5 || currentStep === 6)
+        return form.tipoContato === "email" ? 4 : 3;
+      return null;
+    },
+  });
 
-const { loginComFacebook: autenticarFacebook } = useFacebookLogin(setModal, setForm, setStep);
+  const { loginComFacebook: autenticarFacebook } = useFacebookLogin(
+    setModal,
+    setForm,
+    setStep
+  );
 
   useCodigoTimer({
     active:
@@ -143,7 +147,6 @@ const { loginComFacebook: autenticarFacebook } = useFacebookLogin(setModal, setF
       }
     } else if (step === 4 && name === "telefone") {
       const somenteNumeros = value.replace(/\D/g, "");
-      const visual = formatarTelefoneVisual(somenteNumeros);
       setForm((prev) => ({
         ...prev,
         telefone: somenteNumeros,
@@ -353,7 +356,10 @@ const { loginComFacebook: autenticarFacebook } = useFacebookLogin(setModal, setF
     } else if (step === 4) {
       const numero = form.telefone?.replace(/\D/g, "");
       if (!numero || numero.length < 10) {
-        return showAlert("Telefone obrigatório", "Informe um número válido ou clique em 'Pular'.");
+        return showAlert(
+          "Telefone obrigatório",
+          "Informe um número válido ou clique em 'Pular'."
+        );
       } else {
         enviarCodigoTelefone();
       }
@@ -390,9 +396,7 @@ const { loginComFacebook: autenticarFacebook } = useFacebookLogin(setModal, setF
     setStep(3);
   };
 
-  // *** função nova para login facebook, pode usar o autenticarFacebook internamente ***
   const loginComFacebook = async () => {
-    // O hook useFacebookLogin já atualiza o form e o step, aqui só podemos chamar autenticarFacebook
     autenticarFacebook();
   };
 
@@ -413,8 +417,9 @@ const { loginComFacebook: autenticarFacebook } = useFacebookLogin(setModal, setF
     setStep,
     setForm,
     loginComGoogle,
-    loginComFacebook,   // <-- expõe para uso externo
+    autenticarGoogle,
     googleLoading,
+    loginComFacebook,
     setModal,
     bloquearEnvio,
     bloquearContinuar,

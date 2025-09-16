@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import styles from "./ReverEnderecos.module.css";
 import { useAuth } from "../../Context/AuthContext";
 
@@ -6,14 +6,19 @@ const ENDERECOS_POR_PAGINA = 3;
 
 export default function ReverEnderecos({ onClose }) {
   const { usuario } = useAuth();
-  const enderecos = Array.isArray(usuario?.enderecos) ? usuario.enderecos : [];
+
+  // ✅ useMemo garante que "enderecos" só muda quando usuario.enderecos mudar
+  const enderecos = useMemo(
+    () => (Array.isArray(usuario?.enderecos) ? usuario.enderecos : []),
+    [usuario?.enderecos]
+  );
 
   const [paginaAtual, setPaginaAtual] = useState(0);
 
-  // Resetar página atual sempre que a lista de endereços mudar
+  // ✅ Agora o ESLint não reclama, pois dependemos de usuario?.enderecos
   useEffect(() => {
     setPaginaAtual(0);
-  }, [enderecos]);
+  }, [usuario?.enderecos]);
 
   const totalPaginas = Math.ceil(enderecos.length / ENDERECOS_POR_PAGINA);
   const inicio = paginaAtual * ENDERECOS_POR_PAGINA;

@@ -18,5 +18,5 @@ export default function useCodigoTimer({ active, duration, onExpire, setTime }) 
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [active, duration]);
+  }, [active, duration, onExpire, setTime]);
 }
