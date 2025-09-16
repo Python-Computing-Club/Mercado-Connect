@@ -8,11 +8,9 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const envPath = path.resolve(__dirname, ".env");
-dotenv.config({ path: envPath });
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 
-console.log("✅ .env carregado de:", envPath);
-console.log("🌩️  Config Cloudinary:", {
+console.log("🌩️ Config Cloudinary:", {
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? "****" : "⚠️ NÃO DEFINIDO",
@@ -29,7 +27,7 @@ cloudinary.config({
 });
 
 app.get("/", (req, res) => {
-  res.send("Servidor rodando!");
+  res.send("🚀 Servidor rodando!");
 });
 
 app.post("/api/cloudinary/delete", async (req, res) => {
@@ -39,7 +37,7 @@ app.post("/api/cloudinary/delete", async (req, res) => {
 
     console.log("📸 public_id recebido:", public_id);
 
-    const result = await cloudinary.uploader.destroy(public_id);
+    const result = await cloudinary.uploader.destroy(public_id, { invalidate: true });
     res.json(result);
   } catch (error) {
     console.error("❌ Erro ao excluir imagem:", error);
@@ -47,7 +45,11 @@ app.post("/api/cloudinary/delete", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+  });
+}
+
+export default app;
