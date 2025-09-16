@@ -1,0 +1,146 @@
+.pageWrapper {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.searchBar {
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  padding-bottom: 8px;
+}
+
+.searchBar input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.searchBar input:focus {
+  border-color: #ff3d00;
+  box-shadow: 0 0 4px rgba(255, 61, 0, 0.4);
+}
+
+.categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 18px;
+  border-radius: 14px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  text-align: center;
+  min-height: 120px;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.icone {
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+.nome {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.resultados {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.resultadoItem {
+  display: flex;
+  gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  transition: transform 0.2s ease-in-out;
+}
+
+.resultadoItem:hover {
+  transform: scale(1.02);
+}
+
+.resultadoItem img {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.resultadoInfo {
+  flex: 1;
+}
+
+.resultadoInfo h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.marketName {
+  font-size: 12px;
+  color: #555;
+  margin-top: 4px;
+}
+
+.preco {
+  font-weight: bold;
+  margin-top: 6px;
+  color: #ff3d00;
+}
+
+@media (max-width: 768px) {
+  .categorias {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .icone {
+    font-size: 24px;
+  }
+
+  .card {
+    padding: 14px;
+    min-height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .categorias {
+    grid-template-columns: 1fr;
+  }
+
+  .resultadoItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .resultadoItem img {
+    width: 100%;
+    height: 140px;
+  }
+}

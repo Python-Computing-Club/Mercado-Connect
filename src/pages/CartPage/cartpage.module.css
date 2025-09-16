@@ -1,3 +1,99 @@
+.wrapper {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60px;
+  background-color: #fff;
+  border-top: 1px solid #ddd;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+body,
+.pageWrapper {
+  padding-bottom: 60px;
+  padding-top: 0;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 60px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.icon {
+  background: none;
+  border: none;
+  font-size: 26px;
+  color: #444;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.icon:hover {
+  color: #e53935;
+}
+
+.cartWrapper {
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: transparent;
+  color: #2ecc71;
+  font-weight: bold;
+  font-size: 14px;
+  min-width: 18px;
+  min-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+.userMenu {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+}
+
+.dropdown button {
+  padding: 10px 15px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #444;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown button:hover {
+  background-color: #f5f5f5;
+  color: #e53935;
+}
+
 .cartContainer {
   max-width: 800px;
   margin: 20px auto 80px;
@@ -82,7 +178,6 @@
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -150,4 +245,68 @@
   color: #e53935;
   font-weight: 600;
   font-size: 18px;
+}
+
+@media (max-width: 600px) {
+  .cartContainer {
+    margin: 10px 10px 80px;
+    padding: 15px;
+  }
+
+  .cartItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cartItemImg img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+  }
+
+  .cartItemInfo {
+    margin-left: 0;
+  }
+
+  .cartQty {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .removeBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .cartFooter {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .cartFooterButtons {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .checkoutBtn, .voltarHomeBtn {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .priceRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dropdown button {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 2px 4px;
+    right: -14px;
+  }
 }

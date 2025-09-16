@@ -46,30 +46,33 @@ export default function NavBar({ usuario }) {
       <nav className={styles.navbar}>
         <button onClick={() => navigate("/")} className={styles.icon}>
           <FaHome />
+          <span>Home</span>
         </button>
 
         <button onClick={() => navigate("/buscar")} className={styles.icon}>
           <FaSearch />
+          <span>Buscar</span>
         </button>
 
         <div className={styles.cartWrapper}>
           <button onClick={() => navigate("/carrinho")} className={styles.icon}>
             <FaShoppingCart />
+            <span>Carrinho</span>
             {getQuantidadeTotal() > 0 && (
-              <div className={styles.badge}>
-                {getQuantidadeTotal()}
-              </div>
+              <div className={styles.badge}>{getQuantidadeTotal()}</div>
             )}
           </button>
         </div>
 
         <button onClick={() => navigate("/favoritos")} className={styles.icon}>
           <FaHeart />
+          <span>Favoritos</span>
         </button>
 
         <div className={styles.userMenu}>
           <button onClick={toggleMenu} className={styles.icon}>
             <FaUserCircle />
+            <span>Conta</span>
           </button>
 
           {showMenu && (
@@ -77,7 +80,9 @@ export default function NavBar({ usuario }) {
               <button onClick={abrirPainelDados}>Dados cadastrais</button>
               <button onClick={abrirPainelEnderecos}>Endereços</button>
               <button onClick={() => handleOptionClick("/ajuda")}>Ajuda</button>
-              <button onClick={() => handleOptionClick("/configuracoes")}>Configurações</button>
+              <button onClick={() => handleOptionClick("/configuracoes")}>
+                Configurações
+              </button>
               <button
                 onClick={() => {
                   logout();

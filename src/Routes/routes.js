@@ -6,6 +6,7 @@ import PainelMercado from '../pages/painelMercado/index';
 import GerenciarEstoque from "../pages/cadastroProdutos";
 import CartPage from '../pages/CartPage/index';
 import CategoriaPage from "../pages/produtosCategoria/CategoriaPage";
+import Buscar from "../pages/buscar/index"
 
 export const publicRoutes = [
   { path: "/", element: <Login /> },
@@ -19,5 +20,6 @@ export const privateRoutes = [
   { path: "/painel-mercado", element: <PainelMercado /> },
   { path: "/painel-mercado/estoque", element: <GerenciarEstoque /> },
   { path: "/carrinho", element: <CartPage /> },
-  { path: "/produtos/:categoriaSlug", element: <CategoriaPage /> }
+  { path: "/produtos/:categoriaSlug", element: <CategoriaPage /> },
+  { path: "/buscar", element: <Buscar /> }
 ];
