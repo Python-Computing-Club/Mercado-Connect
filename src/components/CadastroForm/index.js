@@ -6,7 +6,7 @@ import useStepNavigation from "../../hooks/useStepNavigation";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import useGoogleLogin from "../../hooks/useGoogleLogin";
-import useFacebookLogin from "../../hooks/useFacebookLogin";  // <-- Importa hook do Facebook
+import useFacebookLogin from "../../hooks/useFacebookLogin";
 import { criarUsuario, buscarUsuario } from "../../services/firestore/usuarios";
 
 function formatarTelefoneVisual(telefone) {

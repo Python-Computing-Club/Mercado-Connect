@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import AppRoutes from './Routes/AppRoutes';
 import './index.css';
-import testeCNPJ from '../src/pages/testeCNPJ.jsx';
-import PainelMercado from './pages/painelMercado/index.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID
