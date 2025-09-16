@@ -10,8 +10,9 @@ export const publicRoutes = [
   { path: "/", element: <Login /> },
   { path: "/cadastro", element: <CadastroUsuario /> },
   { path: "/cadastro-parceiro", element: <CadastroMercado /> },
-  { path: "/painel-mercado/estoque", element: <GerenciarEstoque /> }
+  { path: "*", element: <Login /> }
 ];
+
 export const privateRoutes = [
   { path: "/home", element: <Home /> },
   { path: "/painel-mercado", element: <PainelMercado /> },
