@@ -9,24 +9,30 @@
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  padding: 10px;
+  padding: 16px;
   overflow-y: auto;
 }
 
 .modalContent {
-  background: white;
-  padding: 24px 32px;
-  border-radius: 12px;
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 14px;
   width: 100%;
-  max-width: 480px;
+  max-width: 380px;
   position: relative;
   box-sizing: border-box;
-  max-height: 90vh; 
+  max-height: 90vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .closeButton {
@@ -45,12 +51,12 @@
 }
 
 .image {
-  width: 220px;
-  max-width: 90%;
+  width: 180px;
+  max-width: 100%;
   height: auto;
   border-radius: 12px;
   margin-bottom: 24px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
   object-fit: contain;
 }
 
@@ -67,23 +73,22 @@
   font-weight: 600;
   color: #556b2f;
   margin-bottom: 20px;
-  text-align: center;
-  width: 100%;
   display: flex;
   justify-content: center;
   gap: 12px;
   align-items: baseline;
+  flex-wrap: wrap;
 }
 
 .oldPrice {
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 700;
   color: #999;
   text-decoration: line-through;
 }
 
 .discountedPrice {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #e53935;
 }
@@ -92,7 +97,9 @@
   width: 100%;
   font-size: 16px;
   color: #444;
-  margin-bottom: 12px;
+  margin-bottom: 1px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .modalContent .details strong {
@@ -100,18 +107,18 @@
 }
 
 .controls {
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1px;
   width: 100%;
 }
 
 input[type="number"] {
   padding: 8px;
-  font-size: 16px;
-  width: 100px;
-  max-width: 100%;
+  font-size: 18px;
+  max-width: 300px;
+  align-items: center;
   box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -123,13 +130,13 @@ input[type="number"]:focus {
 }
 
 .addButton {
-  padding: 12px;
+  padding: 8px;
   background-color: #556b2f;
   color: white;
   border: none;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 10px;
   transition: background-color 0.3s ease;
   width: 100%;
 }
@@ -138,31 +145,38 @@ input[type="number"]:focus {
 }
 
 .modalContent::-webkit-scrollbar {
-  width: 8px;
+  width: 2px;
 }
 .modalContent::-webkit-scrollbar-thumb {
   background-color: rgba(85, 107, 47, 0.5);
   border-radius: 4px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 380px) {
   .modalContent {
-    padding: 16px 20px;
+    padding: 10px;
     max-width: 95%;
   }
+
   .image {
-    width: 160px;
+    width: 135px;
   }
+
   .modalContent h2 {
-    font-size: 20px;
-  }
-  .modalContent .price {
     font-size: 18px;
   }
-  .modalContent .details {
-    font-size: 14px;
+
+  .modalContent .price {
+    font-size: 18px;
+    flex-direction: column;
+    align-items: center;
   }
+
+  .modalContent .details {
+    font-size: 13px;
+  }
+
   input[type="number"] {
-    width: 100%;
+    font-size: 13px;
   }
 }

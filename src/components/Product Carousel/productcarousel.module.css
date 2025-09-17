@@ -1,19 +1,21 @@
 .section {
   width: 100%;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  padding: 0 8px;
 }
 
 .header h2 {
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2f2f2f;
+  margin: 0;
 }
 
 .verMais {
@@ -29,10 +31,12 @@
 
 .sliderWrapper {
   position: relative;
+  padding: 0 8px;
 }
 
 .cardWrapper {
-  padding: 0 8px;
+  max-width: 280px;
+  margin: 0 auto;
 }
 
 @media (max-width: 767px) {
@@ -45,6 +49,6 @@
   }
 
   .cardWrapper {
-    padding: 0 4px;
+    max-width: 240px;
   }
 }

@@ -107,15 +107,15 @@ body,
   border-radius: 8px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 440px) {
   .wrapper {
-    height: 64px;
-    padding: 0 8px;
+    height: 55px;
+    padding: 0;
   }
 
   .navbar {
     justify-content: space-between;
-    padding: 0 8px;
+    padding: 0 1px;
   }
 
   .icon {
@@ -190,6 +190,6 @@ body,
 
   body,
   .pageWrapper {
-    padding-bottom: 74px;
+    padding-bottom: 72px;
   }
 }

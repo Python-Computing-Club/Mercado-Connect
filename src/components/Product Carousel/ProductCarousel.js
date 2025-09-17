@@ -10,9 +10,7 @@ import { useCart } from "../../Context/CartContext";
 export default function ProductCarousel({ title, products, sectionPath }) {
   const navigate = useNavigate();
   const settings = useSliderConfig();
-
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
-
   const { addItem } = useCart();
 
   const handleCardClick = (produto) => {
@@ -34,7 +32,10 @@ export default function ProductCarousel({ title, products, sectionPath }) {
     <div className={styles.section}>
       <div className={styles.header}>
         <h2>{title}</h2>
-        <button onClick={() => navigate(sectionPath)} className={styles.verMais}>
+        <button
+          onClick={() => navigate(sectionPath)}
+          className={styles.verMais}
+        >
           <span className={styles.circle}>›</span>
           <span>Ver mais</span>
         </button>
