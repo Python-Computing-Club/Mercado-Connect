@@ -2,11 +2,13 @@ import Home from "../pages/home";
 import Login from "../pages/login";
 import CadastroUsuario from "../pages/cadastroUsuario";
 import CadastroMercado from "../pages/cadastroMercado";
-import PainelMercado from '../pages/painelMercado/index';
+import PainelMercado from "../pages/painelMercado/index";
 import GerenciarEstoque from "../pages/cadastroProdutos";
-import CartPage from '../pages/CartPage/index';
+import CartPage from "../pages/CartPage/index";
 import CategoriaPage from "../pages/produtosCategoria/CategoriaPage";
-import Buscar from "../pages/buscar/index"
+import Buscar from "../pages/buscar/index";
+import CatalogoMercado from "../pages/catalogo/index";
+import TodasLojas from "../pages/TodosMercados";
 
 export const publicRoutes = [
   { path: "/", element: <Login /> },
@@ -21,5 +23,7 @@ export const privateRoutes = [
   { path: "/painel-mercado/estoque", element: <GerenciarEstoque /> },
   { path: "/carrinho", element: <CartPage /> },
   { path: "/produtos/:categoriaSlug", element: <CategoriaPage /> },
-  { path: "/buscar", element: <Buscar /> }
+  { path: "/buscar", element: <Buscar /> },
+  { path: "/mercado/:id", element: <CatalogoMercado /> },
+  { path: "/mercados", element: <TodasLojas /> }
 ];

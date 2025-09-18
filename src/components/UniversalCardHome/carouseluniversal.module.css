@@ -1,0 +1,92 @@
+.section {
+  margin: 24px 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 0 10px;
+}
+
+.header h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.verMais {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #000000;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.verMais:hover {
+  color: #000000;
+}
+
+.icon {
+  font-size: 1.2rem;
+}
+
+.sliderWrapper .slick-slide > div {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sliderWrapper .slick-track {
+  display: flex !important;
+  gap: 12px;
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.cardWrapper {
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+/* Responsivo */
+@media (max-width: 360px) {
+  .section {
+    margin: 20px 0;
+  }
+
+  .header {
+    margin-bottom: 16px;
+    padding: 0 8px;
+  }
+
+  .header h2 {
+    font-size: 1.05rem;
+  }
+
+  .verMais {
+    font-size: 0.85rem;
+    gap: 4px;
+  }
+
+  .icon {
+    font-size: 1rem;
+  }
+
+  .sliderWrapper {
+    padding: 0 6px;
+  }
+
+  .cardWrapper {
+    padding: 0 6px;
+  }
+}

@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { onSnapshot, doc } from "firebase/firestore";
+import { db } from "../services/firebase";
 
 const CartContext = createContext();
 
@@ -16,6 +18,37 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem("carrinho", JSON.stringify(carrinho));
+  }, [carrinho]);
+
+  useEffect(() => {
+    if (carrinho.length === 0) return;
+
+    const unsubscribes = carrinho.map((item) =>
+      onSnapshot(doc(db, "produtos", item.id), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+
+          setCarrinho((prev) =>
+            prev.map((p) =>
+              p.id === item.id
+                ? {
+                    ...p,
+                    nome: data.nome || p.nome,
+                    preco: typeof data.preco_final === "number" && data.preco_final < data.preco ? data.preco_final : data.preco,
+                    preco_final: data.preco_final,
+                    imagem: data.imagemUrl || data.imagem || p.imagem,
+                    disponivel: data.disponivel,
+                  }
+                : p
+            )
+          );
+        }
+      })
+    );
+
+    return () => {
+      unsubscribes.forEach((unsub) => unsub());
+    };
   }, [carrinho]);
 
   const addItem = (item, quantidade = 1) => {

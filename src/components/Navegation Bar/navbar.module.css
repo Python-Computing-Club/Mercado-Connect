@@ -28,8 +28,9 @@ body,
 .icon {
   background: none;
   border: none;
-  font-size: 23px;
-  color: #444;
+  font-size: 20px;
+  font-family:'Times New Roman', Times, serif;
+  color: #044609;
   cursor: pointer;
   position: relative;
   transition: color 0.2s ease;
@@ -45,20 +46,23 @@ body,
 
 .badge {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  background-color: transparent;
-  color: #2ecc71;
+  top: -11px;
+  right: 30px;
+  background-color: #e53935;
+  color: #fff;
   font-weight: bold;
-  font-size: 10px;
-  min-width: 18px;
-  min-height: 18px;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  user-select: none;
+  min-width: 18px;
+  height: 18px;
+  line-height: 1;
   pointer-events: none;
 }
+
 
 .userMenu {
   position: relative;
@@ -123,13 +127,16 @@ body,
     padding: 4px;
   }
 
+  @media (max-width: 440px) {
   .badge {
-    font-size: 9px;
+    top: 15px;
+    right: 15px;
+    font-size: 10px;
     min-width: 16px;
-    min-height: 16px;
-    right: -10px;
-    bottom: -2px;
+    height: 16px;
+    padding: 1px 5px;
   }
+}
 
   .dropdown {
     bottom: 74px;
@@ -177,10 +184,26 @@ body,
     padding: 6px 10px;
   }
 
-  .badge {
-    font-size: 8px;
-    right: -8px;
+  @media (max-width: 360px) {
+
+  .wrapper {
+    height: 55px;
+    padding: 0 6px;
   }
+
+  .navbar {
+    gap: 1px;
+  }
+
+  .badge {
+    top: 15px;
+    right: 12px;
+    font-size: 9px;
+    min-width: 14px;
+    height: 14px;
+    padding: 1px 4px;
+  }
+}
 
   .painelOverlay {
     width: calc(100% - 24px);

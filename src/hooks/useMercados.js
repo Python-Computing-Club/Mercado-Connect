@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
 
 export default function useMercados() {
@@ -7,25 +7,22 @@ export default function useMercados() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMercados = async () => {
-      try {
-        const colRef = collection(db, "mercados");
-        const snapshot = await getDocs(colRef);
-        const lista = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          nome: doc.data().nome,
-          logoUrl: doc.data().logoUrl || "",
-        }));
-        setMercados(lista);
-      } catch (error) {
-        console.error("Erro ao buscar mercados:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const colRef = collection(db, "mercados");
+    const unsubscribe = onSnapshot(colRef, (snapshot) => {
+      const lista = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    fetchMercados();
+      setMercados(lista);
+      setLoading(false);
+    }, (error) => {
+      console.error("Erro ao escutar mercados:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  return mercados;
+  return { mercados, loading };
 }
