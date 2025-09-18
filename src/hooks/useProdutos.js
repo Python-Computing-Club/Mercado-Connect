@@ -37,7 +37,7 @@ export default function useProdutos() {
         ).slice(0, 15);
 
         const popularesOrdenados = [...disponiveis].sort((a, b) => (b.qtdVendida || 0) - (a.qtdVendida || 0));
-        const popular = shuffle(popularesOrdenados.slice(0, 50)).slice(0, 15); // top 50 randomiza e escolhe 15
+        const popular = shuffle(popularesOrdenados.slice(0, 50)).slice(0, 15);
 
         const grupos = {
           "Hortifruti & Padaria": ["Hortifruti", "Padaria & Confeitaria"],

@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { escutarProdutosPorMercado } from "../../services/firestore/produtos";
 import { useMarket } from "../../Context/MarketContext";
-import ProductCard from "../../components/Product Card/ProductCard";
+import CardUniversal from "../../components/UniversalCardHome/CardHome";
+import ProductModal from "../../modal/ProductModal";
+import NavBar from "../../components/Navegation Bar/navbar";
+import Header from "../../components/Header/header";
 import styles from "./categoria.module.css";
 
 const grupos = {
@@ -23,6 +26,8 @@ export default function CategoriaPage() {
 
   const [produtos, setProdutos] = useState([]);
   const [pagina, setPagina] = useState(1);
+  const [query, setQuery] = useState("");
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const porPagina = 12;
 
   useEffect(() => {
@@ -35,7 +40,6 @@ export default function CategoriaPage() {
       }
 
       let disponiveis = todos.filter((p) => p.disponivel);
-
       const categoriasAlvo = grupos[categoriaSlug];
 
       if (categoriaSlug === "destaque") {
@@ -59,13 +63,22 @@ export default function CategoriaPage() {
     return () => unsubscribe();
   }, [marketId, loading, categoriaSlug]);
 
+  const produtosFiltrados = useMemo(() => {
+    if (!query) return produtos;
+    return produtos.filter((p) =>
+      p.nome.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [query, produtos]);
+
   const inicio = (pagina - 1) * porPagina;
   const fim = inicio + porPagina;
-  const paginaAtual = produtos.slice(inicio, fim);
-  const totalPaginas = Math.ceil(produtos.length / porPagina);
+  const paginaAtual = produtosFiltrados.slice(inicio, fim);
+  const totalPaginas = Math.ceil(produtosFiltrados.length / porPagina);
 
   return (
     <div className={styles.pageWrapper}>
+      <Header />
+
       <div className={styles.backButtonWrapper}>
         <Link to="/" className={styles.backButton}>
           ⬅ Voltar para Home
@@ -76,12 +89,27 @@ export default function CategoriaPage() {
         {categoriaSlug.replace(/-/g, " ").toUpperCase()}
       </h1>
 
+      <div className={styles.searchBar}>
+        <input
+          type="text"
+          placeholder="Buscar nesta categoria..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
       {paginaAtual.length === 0 ? (
-        <p>Nenhum produto disponível nesta categoria.</p>
+        <p className={styles.emptyMessage}>Nenhum produto disponível nesta categoria.</p>
       ) : (
         <div className={styles.grid}>
           {paginaAtual.map((produto) => (
-            <ProductCard key={produto.id} produto={produto} />
+            <CardUniversal
+              key={produto.id}
+              item={produto}
+              type="produto"
+              onClick={() => setProdutoSelecionado(produto)}
+              onAddClick={() => setProdutoSelecionado(produto)}
+            />
           ))}
         </div>
       )}
@@ -92,7 +120,7 @@ export default function CategoriaPage() {
             disabled={pagina === 1}
             onClick={() => setPagina((p) => p - 1)}
           >
-            Anterior
+            ⬅ Anterior
           </button>
           <span>
             Página {pagina} de {totalPaginas}
@@ -101,10 +129,23 @@ export default function CategoriaPage() {
             disabled={pagina === totalPaginas}
             onClick={() => setPagina((p) => p + 1)}
           >
-            Próxima
+            Próxima ➡
           </button>
         </div>
       )}
+
+      {produtoSelecionado && (
+        <ProductModal
+          produto={produtoSelecionado}
+          onClose={() => setProdutoSelecionado(null)}
+          onAddToCart={(produto, quantidade) => {
+            console.log("Adicionado ao carrinho:", produto, "x", quantidade);
+            setProdutoSelecionado(null);
+          }}
+        />
+      )}
+
+      <NavBar />
     </div>
   );
 }

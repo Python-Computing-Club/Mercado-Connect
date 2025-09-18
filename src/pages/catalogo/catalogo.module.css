@@ -1,0 +1,133 @@
+.pageWrapper {
+  padding: 80px 16px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background-color: #f9f9f9;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.backButtonWrapper {
+  position: fixed;
+  left: 6px;
+}
+
+
+.backButton {
+  background: #0b4d0b;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  gap: 6px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.backButton:hover {
+  background: #0a3e0a;
+}
+
+.marketInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.marketName {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.marketNota {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.searchBar {
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+}
+
+.searchBar input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.searchBar input:focus {
+  border-color: #ff3d00;
+  box-shadow: 0 0 4px rgba(255, 61, 0, 0.4);
+}
+
+.categoriaSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.categoriaTitulo {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #444;
+  margin-left: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  font-size: 1rem;
+  margin-top: 32px;
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .searchBar input {
+    font-size: 0.9rem;
+  }
+
+  .marketName {
+    font-size: 1rem;
+  }
+
+  .categoriaTitulo {
+    font-size: 1rem;
+  }
+}

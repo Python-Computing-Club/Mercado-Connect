@@ -1,28 +1,31 @@
-import HeaderMercado from '../../components/HeaderMercado';
-import { Card, Container, Toast, ToastContainer } from 'react-bootstrap';
 import { useState } from 'react';
+import { Card, Container, Toast, ToastContainer } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+
+import HeaderMercado from '../../components/HeaderMercado';
+import Modal from '../../modal/modal';
 import styles from './painel-mercado.module.css';
+
 import FormatCEP from '../../hooks/FormatCEP';
 import consultarCEP from '../../hooks/useValidarEndereco';
 import useFormatTelefone from '../../hooks/useFormatTelefone';
-import Modal from '../../modal/modal';
 import useEmailCodigo from '../../hooks/useEmailCodigo';
 import { useTextBeeSms } from '../../hooks/useTextBeeSms';
 import { atualizarMercado, deletarMercado } from '../../services/firestore/mercados';
 import { autenticar } from '../../services/authService';
-import { useNavigate } from 'react-router-dom';
+import { uploadParaCloudinary, excluirImagemCloudinary } from '../../hooks/cloudinaryUpload';
 
 let usuario = JSON.parse(localStorage.getItem("entidade"));
 
 export default function PainelMercado() {
     const navigate = useNavigate();
 
-    // Estado inicial seguro (mesmo se localStorage estiver vazio)
     const [dadosMercado, setDadosMercado] = useState(
         usuario || {
             estabelecimento: "",
             email: "",
             telefone: "",
+            logo: { url: "", public_id: "" },
             endereco: {
                 cep: "",
                 logradouro: "",
@@ -39,6 +42,8 @@ export default function PainelMercado() {
     const [modal, setModal] = useState({ open: false, title: "", message: "" });
     const [showToast, setShowToast] = useState(false);
     const [deleteMercado, setDeleteMercado] = useState(false);
+    const [logoFile, setLogoFile] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
 
     const toggleDeleteMercado = () => setDeleteMercado(!deleteMercado);
     const toggleShowToast = () => setShowToast(!showToast);
@@ -60,6 +65,8 @@ export default function PainelMercado() {
         usuario = await autenticar("mercados", usuario.email, "email");
         setDadosMercado(usuario);
         setMostrarFormulario(false);
+        setLogoFile(null);
+        setLogoPreview(null);
     };
 
     const handleChange = async ({ target: { name, value } }) => {
@@ -67,10 +74,7 @@ export default function PainelMercado() {
 
         if (campo === "telefone") {
             const onlyNumbers = value.replace(/\D/g, "");
-            setDadosMercado((prev) => ({
-                ...prev,
-                telefone: formatTelefone(onlyNumbers)
-            }));
+            setDadosMercado((prev) => ({ ...prev, telefone: formatTelefone(onlyNumbers) }));
             return;
         }
 
@@ -89,68 +93,74 @@ export default function PainelMercado() {
                         estado: endereco.uf || ""
                     });
                 } else {
-                    Object.assign(novoEndereco, {
-                        logradouro: "",
-                        bairro: "",
-                        cidade: "",
-                        estado: ""
-                    });
+                    Object.assign(novoEndereco, { logradouro: "", bairro: "", cidade: "", estado: "" });
                 }
             }
-
-            setDadosMercado((prev) => ({
-                ...prev,
-                endereco: novoEndereco
-            }));
+            setDadosMercado((prev) => ({ ...prev, endereco: novoEndereco }));
             return;
         }
 
         if (grupo === "endereco") {
             setDadosMercado((prev) => ({
                 ...prev,
-                endereco: {
-                    ...prev.endereco,
-                    [campo]: value
-                }
+                endereco: { ...prev.endereco, [campo]: value }
             }));
         } else {
-            setDadosMercado((prev) => ({
-                ...prev,
-                [campo]: value
-            }));
+            setDadosMercado((prev) => ({ ...prev, [campo]: value }));
+        }
+    };
+    
+    const handleLogoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setLogoFile(file);
+            setLogoPreview(URL.createObjectURL(file));
         }
     };
 
     const handleSubmit = async () => {
-        if (
-            !dadosMercado.telefone?.length ||
-            !dadosMercado.estabelecimento?.trim().length ||
-            !dadosMercado.endereco?.cep?.trim() ||
-            !dadosMercado.endereco?.numero ||
-            !dadosMercado.email
-        ) {
+        if (!dadosMercado.estabelecimento?.trim().length || !dadosMercado.endereco?.cep?.trim() || !dadosMercado.endereco?.numero || !dadosMercado.email) {
             showAlert("Preencha todos os campos!", "Preencha todos os campos obrigatórios!");
-        } else {
-            const codigoEmail = await enviarCodigo(dadosMercado.email, "email", showAlert, showAlert);
-            const codigoSMS = await sendVerificationCode(dadosMercado.telefone);
-
-            if (!codigoEmail || !codigoSMS) {
-                return showAlert("Erro", "Não foi possível enviar os códigos de verificação");
-            }
-
-            setDadosMercado((prev) => ({
-                ...prev,
-                codigoEmailGerado: codigoEmail,
-                codigoSMSGerado: codigoSMS,
-                etapaVerificacao: true,
-                codigoEmail: "",
-                codigoSMS: ""
-            }));
-
-            setMostrarFormulario(false);
-            toggleShowToast();
+            return;
         }
+
+        let dadosParaSalvar = { ...dadosMercado };
+
+        if (logoFile) {
+            showAlert("Aguarde", "Enviando sua nova logo...");
+            const uploadInfo = await uploadParaCloudinary(logoFile);
+
+            if (uploadInfo) {
+                if (dadosMercado.logo?.public_id) {
+                    await excluirImagemCloudinary(dadosMercado.logo.public_id);
+                }
+                dadosParaSalvar.logo = { url: uploadInfo.url, public_id: uploadInfo.public_id };
+            } else {
+                showAlert("Erro de Upload", "Não foi possível enviar sua logo. Tente novamente.");
+                return;
+            }
+        }
+        
+        const codigoEmail = await enviarCodigo(dadosParaSalvar.email, "email", showAlert, showAlert);
+        const codigoSMS = await sendVerificationCode(dadosParaSalvar.telefone);
+
+        if (!codigoEmail || !codigoSMS) {
+            return showAlert("Erro", "Não foi possível enviar os códigos de verificação");
+        }
+
+        setDadosMercado({
+            ...dadosParaSalvar,
+            codigoEmailGerado: codigoEmail,
+            codigoSMSGerado: codigoSMS,
+            etapaVerificacao: true,
+            codigoEmail: "",
+            codigoSMS: ""
+        });
+
+        setMostrarFormulario(false);
+        toggleShowToast();
     };
+
 
     const handleDelete = async () => {
         showAlert("Esta ação irá deletar todos os dados do mercado!", "Serão enviados códigos de confirmação para seu email e telefone");
@@ -186,18 +196,19 @@ export default function PainelMercado() {
                 const exclusao = await deletarMercado(dadosMercado.id);
                 if (exclusao) {
                     showAlert("Mercado deletado", "Seus dados foram deletados com sucesso. Saindo...");
-                    setTimeout(() => {
-                        navigate("/");
-                    }, 3000);
+                    setTimeout(() => navigate("/"), 3000);
                     return;
                 } else {
                     navigate("/painel-mercado");
                 }
             }
-            const updateMercado = await atualizarMercado(usuario.id, {
+
+            const dadosParaAtualizar = {
                 estabelecimento: dadosMercado.estabelecimento,
                 email: dadosMercado.email,
                 telefone: dadosMercado.telefone,
+                "logo.url": dadosMercado.logo?.url || "",
+                "logo.public_id": dadosMercado.logo?.public_id || "",
                 "endereco.cep": dadosMercado.endereco.cep,
                 "endereco.logradouro": dadosMercado.endereco.logradouro,
                 "endereco.cidade": dadosMercado.endereco.cidade,
@@ -205,13 +216,17 @@ export default function PainelMercado() {
                 "endereco.bairro": dadosMercado.endereco.bairro,
                 "endereco.numero": dadosMercado.endereco.numero,
                 "endereco.complemento": dadosMercado.endereco.complemento ?? ""
-            });
+            };
+
+            const updateMercado = await atualizarMercado(usuario.id, dadosParaAtualizar);
+
             if (updateMercado) {
                 showAlert("Dados atualizados", "Seus dados foram atualizados com sucesso");
                 setTimeout(async () => {
                     usuario = await autenticar("mercados", usuario.email, "email");
-                    setDadosMercado(usuario);
-                    dadosMercado.etapaVerificacao = false;
+                    setDadosMercado({ ...usuario, etapaVerificacao: false });
+                    setLogoFile(null);
+                    setLogoPreview(null);
                 }, 1500);
             } else {
                 showAlert("Erro na atualização", "Erro ao atualizar os dados cadastrais");
@@ -241,7 +256,6 @@ export default function PainelMercado() {
             {dadosMercado.etapaVerificacao && (
                 <div className={styles.verificacaoContainer}>
                     <h3>Confirme seus dados</h3>
-
                     <div className={styles.formVerificacao}>
                         <label>Código enviado por Email</label>
                         <input
@@ -252,7 +266,6 @@ export default function PainelMercado() {
                             placeholder="Digite o código do email"
                         />
                     </div>
-
                     <div className={styles.formVerificacao}>
                         <label>Código enviado por SMS</label>
                         <input
@@ -263,7 +276,6 @@ export default function PainelMercado() {
                             placeholder="Digite o código do SMS"
                         />
                     </div>
-
                     <button type="button" onClick={validarCodigos} className={styles.submitButton}>
                         Confirmar Verificação
                     </button>
@@ -281,6 +293,21 @@ export default function PainelMercado() {
             {mostrarFormulario && !dadosMercado.etapaVerificacao ? (
                 <Container className={styles.formContainer}>
                     <h2 className={styles.titles}>Informações da Loja</h2>
+                    
+                    <div className={styles.logoContainer}>
+                        <label>Logo do Mercado</label>
+                        <img 
+                            src={logoPreview || dadosMercado.logo?.url || 'https://via.placeholder.com/150?text=Logo'} 
+                            alt="Prévia da logo" 
+                            className={styles.logoPreview} 
+                        />
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={handleLogoChange}
+                        />
+                    </div>
+                    
                     <form className={styles.formLoja}>
                         <div className={styles.formGroup}>
                             <label>Nome do Mercado</label>
@@ -406,7 +433,6 @@ export default function PainelMercado() {
                                 </Card.Link>
                             </Card.Body>
                         </Card>
-
                         <Card style={{ width: '18rem' }}>
                             <Card.Body>
                                 <Card.Title className={styles.cardTitle}>Estoque</Card.Title>
@@ -425,7 +451,6 @@ export default function PainelMercado() {
                                 </Card.Link>
                             </Card.Body>
                         </Card>
-
                         <Card style={{ width: '18rem' }}>
                             <Card.Body>
                                 <Card.Title className={styles.cardTitle}>Minha Loja</Card.Title>
