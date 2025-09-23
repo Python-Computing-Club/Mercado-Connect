@@ -11,13 +11,13 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
-  padding: 0 10px;
+  padding: 0 16px;
 }
 
 .emptyMessage {
   text-align: center;
   color: #888;
-  font-size: 16px;
+  font-size: 1rem;
   margin: 16px 0;
 }
 
@@ -34,7 +34,7 @@
 }
 
 .header h2 {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #2f2f2f;
   margin: 0;
@@ -46,19 +46,18 @@
   gap: 6px;
   background: none;
   border: none;
-  font-size: 14px;
+  font-size: 0.9rem;
   cursor: pointer;
-  color: #000000;
-  transition: color 0.3s ease;
+  color: #000;
   font-weight: 500;
 }
 
 .verMais:hover {
-  color: #000000;
+  color: #000;
 }
 
 .icon {
-  font-size: 20px;
+  font-size: 1.2rem;
   transition: transform 0.3s ease;
 }
 
@@ -68,49 +67,52 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
   padding: 4px;
   justify-items: center;
 }
 
-/* Responsivo */
+/* Responsivo geral */
 @media (max-width: 767px) {
   .pageWrapper {
-    padding-top: 100px;
-    padding-bottom: 60px;
+    padding-top: 90px;
+    padding-bottom: 64px;
   }
 
   .contentArea {
     gap: 24px;
-    padding: 0 8px;
-  }
-
-  .header h2 {
-    font-size: 18px;
+    padding: 0 10px;
   }
 
   .grid {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h2 {
+    font-size: 1.1rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 10px;
   }
 }
 
 @media (max-width: 360px) {
-  .pageWrapper {
-    padding-top: 90px;
-    padding-bottom: 68px;
-  }
-
   .contentArea {
-    gap: 16px;
     padding: 0 6px;
+    gap: 16px;
   }
 
   .header h2 {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 8px;
   }
 }
