@@ -25,39 +25,41 @@
   border: none;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #000000;
+  color: #000;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .verMais:hover {
-  color: #000000;
+  color: #000;
 }
 
 .icon {
   font-size: 1.2rem;
 }
 
-.sliderWrapper .slick-slide > div {
-  display: flex;
-  justify-content: center;
-  max-width: 100%;
-  box-sizing: border-box;
+.sliderWrapper {
+  padding: 0 6px;
 }
 
 .sliderWrapper .slick-track {
   display: flex !important;
-  gap: 12px;
-  padding-left: 0;
-  padding-right: 0;
+  gap: 4px;
+}
+
+.sliderWrapper .slick-slide > div {
+  display: flex !important;
+  justify-content: center;
 }
 
 .cardWrapper {
-  padding: 0 6px;
+  min-width: 160px;
+  max-width: 300px;
+  flex: 0 0 auto;
+  padding: 0px;
   box-sizing: border-box;
 }
 
-/* Responsivo */
 @media (max-width: 480px) {
   .section {
     margin: 20px 0;
@@ -82,10 +84,21 @@
   }
 
   .sliderWrapper {
-    padding: 0 6px;
+    padding: 0 4px;
   }
 
   .cardWrapper {
+    min-width: 140px;
+    max-width: 160px;
+    flex: 0 0 auto;
     padding: 0 4px;
+  }
+}
+
+@media (max-width: 360px) {
+  .cardWrapper {
+    min-width: 130px;
+    max-width: 150px;
+    padding: 0 3px;
   }
 }
