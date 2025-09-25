@@ -1,7 +1,11 @@
-import { FiPlus } from "react-icons/fi";
+import { FiPlus, FiHeart } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
 import styles from "./cardcategoria.module.css";
+import { useFavoritos } from "../../Context/FavoritosContext";
 
 export default function CardCategoria({ item, onClick }) {
+  const { toggleFavoritoProduto, isFavoritoProduto } = useFavoritos();
+
   if (!item) return null;
 
   const imagemSrc =
@@ -10,6 +14,16 @@ export default function CardCategoria({ item, onClick }) {
 
   return (
     <div className={styles.card} onClick={() => onClick?.(item)}>
+      <button
+        className={styles.favoriteButton}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleFavoritoProduto(item);
+        }}
+      >
+        {isFavoritoProduto(item.id) ? <FaHeart color="red" /> : <FiHeart color="gray" />}
+      </button>
+
       <button
         className={styles.addButton}
         onClick={(e) => {
