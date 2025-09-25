@@ -153,7 +153,6 @@ export default function AddressPicker({ initialAddress = "", initialPosition = n
     if (!showModal) {
       initMap(position);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showModal, position]);
 
   async function handlePermissionResponse(accepted) {

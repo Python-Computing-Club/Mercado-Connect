@@ -426,4 +426,11 @@ body,
     padding: 5px 6px;
   }
 }
+
+.errorMessage {
+  color: red;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
 }

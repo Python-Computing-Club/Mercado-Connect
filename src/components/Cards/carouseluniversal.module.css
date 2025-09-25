@@ -27,44 +27,43 @@
   font-weight: 500;
   color: #000;
   cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.verMais:hover {
-  color: #000;
 }
 
 .icon {
   font-size: 1.2rem;
 }
 
-.sliderWrapper {
-  padding: 0 6px;
+.sliderWrapper .slick-slide > div {
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .sliderWrapper .slick-track {
   display: flex !important;
-  gap: 8px;
-}
-
-.sliderWrapper .slick-slide > div {
-  display: flex !important;
-  justify-content: center;
+  gap: 12px;
 }
 
 .cardWrapper {
-  min-width: 160px;
-  max-width: 300px;
-  flex: 0 0 auto;
+  flex: 1 0 0;
+  max-width: 100%;
   padding: 0 6px;
   box-sizing: border-box;
 }
 
-@media (max-width: 480px) {
-  .section {
-    margin: 20px 0;
+@media (max-width: 1024px) {
+  .cardWrapper {
+    flex: 1 0 33%;
   }
+}
 
+@media (max-width: 768px) {
+  .cardWrapper {
+    flex: 1 0 48%;
+  }
+}
+
+@media (max-width: 480px) {
   .header {
     margin-bottom: 16px;
     padding: 0 8px;
@@ -83,22 +82,8 @@
     font-size: 1rem;
   }
 
-  .sliderWrapper {
-    padding: 0 4px;
-  }
-
   .cardWrapper {
-    min-width: 140px;
-    max-width: 160px;
-    flex: 0 0 auto;
+    flex: 1 0 80%;
     padding: 0 4px;
-  }
-}
-
-@media (max-width: 360px) {
-  .cardWrapper {
-    min-width: 130px;
-    max-width: 150px;
-    padding: 0 3px;
   }
 }

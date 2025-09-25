@@ -11,7 +11,7 @@
   right: 0;
   z-index: 20;
   box-sizing: border-box;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   height: 72px;
   overflow: hidden;
 }
@@ -22,15 +22,15 @@
   gap: 12px;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
 }
 
 .logo {
   width: 60px;
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
   flex-shrink: 0;
+  display: block;
 }
 
 .marketName {
@@ -40,6 +40,8 @@
   color: rgb(1, 100, 1);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .userArea {
@@ -52,26 +54,21 @@
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
 }
 
-/* ----------- MOBILE ----------- */
 @media (max-width: 767px) {
   .header {
-    padding: 8px 10px;
-    height: 100px;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-  }
-
-  .logoArea {
-    justify-content: center;
+    padding: 8px 10px;
+    height: 72px;
     gap: 8px;
-    width: 100%;
-    margin-bottom: 4px;
   }
 
   .logo {
-    width: 50px;
+    width: 48px;
+    height: 48px;
   }
 
   .marketName {
@@ -80,9 +77,21 @@
 
   .userArea {
     font-size: 14px;
-    width: 100%;
-    text-align: center;
-    margin: 0;
-    padding: 4px 0;
+    max-width: 120px;
+    text-align: right;
+    padding: 0 8px;
+  }
+}
+
+
+
+@media (max-width: 480px) {
+  .logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .marketName {
+    font-size: 16px;
   }
 }

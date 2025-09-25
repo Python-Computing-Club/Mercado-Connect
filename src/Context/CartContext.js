@@ -34,10 +34,15 @@ export const CartProvider = ({ children }) => {
                 ? {
                     ...p,
                     nome: data.nome || p.nome,
-                    preco: typeof data.preco_final === "number" && data.preco_final < data.preco ? data.preco_final : data.preco,
+                    preco:
+                      typeof data.preco_final === "number" &&
+                      data.preco_final < data.preco
+                        ? data.preco_final
+                        : data.preco,
                     preco_final: data.preco_final,
                     imagem: data.imagemUrl || data.imagem || p.imagem,
-                    disponivel: data.disponivel,
+                    disponivel: data.disponivel ?? p.disponivel,
+                    estoque: data.quantidade ?? p.estoque,
                   }
                 : p
             )
@@ -54,15 +59,20 @@ export const CartProvider = ({ children }) => {
   const addItem = (item, quantidade = 1) => {
     setCarrinho((prev) => {
       const existente = prev.find((p) => p.id === item.id);
-      const precoFinal = typeof item.preco_final === "number" && item.preco_final < item.preco
-        ? item.preco_final
-        : item.preco;
+      const precoFinal =
+        typeof item.preco_final === "number" && item.preco_final < item.preco
+          ? item.preco_final
+          : item.preco;
+
+      const estoqueAtual = item.quantidade ?? item.estoque ?? 99;
 
       if (existente) {
+        const novaQtd = Math.min(
+          existente.quantidade + quantidade,
+          estoqueAtual
+        );
         return prev.map((p) =>
-          p.id === item.id
-            ? { ...p, quantidade: p.quantidade + quantidade }
-            : p
+          p.id === item.id ? { ...p, quantidade: novaQtd } : p
         );
       }
 
@@ -70,19 +80,29 @@ export const CartProvider = ({ children }) => {
         ...prev,
         {
           ...item,
-          quantidade,
+          quantidade: Math.min(quantidade, estoqueAtual),
           preco: precoFinal,
           imagem: item.imagemUrl || item.imagem || "",
+          estoque: estoqueAtual,
         },
       ];
     });
   };
 
-  const updateItemQuantity = (id, novaQtd) => {
+  const updateItemQuantity = (id, novaQtd, estoqueMax) => {
     if (novaQtd < 1) return;
+
     setCarrinho((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, quantidade: novaQtd } : item
+        item.id === id
+          ? {
+              ...item,
+              quantidade: Math.min(
+                novaQtd,
+                estoqueMax ?? item.estoque ?? item.quantidade ?? 1
+              ),
+            }
+          : item
       )
     );
   };

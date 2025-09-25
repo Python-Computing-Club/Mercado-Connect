@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { escutarProdutosPorMercado } from "../../services/firestore/produtos";
 import { useMarket } from "../../Context/MarketContext";
-import CardUniversal from "../../components/UniversalCardHome/CardHome";
+import { useCart } from "../../Context/CartContext";
+import CardCategoria from "../../components/Cards/CardCategoria";
 import ProductModal from "../../modal/ProductModal";
 import NavBar from "../../components/Navegation Bar/navbar";
 import Header from "../../components/Header/header";
@@ -23,12 +24,13 @@ const grupos = {
 export default function CategoriaPage() {
   const { marketId, loading } = useMarket();
   const { categoriaSlug } = useParams();
+  const { addItem } = useCart();
 
   const [produtos, setProdutos] = useState([]);
   const [pagina, setPagina] = useState(1);
   const [query, setQuery] = useState("");
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
-  const porPagina = 12;
+  const porPagina = 20;
 
   useEffect(() => {
     if (loading || !marketId) return;
@@ -103,12 +105,10 @@ export default function CategoriaPage() {
       ) : (
         <div className={styles.grid}>
           {paginaAtual.map((produto) => (
-            <CardUniversal
+            <CardCategoria
               key={produto.id}
               item={produto}
-              type="produto"
               onClick={() => setProdutoSelecionado(produto)}
-              onAddClick={() => setProdutoSelecionado(produto)}
             />
           ))}
         </div>
@@ -139,7 +139,7 @@ export default function CategoriaPage() {
           produto={produtoSelecionado}
           onClose={() => setProdutoSelecionado(null)}
           onAddToCart={(produto, quantidade) => {
-            console.log("Adicionado ao carrinho:", produto, "x", quantidade);
+            addItem(produto, quantidade);
             setProdutoSelecionado(null);
           }}
         />

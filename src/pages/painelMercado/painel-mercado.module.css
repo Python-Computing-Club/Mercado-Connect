@@ -1,6 +1,6 @@
 .banner {
-  height: 50vh; /* metade da altura da tela */
-  background-image: url('./banner.jpg'); /* ajuste o caminho conforme sua imagem */
+  height: 50vh;
+  background-image: url('./banner.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -14,7 +14,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4); /* escurece a imagem para destacar o texto */
+  background: rgba(0, 0, 0, 0.4);
   z-index: 0;
 }
 

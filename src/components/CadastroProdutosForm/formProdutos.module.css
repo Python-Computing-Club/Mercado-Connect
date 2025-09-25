@@ -165,7 +165,6 @@ textarea {
   color: #012e0d;
 }
 
-/* --- RESPONSIVIDADE --- */
 @media (max-width: 768px) {
   .row {
     flex-direction: column;

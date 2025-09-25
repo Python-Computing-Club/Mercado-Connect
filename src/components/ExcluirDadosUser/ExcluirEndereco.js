@@ -49,7 +49,6 @@ export default function ExcluirEnderecos({ onClose }) {
       const sucesso = await atualizarUsuario(usuario.id, { enderecos: novosEnderecos });
 
       if (sucesso) {
-        // Atualiza localmente
         localStorage.setItem(
           "userSession",
           JSON.stringify({ ...usuario, enderecos: novosEnderecos })
@@ -66,7 +65,6 @@ export default function ExcluirEnderecos({ onClose }) {
           setPaginaAtual(ultimaPagina);
         }
 
-        // Força atualização da página (se necessário)
         window.location.reload();
       } else {
         setError("Erro ao excluir o endereço.");

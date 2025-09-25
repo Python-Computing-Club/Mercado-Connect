@@ -47,7 +47,7 @@ export default function useLoginFormLogic() {
   const { sendVerificationCode } = useTextBeeSms();
   const { login } = useAuth();
 
-  const { loginComFacebook } = useFacebookLogin(setModal, () => {}, () => {}, () => {}, "login"); // <- USO DO HOOK FB
+  const { loginComFacebook } = useFacebookLogin(setModal, () => {}, () => {}, () => {}, "login");
 
   const showAlert = (title, message) => {
     setModal({ open: true, title, message });

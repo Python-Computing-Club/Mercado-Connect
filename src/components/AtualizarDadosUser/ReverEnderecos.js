@@ -7,7 +7,6 @@ const ENDERECOS_POR_PAGINA = 3;
 export default function ReverEnderecos({ onClose }) {
   const { usuario } = useAuth();
 
-  // ✅ useMemo garante que "enderecos" só muda quando usuario.enderecos mudar
   const enderecos = useMemo(
     () => (Array.isArray(usuario?.enderecos) ? usuario.enderecos : []),
     [usuario?.enderecos]
@@ -15,7 +14,6 @@ export default function ReverEnderecos({ onClose }) {
 
   const [paginaAtual, setPaginaAtual] = useState(0);
 
-  // ✅ Agora o ESLint não reclama, pois dependemos de usuario?.enderecos
   useEffect(() => {
     setPaginaAtual(0);
   }, [usuario?.enderecos]);

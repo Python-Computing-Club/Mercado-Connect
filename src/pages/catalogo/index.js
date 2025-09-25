@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { escutarProdutosPorMercado } from "../../services/firestore/produtos";
 import { buscarMercadoPorId } from "../../services/firestore/mercados";
-import CardHome from "../../components/UniversalCardHome/CardHome";
+import { useCart } from "../../Context/CartContext";
+import CardHome from "../../components/Cards/CardCategoria";
 import ProductModal from "../../modal/ProductModal";
 import NavBar from "../../components/Navegation Bar/navbar";
 import Header from "../../components/Header/header";
@@ -20,6 +21,7 @@ const grupos = {
 
 export default function CatalogoMercado() {
   const { id } = useParams();
+  const { addItem } = useCart();
   const navigate = useNavigate();
   const [mercado, setMercado] = useState(null);
   const [produtos, setProdutos] = useState([]);
@@ -113,16 +115,16 @@ export default function CatalogoMercado() {
         <p className={styles.empty}>Nenhum produto disponível neste mercado.</p>
       )}
 
-      {produtoSelecionado && (
-        <ProductModal
-          produto={produtoSelecionado}
-          onClose={() => setProdutoSelecionado(null)}
-          onAddToCart={(produto, quantidade) => {
-            console.log("Adicionado ao carrinho:", produto, "x", quantidade);
-            setProdutoSelecionado(null);
-          }}
-        />
-      )}
+        {produtoSelecionado && (
+         <ProductModal
+           produto={produtoSelecionado}
+           onClose={() => setProdutoSelecionado(null)}
+           onAddToCart={(produto, quantidade) => {
+             addItem(produto, quantidade);
+             setProdutoSelecionado(null);
+           }}
+         />
+       )}
 
       <NavBar />
     </div>

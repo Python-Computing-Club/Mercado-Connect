@@ -1,11 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import styles from "./cardhome.module.css";
+import styles from "./cardhome.module.css"
 import { FiPlus } from "react-icons/fi";
 
 export default function CardHome({ item, type, onClick, onAddClick }) {
   const navigate = useNavigate();
 
-  // Proteção contra item indefinido
   if (!item) {
     return (
       <div className={styles.card}>
@@ -31,7 +30,8 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
 
   const imagemSrc =
     type === "produto"
-      ? item.imagemUrl || "https://res.cloudinary.com/dwkrozkp2/image/upload/v1757609252/lje3rzkfbneourao4nhk.jpg"
+      ? item.imagemUrl ||
+        "https://res.cloudinary.com/dwkrozkp2/image/upload/v1757609252/lje3rzkfbneourao4nhk.jpg"
       : item.logo?.url || "/placeholder.png";
 
   const altText =
@@ -97,9 +97,11 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
             </p>
             <p className={styles.nota}>
               ⭐{" "}
-              {item.nota
-                ? item.nota.toFixed(1)
-                : <span className={styles.semNota}>Sem nota</span>}
+              {item.nota ? (
+                item.nota.toFixed(1)
+              ) : (
+                <span className={styles.semNota}>Sem nota</span>
+              )}
             </p>
           </>
         )}

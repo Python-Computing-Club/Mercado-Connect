@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "../../Context/CartContext";
 import useProdutos from "../../hooks/useProdutos";
 import NavBar from "../../components/Navegation Bar/navbar";
@@ -12,7 +12,17 @@ function CartPage() {
   const produtos = useProdutos();
   const navigate = useNavigate();
 
-  // Mapeia os itens do carrinho com os dados atualizados dos produtos
+  const [mensagemErro, setMensagemErro] = useState({});
+  const [valoresInputs, setValoresInputs] = useState({});
+
+  useEffect(() => {
+    const novosValores = {};
+    carrinho.forEach((item) => {
+      novosValores[item.id] = item.quantidade;
+    });
+    setValoresInputs(novosValores);
+  }, [carrinho]);
+
   const carrinhoComProdutos = carrinho.map((itemCarrinho) => {
     const produtoAtual = produtos.todos?.find((p) => p.id === itemCarrinho.id);
     return produtoAtual
@@ -22,8 +32,13 @@ function CartPage() {
           preco: produtoAtual.preco,
           preco_final: produtoAtual.preco_final,
           imagem: produtoAtual.imagemUrl || produtoAtual.imagem || "",
+          estoqueDisponivel:
+            produtoAtual.quantidade ??
+            itemCarrinho.estoque ??
+            itemCarrinho.quantidade ??
+            1,
         }
-      : itemCarrinho; // fallback se não encontrar
+      : itemCarrinho;
   });
 
   const getTotal = () => {
@@ -34,6 +49,29 @@ function CartPage() {
           : item.preco || 0;
       return total + precoUsado * item.quantidade;
     }, 0);
+  };
+
+  const handleChangeQuantidade = (valorDigitado, id, estoque) => {
+    let value = parseInt(valorDigitado, 10);
+
+    if (isNaN(value) || value < 1) {
+      value = 1;
+      setMensagemErro((prev) => ({
+        ...prev,
+        [id]: "A quantidade mínima é 1",
+      }));
+    } else if (value > estoque) {
+      value = estoque;
+      setMensagemErro((prev) => ({
+        ...prev,
+        [id]: `Quantidade máxima disponível é ${estoque}`,
+      }));
+    } else {
+      setMensagemErro((prev) => ({ ...prev, [id]: "" }));
+    }
+
+    setValoresInputs((prev) => ({ ...prev, [id]: value }));
+    updateItemQuantity(id, value, estoque);
   };
 
   if (carrinho.length === 0) {
@@ -62,7 +100,15 @@ function CartPage() {
 
         <div className={styles.cartItems}>
           {carrinhoComProdutos.map(
-            ({ id, nome, preco, preco_final, quantidade, imagem }) => {
+            ({
+              id,
+              nome,
+              preco,
+              preco_final,
+              quantidade,
+              imagem,
+              estoqueDisponivel,
+            }) => {
               const precoUsado =
                 typeof preco_final === "number" && preco_final < preco
                   ? preco_final
@@ -109,16 +155,32 @@ function CartPage() {
                       <input
                         type="number"
                         min="1"
-                        value={quantidade}
+                        max={estoqueDisponivel}
+                        value={valoresInputs[id] ?? quantidade}
                         onChange={(e) =>
-                          updateItemQuantity(id, parseInt(e.target.value, 10))
+                          handleChangeQuantidade(
+                            e.target.value,
+                            id,
+                            estoqueDisponivel
+                          )
                         }
                       />
+                      <span className={styles.estoqueInfo}>
+                        (máx: {estoqueDisponivel})
+                      </span>
                     </div>
+
+                    {mensagemErro[id] && (
+                      <p className={styles.errorMessage}>
+                        {mensagemErro[id]}
+                      </p>
+                    )}
 
                     <p>
                       Subtotal:{" "}
-                      <strong>R$ {(precoUsado * quantidade).toFixed(2)}</strong>
+                      <strong>
+                        R$ {(precoUsado * quantidade).toFixed(2)}
+                      </strong>
                     </p>
 
                     <button

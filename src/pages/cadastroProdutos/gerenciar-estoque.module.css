@@ -348,8 +348,6 @@
   box-shadow: 0 0 8px rgba(37, 211, 102, 0.6);
 }
 
-/* Responsividade */
-
 @media (max-width: 960px) {
   .page {
     padding: 16px;

@@ -1,7 +1,7 @@
 import Slider from "react-slick";
 import { useNavigate } from "react-router-dom";
 import { MdArrowCircleRight } from "react-icons/md";
-import CardHome from "../UniversalCardHome/CardHome";
+import CardHome from "./CardHome";
 import styles from "./carouseluniversal.module.css";
 import useSliderConfig from "../../hooks/useSliderConfig";
 
@@ -14,7 +14,7 @@ export default function CarouselUniversal({
   onAddClick,
 }) {
   const navigate = useNavigate();
-  const settings = useSliderConfig();
+  const settings = useSliderConfig(items?.length || 0);
 
   if (!items || items.length === 0) return null;
 

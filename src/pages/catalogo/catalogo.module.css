@@ -16,10 +16,11 @@
 }
 
 .backButtonWrapper {
-  position: fixed;
-  left: 6px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 6px;
 }
-
 
 .backButton {
   background: #0b4d0b;

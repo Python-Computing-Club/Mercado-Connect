@@ -4,7 +4,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import cartIcon from '../../assets/teste.png';
-import { useAuth } from '../../Context/AuthContext'; // ajuste o caminho se necessário
+import { useAuth } from '../../Context/AuthContext';
 
 export default function HeaderMercado({ onResetar }) {
   const { logout } = useAuth();

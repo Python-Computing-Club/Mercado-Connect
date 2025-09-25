@@ -1,16 +1,18 @@
 export default function useSliderConfig() {
   return {
-    dots: true,
+    dots: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 3.2,
-    slidesToScroll: 2,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    variableWidth: true,
     responsive: [
       {
         breakpoint: 768,
         settings: {
-          slidesToShow: 2.2,
+          slidesToShow: 1,
           slidesToScroll: 1,
+          variableWidth: false,
         },
       },
     ],

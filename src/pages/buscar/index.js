@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import useProdutos from "../../hooks/useProdutos";
 import useMercados from "../../hooks/useMercados";
-import CardHome from "../../components/UniversalCardHome/CardHome";
+import CardHome from "../../components/Cards/CardHome";
 import ProductModal from "../../modal/ProductModal";
 import NavBar from "../../components/Navegation Bar/navbar";
 import styles from "./buscar.module.css";
@@ -71,7 +71,6 @@ export default function BuscarPage() {
 
   const handleAddClick = (produto) => setProdutoSelecionado(produto);
 
-  // Memoizar para evitar warning do eslint
   const sortearSugestoes = useCallback(() => {
     if (!mercados || mercados.length === 0) {
       setSugestoesMercados([]);
@@ -91,7 +90,7 @@ export default function BuscarPage() {
     sortearSugestoes();
     const interval = setInterval(() => {
       sortearSugestoes();
-    }, 30 * 60 * 1000); // 30 minutos
+    }, 30 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [sortearSugestoes]);
