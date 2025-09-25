@@ -1,9 +1,17 @@
 import { useNavigate } from "react-router-dom";
-import styles from "./cardhome.module.css"
-import { FiPlus } from "react-icons/fi";
+import styles from "./cardhome.module.css";
+import { FiPlus, FiHeart } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
+import { useFavoritos } from "../../Context/FavoritosContext";
 
 export default function CardHome({ item, type, onClick, onAddClick }) {
   const navigate = useNavigate();
+  const {
+    toggleFavoritoProduto,
+    toggleFavoritoMercado,
+    isFavoritoProduto,
+    isFavoritoMercado,
+  } = useFavoritos();
 
   if (!item) {
     return (
@@ -41,6 +49,24 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
 
   return (
     <div className={styles.card} onClick={handleClick}>
+      <button
+        className={styles.favoriteButton}
+        onClick={(e) => {
+          e.stopPropagation();
+          type === "produto"
+            ? toggleFavoritoProduto(item)
+            : toggleFavoritoMercado(item);
+        }}
+      >
+        {type === "produto"
+          ? isFavoritoProduto(item.id)
+            ? <FaHeart color="red" />
+            : <FiHeart color="gray" />
+          : isFavoritoMercado(item.id)
+            ? <FaHeart color="red" />
+            : <FiHeart color="gray" />}
+      </button>
+
       {type === "produto" && (
         <button
           className={styles.addButton}
