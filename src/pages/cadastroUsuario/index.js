@@ -8,6 +8,8 @@ import useCadastroForm from "../../components/CadastroForm/index.js";
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import useFacebookLogin from "../../hooks/useFacebookLogin";
+import TermosDeUso from "../../components/Termo-e-privacidade/TermoDeUso.js";
+import PoliticaDePrivacidade from "../../components/Termo-e-privacidade/PoliticaDePrivacidade.js";
 
 export default function CadastroUsuario() {
   const {
@@ -256,26 +258,40 @@ export default function CadastroUsuario() {
         {step === 6 && (
           <>
             <p>Quase lá! Confirme abaixo para finalizar seu cadastro:</p>
-            <div className={styles.privacyContainer}>
+            <div className={styles.privacyRow}>
               <input
                 type="checkbox"
                 id="terms"
                 checked={acceptedTerms}
                 onChange={(e) => setAcceptedTerms(e.target.checked)}
               />
-              <label htmlFor="terms">
+              <label htmlFor="terms" className={styles.privacyLabel}>
                 Aceito os{" "}
-                <a href="/termos-de-uso" target="_blank" rel="noopener noreferrer">
+                <span
+                  className={styles.link}
+                  onClick={() =>
+                    setModal({
+                      open: true,
+                      title: "Termos de Uso",
+                      content: <TermosDeUso />,
+                    })
+                  }
+                >
                   Termos de Uso
-                </a>{" "}
+                </span>{" "}
                 e a{" "}
-                <a
-                  href="/politica-de-privacidade"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <span
+                  className={styles.link}
+                  onClick={() =>
+                    setModal({
+                      open: true,
+                      title: "Política de Privacidade",
+                      content: <PoliticaDePrivacidade />,
+                    })
+                  }
                 >
                   Política de Privacidade
-                </a>.
+                </span>.
               </label>
             </div>
             <div className={styles.buttonGroup}>
@@ -298,6 +314,7 @@ export default function CadastroUsuario() {
         <Modal
           title={modal.title}
           message={modal.message}
+          content={modal.content}
           onClose={() => setModal((m) => ({ ...m, open: false }))}
         />
       )}

@@ -212,37 +212,52 @@ input:focus {
   flex-wrap: wrap;
 }
 
-.privacyContainer {
+.privacyRow {
   display: flex;
   align-items: center;
-  font-size: 14px;
-  color: #333;
-  user-select: none;
-  margin-bottom: 15px;
-  width: 100%;
-  position: relative;
+  gap: 8px;
+  margin: 15px 0;
+  flex-wrap: wrap;
 }
 
-.privacyContainer input[type="checkbox"] {
+.privacyLabel {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+  user-select: none;
+}
+
+/* ✅ Aparência de link */
+.link {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #0056b3;
+}
+
+.privacyRow input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
   border: 1.5px solid #ccc;
   border-radius: 4px;
   transition: border-color 0.3s ease, background-color 0.3s ease;
-  margin-right: 10px;
   position: relative;
   appearance: none;
   -webkit-appearance: none;
   outline: none;
 }
 
-.privacyContainer input[type="checkbox"]:checked {
+.privacyRow input[type="checkbox"]:checked {
   background-color: #006400;
   border-color: #006400;
 }
 
-.privacyContainer input[type="checkbox"]:checked::after {
+.privacyRow input[type="checkbox"]:checked::after {
   content: "✔";
   position: absolute;
   top: 0;
@@ -254,19 +269,6 @@ input:focus {
   font-size: 12px;
   line-height: 18px;
   user-select: none;
-}
-
-.privacyContainer label {
-  cursor: pointer;
-}
-
-.privacyContainer label a {
-  color: #006400;
-  text-decoration: underline;
-}
-
-.privacyContainer label a:hover {
-  color: #004d00;
 }
 
 @media (max-width: 500px) {

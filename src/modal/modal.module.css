@@ -81,3 +81,9 @@ p {
 .cancelBtn:hover {
   background-color: #bbb;
 }
+
+.body {
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
