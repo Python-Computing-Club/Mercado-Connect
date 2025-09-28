@@ -1,0 +1,72 @@
+.headerContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 1rem;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(6px);
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.modalDialog {
+  max-width: 600px;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+}
+
+.title{
+    font-size: 1.5rem;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 3rem;
+}
+
+.resumeTitle{
+    font-size: 1.3rem;
+    text-align: left;
+    padding-left: 1rem;
+}
+
+.total{
+    font-size: 1.1rem;
+    text-align: left;
+    padding-left: 1rem;
+    font-weight: 400;
+}
+
+.selectedAddress{
+    margin: 1rem;
+    border: 1.5px solid #004d00;
+}
+
+.voltarHomeBtn {
+  background-color: #004d00;
+  height: 40px;
+  font-size: 0.8rem;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+  transition: background-color 0.3s ease;
+}
+
