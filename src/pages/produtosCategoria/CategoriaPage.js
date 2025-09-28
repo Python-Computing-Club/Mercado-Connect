@@ -5,7 +5,7 @@ import { useMarket } from "../../Context/MarketContext";
 import { useCart } from "../../Context/CartContext";
 import CardCategoria from "../../components/Cards/CardCategoria";
 import ProductModal from "../../modal/ProductModal";
-import NavBar from "../../components/Navegation Bar/navbar";
+import NavBar from "../../components/NavegationBar/navbar";
 import Header from "../../components/Header/header";
 import styles from "./categoria.module.css";
 

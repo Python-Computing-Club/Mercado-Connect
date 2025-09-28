@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "../../Context/CartContext";
 import useProdutos from "../../hooks/useProdutos";
-import NavBar from "../../components/Navegation Bar/navbar";
+import Header from "../../components/Header/header"; // ✅ Importado o Header
+import NavBar from "../../components/NavegationBar/navbar";
 import { useNavigate } from "react-router-dom";
 import styles from "./cartpage.module.css";
 
@@ -20,8 +21,13 @@ function CartPage() {
     carrinho.forEach((item) => {
       novosValores[item.id] = item.quantidade;
     });
-    setValoresInputs(novosValores);
-  }, [carrinho]);
+
+    const mudou =
+      JSON.stringify(novosValores) !== JSON.stringify(valoresInputs);
+    if (mudou) {
+      setValoresInputs(novosValores);
+    }
+  }, [carrinho, valoresInputs]);
 
   const carrinhoComProdutos = carrinho.map((itemCarrinho) => {
     const produtoAtual = produtos.todos?.find((p) => p.id === itemCarrinho.id);
@@ -77,6 +83,7 @@ function CartPage() {
   if (carrinho.length === 0) {
     return (
       <>
+        <Header /> {/* ✅ Adicionado aqui também */}
         <NavBar />
         <div className={styles.cartContainerEmpty}>
           <p className={styles.cartEmpty}>Seu carrinho está vazio.</p>
@@ -93,6 +100,7 @@ function CartPage() {
 
   return (
     <>
+      <Header /> {/* ✅ Adicionado no topo da página */}
       <NavBar />
 
       <div className={styles.cartContainer}>
@@ -202,7 +210,10 @@ function CartPage() {
           <div className={styles.cartFooterButtons}>
             <button
               className={styles.checkoutBtn}
-              onClick={() => alert("Finalizando compra!")}
+              onClick={() => {
+                console.log("Navegando para checkout");
+                navigate("/checkout-pedido");
+              }}
             >
               Finalizar Compra
             </button>
