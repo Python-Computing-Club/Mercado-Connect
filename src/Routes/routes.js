@@ -10,7 +10,7 @@ import Buscar from "../pages/buscar/index";
 import CatalogoMercado from "../pages/catalogo/index";
 import TodasLojas from "../pages/TodosMercados";
 import FavoritosPage from "../pages/favoritos/favoritosPage";
-
+import CheckoutPedido from "../pages/checkoutPedido";
 
 export const publicRoutes = [
   { path: "/", element: <Login /> },
@@ -28,5 +28,6 @@ export const privateRoutes = [
   { path: "/buscar", element: <Buscar /> },
   { path: "/mercado/:id", element: <CatalogoMercado /> },
   { path: "/mercados", element: <TodasLojas /> },
-  { path: "/favoritos", element: <FavoritosPage /> }
+  { path: "/favoritos", element: <FavoritosPage /> },
+  { path: "/checkout-pedido", element: <CheckoutPedido /> }
 ];

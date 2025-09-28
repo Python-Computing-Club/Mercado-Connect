@@ -5,7 +5,7 @@ import { useAuth } from "../../Context/AuthContext";
 
 import CardHome from "../../components/Cards/CardHome";
 import Header from "../../components/Header/header";
-import NavBar from "../../components/Navegation Bar/navbar";
+import NavBar from "../../components/NavegationBar/navbar";
 import ProductModal from "../../modal/ProductModal";
 
 export default function FavoritosPage() {

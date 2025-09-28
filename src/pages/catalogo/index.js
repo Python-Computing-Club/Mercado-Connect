@@ -5,7 +5,7 @@ import { buscarMercadoPorId } from "../../services/firestore/mercados";
 import { useCart } from "../../Context/CartContext";
 import CardHome from "../../components/Cards/CardCategoria";
 import ProductModal from "../../modal/ProductModal";
-import NavBar from "../../components/Navegation Bar/navbar";
+import NavBar from "../../components/NavegationBar/navbar";
 import Header from "../../components/Header/header";
 import styles from "./catalogo.module.css";
 

@@ -12,8 +12,9 @@
 
 body,
 .pageWrapper {
+  padding-top: 72px;
   padding-bottom: 60px;
-  padding-top: 0;
+  overflow-x: hidden;
 }
 
 .navbar {
@@ -95,9 +96,9 @@ body,
 }
 
 .cartContainer {
-  max-width: 800px;
-  margin: 20px auto 80px;
-  padding: 20px;
+  max-width: 700px;
+  margin: 10px auto 70px;
+  padding: 16px;
   background-color: #f9fafb;
   border-radius: 8px;
 }
@@ -117,8 +118,9 @@ body,
   display: flex;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  gap: 10px;
   align-items: center;
 }
 
@@ -159,7 +161,7 @@ body,
 .removeBtn {
   background-color: #e53935;
   color: white;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -177,7 +179,7 @@ body,
   background-color: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -197,7 +199,8 @@ body,
   flex-wrap: wrap;
 }
 
-.checkoutBtn, .voltarHomeBtn {
+.checkoutBtn,
+.voltarHomeBtn {
   background-color: #004d00;
   color: white;
   padding: 10px 20px;
@@ -209,7 +212,8 @@ body,
   transition: background-color 0.3s ease;
 }
 
-.checkoutBtn:hover, .voltarHomeBtn:hover {
+.checkoutBtn:hover,
+.voltarHomeBtn:hover {
   background-color: #003300;
 }
 
@@ -247,10 +251,17 @@ body,
   font-size: 18px;
 }
 
+.errorMessage {
+  color: red;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ✅ Responsividade */
 @media (max-width: 600px) {
   .cartContainer {
-    margin: 10px 10px 80px;
-    padding: 15px;
+    margin: 8px 8px 70px;
+    padding: 12px;
   }
 
   .cartItem {
@@ -289,7 +300,8 @@ body,
     width: 100%;
   }
 
-  .checkoutBtn, .voltarHomeBtn {
+  .checkoutBtn,
+  .voltarHomeBtn {
     width: 100%;
     padding: 10px;
   }
@@ -309,8 +321,9 @@ body,
     padding: 2px 4px;
     right: -14px;
   }
+}
 
- @media (max-width: 360px) {
+@media (max-width: 360px) {
   .cartContainer {
     margin: 6px auto;
     padding: 10px 8px;
@@ -425,12 +438,4 @@ body,
     font-size: 10px;
     padding: 5px 6px;
   }
-}
-
-.errorMessage {
-  color: red;
-  font-size: 13px;
-  margin-top: 4px;
-}
-
 }
