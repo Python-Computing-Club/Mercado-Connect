@@ -56,6 +56,25 @@
     border: 1.5px solid #004d00;
 }
 
+.totalAccordion{
+  margin: 1rem;
+  border: 1.5px solid #004d00;
+  border-radius: 5px;
+}
+
+.itemsContainer{
+  display: flex;
+  margin-top: 15px;
+}
+
+.itemNome{
+  font-weight: 700;
+}
+
+.infoItemContainer{
+  line-height: 10px;
+}
+
 .voltarHomeBtn {
   background-color: #004d00;
   height: 40px;
@@ -68,5 +87,13 @@
   font-weight: bold;
   white-space: nowrap;
   transition: background-color 0.3s ease;
+}
+
+.btnPagamento{
+  background-color: #004d00;
+  height: 40px;
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 1rem;
 }
 

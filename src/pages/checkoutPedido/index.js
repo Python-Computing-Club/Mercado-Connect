@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Card, Button, Modal } from "react-bootstrap";
+import { Card, Button, Modal, Accordion } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { criarPreferencia } from "../../services/MercadoPago";
+import { criarPedido } from "../../services/firestore/pedidos";
 import styles from './checkout.module.css';
 
 export default function CheckoutPedido() {
@@ -15,7 +16,6 @@ export default function CheckoutPedido() {
     const usuario = JSON.parse(localStorage.getItem('userSession'));
 
     const totalCarrinho = () => {
-
         return carrinho.reduce(
             (acc, item) => {
                 const precoUsado =
@@ -51,13 +51,22 @@ export default function CheckoutPedido() {
     }
 
     const handlePagamento = async () => {
+        const data_hora = new Date()
+        const pedido = {
+            id_usuario: usuario.id,
+            id_mercado: carrinho[0].id_mercado,
+            data_pedido: data_hora.toLocaleString(),
+            status: "Confirmado",
+            valor_total: total.toFixed(2)
+        }
+        await criarPedido(pedido);
         setLoading(true);
-        try{
+        try {
             const urlPagamento = await criarPreferencia(carrinho, usuario);
             window.location.href = urlPagamento;
-        } catch (error){
+        } catch (error) {
             alert('Erro ao iniciar pagamento');
-        } finally{
+        } finally {
             setLoading(false);
         }
     }
@@ -108,20 +117,28 @@ export default function CheckoutPedido() {
                 </Card.Body>
             </Card>
             <h2 className={styles.resumeTitle}>Opções de entrega</h2>
-            <h2 className={styles.resumeTitle}>Forma de pagamento</h2>
-            <Card className={styles.selectedPaymentMethod}>
-                <Card.Body>
-                    <Card.Title>{enderecoSelecionado?.rua}, {enderecoSelecionado?.numero}</Card.Title>
-                    <Card.Text>
-                        {enderecoSelecionado?.bairro}
-                    </Card.Text>
-                    <Button variant="success" onClick={handleTrocaEndereco}>Trocar</Button>
-                </Card.Body>
-            </Card>
-            <h2 className={styles.resumeTitle}>Total</h2>
-            <h2 className={styles.total}><strong>R$ {total.toFixed(2)}</strong> /{quantidade} itens</h2>
-            <Button variant="success" onClick={handlePagamento} disabled={loading}>
-                {loading ? 'Redirecionando ...' : 'Pagar com Mercado Pago'}
+            <Accordion className={styles.totalAccordion}>
+                <Accordion.Item eventKey="0">
+                    <Accordion.Header>
+                        <h2 className={styles.resumeTitle}>Total</h2>
+                        <h2 className={styles.total}><strong>R$ {total.toFixed(2)}</strong> /{quantidade} itens</h2>
+                    </Accordion.Header>
+                    <Accordion.Body>
+                        {carrinho.map((item) => (
+                            <div className={styles.itemsContainer}>
+                                <img src={item.imagem} width={100}/>
+                                <div className={styles.infoItemContainer}>
+                                    <p className={styles.itemNome}>{item.nome}</p>
+                                    <p>R$ {item.preco_final}</p>
+                                    <p>Quantidade: {item.quantidade}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
+            <Button variant="success" className={styles.btnPagamento} onClick={handlePagamento} disabled={loading}>
+                {loading ? 'Redirecionando ...' : 'Realizar Pagamento'}
             </Button>
         </>
     );
