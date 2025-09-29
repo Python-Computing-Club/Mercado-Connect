@@ -11,6 +11,9 @@ import CatalogoMercado from "../pages/catalogo/index";
 import TodasLojas from "../pages/TodosMercados";
 import FavoritosPage from "../pages/favoritos/favoritosPage";
 import CheckoutPedido from "../pages/checkoutPedido";
+import PagamentoSucesso from "../components/telasPagamento/pagamentoSucesso";
+import PagamentoErro from "../components/telasPagamento/pagamentoErro";
+import PagamentoPendente from "../components/telasPagamento/pagamentoPendente";
 
 export const publicRoutes = [
   { path: "/", element: <Login /> },
@@ -29,5 +32,8 @@ export const privateRoutes = [
   { path: "/mercado/:id", element: <CatalogoMercado /> },
   { path: "/mercados", element: <TodasLojas /> },
   { path: "/favoritos", element: <FavoritosPage /> },
-  { path: "/checkout-pedido", element: <CheckoutPedido /> }
+  { path: "/checkout-pedido", element: <CheckoutPedido /> },
+  { path: "/pagamento-sucesso", element: <PagamentoSucesso/>},
+  { path: "/pagamento-erro", element: <PagamentoErro/>},
+  { path: "/pagamento-pendente", element: <PagamentoPendente/>}
 ];

@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { Card, Button, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { criarPreferencia } from "../../services/MercadoPago";
 import styles from './checkout.module.css';
 
 export default function CheckoutPedido() {
     const [enderecos, setEnderecos] = useState([]);
     const navigate = useNavigate();
     const [modal, setModal] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [enderecoSelecionado, setEnderecoSelecionado] = useState(null);
-    const [pagamentoSelecionado, setPagamento] = useState(null);
-    const formas_pagamento = ["PIX", "Cartão de Débito"]
+
+    const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    const usuario = JSON.parse(localStorage.getItem('userSession'));
 
     const totalCarrinho = () => {
-        const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
         return carrinho.reduce(
             (acc, item) => {
@@ -33,12 +35,9 @@ export default function CheckoutPedido() {
 
 
     useEffect(() => {
-        const usuario = JSON.parse(localStorage.getItem('userSession'));
         setEnderecos(usuario.enderecos);
         if (enderecoSelecionado == null) {
             setEnderecoSelecionado(usuario.enderecos[0]);
-        } else if (pagamentoSelecionado == null){
-            setPagamento("PIX")
         }
     }, []);
 
@@ -49,6 +48,18 @@ export default function CheckoutPedido() {
     function handleSelecionaEndereco(endereco) {
         setEnderecoSelecionado(endereco);
         setModal(false);
+    }
+
+    const handlePagamento = async () => {
+        setLoading(true);
+        try{
+            const urlPagamento = await criarPreferencia(carrinho, usuario);
+            window.location.href = urlPagamento;
+        } catch (error){
+            alert('Erro ao iniciar pagamento');
+        } finally{
+            setLoading(false);
+        }
     }
 
     return (
@@ -109,6 +120,9 @@ export default function CheckoutPedido() {
             </Card>
             <h2 className={styles.resumeTitle}>Total</h2>
             <h2 className={styles.total}><strong>R$ {total.toFixed(2)}</strong> /{quantidade} itens</h2>
+            <Button variant="success" onClick={handlePagamento} disabled={loading}>
+                {loading ? 'Redirecionando ...' : 'Pagar com Mercado Pago'}
+            </Button>
         </>
     );
 }
