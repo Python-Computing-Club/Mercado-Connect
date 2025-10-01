@@ -428,9 +428,14 @@ export default function PainelMercado() {
                                 <Card.Text>
                                     Gerencie seus pedidos em tempo real, veja o status de cada um e mantenha seus clientes informados.
                                 </Card.Text>
-                                <Card.Link className={styles.buttonCard} as="button" href="#">
+                                <Card.Link
+                                    as="button"
+                                    className={styles.buttonCard}
+                                    onClick={() => navigate("/painel-mercado/pedidos")}
+                                >
                                     Gerenciar Pedidos
                                 </Card.Link>
+
                             </Card.Body>
                         </Card>
                         <Card style={{ width: '18rem' }}>
