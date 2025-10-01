@@ -7,6 +7,7 @@ import {
   FaShoppingCart,
   FaHeart,
   FaUserCircle,
+  FaClipboardList,
 } from "react-icons/fa";
 import { useAuth } from "../../Context/AuthContext";
 import PainelDadosCadastrais from "../PainelUser/PainelDadosCadastrais";
@@ -52,6 +53,11 @@ export default function NavBar({ usuario }) {
         <button onClick={() => navigate("/buscar")} className={styles.icon}>
           <FaSearch />
           <span>Buscar</span>
+        </button>
+
+        <button onClick={() => navigate("/pedidos")} className={styles.icon}>
+          <FaClipboardList />
+          <span>Pedidos</span>
         </button>
 
         <div className={styles.cartWrapper}>

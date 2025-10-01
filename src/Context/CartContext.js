@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { onSnapshot, doc } from "firebase/firestore";
+import { getDoc, doc } from "firebase/firestore";
 import { db } from "../services/firebase";
 
 const CartContext = createContext();
@@ -16,45 +16,79 @@ export const CartProvider = ({ children }) => {
     }
   });
 
+  const [produtosAtualizados, setProdutosAtualizados] = useState({});
+
   useEffect(() => {
     localStorage.setItem("carrinho", JSON.stringify(carrinho));
   }, [carrinho]);
 
   useEffect(() => {
-    if (carrinho.length === 0) return;
+    const atualizarProdutos = async () => {
+      const novosDados = {};
 
-    const unsubscribes = carrinho.map((item) =>
-      onSnapshot(doc(db, "produtos", item.id), (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+      for (const item of carrinho) {
+        try {
+          const ref = doc(db, "produtos", item.id);
+          const snap = await getDoc(ref);
 
-          setCarrinho((prev) =>
-            prev.map((p) =>
-              p.id === item.id
-                ? {
-                    ...p,
-                    nome: data.nome || p.nome,
-                    preco:
-                      typeof data.preco_final === "number" &&
-                      data.preco_final < data.preco
-                        ? data.preco_final
-                        : data.preco,
-                    preco_final: data.preco_final,
-                    imagem: data.imagemUrl || data.imagem || p.imagem,
-                    disponivel: data.disponivel ?? p.disponivel,
-                    estoque: data.quantidade ?? p.estoque,
-                  }
-                : p
-            )
-          );
+          if (snap.exists()) {
+            const data = snap.data();
+
+            novosDados[item.id] = {
+              nome: data.nome,
+              preco:
+                typeof data.preco_final === "number" && data.preco_final < data.preco
+                  ? data.preco_final
+                  : data.preco,
+              preco_final: data.preco_final,
+              imagem: data.imagemUrl || data.imagem || "",
+              disponivel: data.disponivel ?? true,
+              estoque: data.quantidade ?? 99,
+            };
+          }
+        } catch (e) {
+          console.error("Erro ao atualizar produto:", item.id, e);
         }
-      })
-    );
+      }
 
-    return () => {
-      unsubscribes.forEach((unsub) => unsub());
+      setProdutosAtualizados(novosDados);
     };
+
+    atualizarProdutos();
+
+    const intervalo = setInterval(atualizarProdutos, 60000);
+
+    return () => clearInterval(intervalo);
   }, [carrinho]);
+
+  useEffect(() => {
+    setCarrinho((prev) => {
+      let mudou = false;
+      const atualizado = prev.map((item) => {
+        const atualizado = produtosAtualizados[item.id];
+        if (!atualizado) return item;
+
+        const novoItem = {
+          ...item,
+          nome: atualizado.nome || item.nome,
+          preco: atualizado.preco || item.preco,
+          preco_final: atualizado.preco_final,
+          imagem: atualizado.imagem || item.imagem,
+          disponivel: atualizado.disponivel ?? item.disponivel,
+          estoque: atualizado.estoque ?? item.estoque,
+        };
+
+        if (JSON.stringify(item) !== JSON.stringify(novoItem)) {
+          mudou = true;
+          return novoItem;
+        }
+
+        return item;
+      });
+
+      return mudou ? atualizado : prev;
+    });
+  }, [produtosAtualizados]);
 
   const addItem = (item, quantidade = 1) => {
     setCarrinho((prev) => {
@@ -67,10 +101,7 @@ export const CartProvider = ({ children }) => {
       const estoqueAtual = item.quantidade ?? item.estoque ?? 99;
 
       if (existente) {
-        const novaQtd = Math.min(
-          existente.quantidade + quantidade,
-          estoqueAtual
-        );
+        const novaQtd = Math.min(existente.quantidade + quantidade, estoqueAtual);
         return prev.map((p) =>
           p.id === item.id ? { ...p, quantidade: novaQtd } : p
         );

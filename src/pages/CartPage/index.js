@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useCart } from "../../Context/CartContext";
 import useProdutos from "../../hooks/useProdutos";
-import Header from "../../components/Header/header"; // ✅ Importado o Header
+import Header from "../../components/Header/header";
 import NavBar from "../../components/NavegationBar/navbar";
 import { useNavigate } from "react-router-dom";
 import styles from "./cartpage.module.css";
@@ -15,6 +15,7 @@ function CartPage() {
 
   const [mensagemErro, setMensagemErro] = useState({});
   const [valoresInputs, setValoresInputs] = useState({});
+  const valoresRef = useRef({});
 
   useEffect(() => {
     const novosValores = {};
@@ -23,11 +24,13 @@ function CartPage() {
     });
 
     const mudou =
-      JSON.stringify(novosValores) !== JSON.stringify(valoresInputs);
+      JSON.stringify(novosValores) !== JSON.stringify(valoresRef.current);
+
     if (mudou) {
+      valoresRef.current = novosValores;
       setValoresInputs(novosValores);
     }
-  }, [carrinho, valoresInputs]);
+  }, [carrinho]);
 
   const carrinhoComProdutos = carrinho.map((itemCarrinho) => {
     const produtoAtual = produtos.todos?.find((p) => p.id === itemCarrinho.id);
@@ -83,7 +86,7 @@ function CartPage() {
   if (carrinho.length === 0) {
     return (
       <>
-        <Header /> {/* ✅ Adicionado aqui também */}
+        <Header />
         <NavBar />
         <div className={styles.cartContainerEmpty}>
           <p className={styles.cartEmpty}>Seu carrinho está vazio.</p>
@@ -100,7 +103,7 @@ function CartPage() {
 
   return (
     <>
-      <Header /> {/* ✅ Adicionado no topo da página */}
+      <Header />
       <NavBar />
 
       <div className={styles.cartContainer}>
