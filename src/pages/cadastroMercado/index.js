@@ -4,6 +4,7 @@ import cartIcon from "../../assets/teste.png";
 import Modal from "../../modal/modal.js";
 import styles from "./cadastro.module.css";
 import useCadastroMercadoForm from "../../components/CadastroMercadoForm/index.js";
+import AddressPicker from "../../hooks/AddressPicker"; // Importação do mapa
 
 export default function CadastroMercado() {
   const {
@@ -13,7 +14,7 @@ export default function CadastroMercado() {
     modal,
     tempoRestante,
     handleChange,
-    enviarCodigoHandler, 
+    enviarCodigoHandler,
     reenviarCodigo,
     validarCodigo,
     handleBack,
@@ -146,7 +147,7 @@ export default function CadastroMercado() {
               name="endereco"
               value={form.endereco}
               onChange={handleChange}
-              disabled={true}
+              disabled
             />
             <label>Estado</label>
             <input
@@ -154,7 +155,7 @@ export default function CadastroMercado() {
               name="estado"
               value={form.estado}
               onChange={handleChange}
-              disabled={true}
+              disabled
             />
             <label>Cidade</label>
             <input
@@ -162,7 +163,7 @@ export default function CadastroMercado() {
               name="cidade"
               value={form.cidade}
               onChange={handleChange}
-              disabled={true}
+              disabled
             />
             <label>Bairro</label>
             <input
@@ -170,7 +171,7 @@ export default function CadastroMercado() {
               name="bairro"
               value={form.bairro}
               onChange={handleChange}
-              disabled={true}
+              disabled
             />
             <label>Número *</label>
             <input
@@ -187,6 +188,33 @@ export default function CadastroMercado() {
               onChange={handleChange}
               placeholder="Ex: Casa A"
             />
+
+            {/* ⬇️ Componente AddressPicker para ajustar localização no mapa */}
+            <div className={styles.addressPickerContainer}>
+              <p>Confirme a localização no mapa:</p>
+              <AddressPicker
+                initialAddress={`${form.endereco}, ${form.numero}, ${form.bairro}, ${form.cidade} - ${form.estado}`}
+                initialPosition={
+                  form.lat != null && form.lng != null
+                    ? { lat: form.lat, lng: form.lng }
+                    : null
+                }
+                onChange={({ address, position, rua, bairro, cidade, estado, cep, numero }) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    endereco: rua || prev.endereco,
+                    bairro: bairro || prev.bairro,
+                    cidade: cidade || prev.cidade,
+                    estado: estado || prev.estado,
+                    cep: cep || prev.cep,
+                    numero: numero || prev.numero,
+                    lat: position?.lat,
+                    lng: position?.lng,
+                  }));
+                }}
+              />
+            </div>
+
             <div className={styles.buttonGroup}>
               <button type="button" className={styles.backBtn} onClick={handleBack}>
                 Voltar
