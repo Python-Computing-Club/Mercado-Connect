@@ -15,14 +15,29 @@ console.log("Cloudinary env:", {
 
 const app = express();
 
+const port = 3000;
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-app.use(cors()); 
+// ✅ CORS configurado corretamente para dev + produção
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://mercado-connect.vercel.app",
+];
 
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS não permitido para essa origem: " + origin));
+    }
+  }
+}));
 
 app.use(express.json());
 
