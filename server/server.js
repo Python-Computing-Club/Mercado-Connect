@@ -1,9 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import fetch from "node-fetch";
 import { v2 as cloudinary } from "cloudinary";
 import cloudinaryDeleteRouter from "./cloudinaryDelete.js";
-import axios from "axios";
 
 dotenv.config({ path: ".env" });
 
@@ -24,58 +24,77 @@ cloudinary.config({
 app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
 
+// 🌩️ Cloudinary delete
 app.use("/api/cloudinary", cloudinaryDeleteRouter);
 
+// 🔍 Rota raiz
 app.get("/", (req, res) => {
   res.send("✅ Backend rodando e CORS habilitado!");
 });
 
-// 🚚 Rota Uber Direct API - modo Sandbox
-app.post("/api/uber/iniciar-entrega", async (req, res) => {
-  const { pedido, endereco, usuario } = req.body;
+// 💰 Cotação Uber
+app.post("/api/uber-quote", async (req, res) => {
+  const payload = req.body;
+  const customerId = process.env.UBER_CUSTOMER_ID;
+  const token = process.env.UBER_TOKEN;
+  const env = process.env.UBER_ENV || "sandbox";
+
+  const url = `https://${env}-api.uber.com/v1/customers/${customerId}/delivery_quotes`;
 
   try {
-    // 1. Gerar token OAuth
-    const tokenRes = await axios.post("https://auth.uber.com/oauth/v2/token", null, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      params: {
-        client_id: process.env.UBER_CLIENT_ID,
-        client_secret: process.env.UBER_CLIENT_SECRET,
-        grant_type: "client_credentials",
-        scope: "eats.orders eats.deliveries",
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(payload),
     });
 
-    const accessToken = tokenRes.data.access_token;
+    const data = await response.json();
 
-    // 2. Criar entrega simulada
-    const entrega = {
-      pickup: {
-        address: "Rua do Mercado, 123, São Paulo, SP",
-        contact: { name: "Mercado Central", phone: "+5511999999999" },
+    if (!response.ok) {
+      console.error("Erro na cotação Uber:", data);
+      return res.status(response.status).json(data);
+    }
+
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("Erro ao cotar com Uber:", err);
+    res.status(500).json({ error: "Falha na cotação Uber" });
+  }
+});
+
+// 📦 Criar entrega Uber
+app.post("/api/uber-delivery", async (req, res) => {
+  const payload = req.body;
+  const customerId = process.env.UBER_CUSTOMER_ID;
+  const token = process.env.UBER_TOKEN;
+  const env = process.env.UBER_ENV || "sandbox";
+
+  const url = `https://${env}-api.uber.com/v1/customers/${customerId}/deliveries`;
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-      dropoff: {
-        address: `${endereco.rua}, ${endereco.numero}, ${endereco.bairro}, ${endereco.cidade}`,
-        contact: { name: usuario.nome, phone: usuario.telefone },
-      },
-      order_id: pedido.id,
-      items: pedido.itens.map(item => ({
-        name: item.nome,
-        quantity: item.quantidade,
-      })),
-      dropoff_verification: { type: "pin" },
-    };
+      body: JSON.stringify(payload),
+    });
 
-    const entregaRes = await axios.post(
-      `https://sandbox-api.uber.com/v1/customers/${process.env.UBER_CUSTOMER_ID}/deliveries`,
-      entrega,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
+    const data = await response.json();
 
-    res.json(entregaRes.data);
-  } catch (error) {
-    console.error("Erro na entrega Uber:", error.response?.data || error.message);
-    res.status(500).json({ error: "Erro ao iniciar entrega Uber." });
+    if (!response.ok) {
+      console.error("Erro na criação da entrega Uber:", data);
+      return res.status(response.status).json(data);
+    }
+
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("Erro ao criar entrega Uber:", err);
+    res.status(500).json({ error: "Falha na criação de entrega Uber" });
   }
 });
 
