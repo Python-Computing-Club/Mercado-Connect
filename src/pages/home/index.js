@@ -1,9 +1,8 @@
 import { useState } from "react";
 import Header from "../../components/Header/header";
-import NavBar from "../../components/Navegation Bar/navbar";
+import NavBar from "../../components/NavegationBar/navbar";
 import CarouselUniversal from "../../components/Cards/CarouselUniversal";
 import ProductModal from "../../modal/ProductModal";
-import { useNavigate } from "react-router-dom";
 import styles from "./home.module.css";
 import useProdutos from "../../hooks/useProdutos";
 import useMercados from "../../hooks/useMercados";
@@ -11,9 +10,7 @@ import { useCart } from "../../Context/CartContext";
 
 export default function Home() {
   const produtos = useProdutos();
-  const { mercados, loading } = useMercados();
-  const navigate = useNavigate();
-
+  const { mercados } = useMercados(); // ✅ removido 'loading'
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const { addItem } = useCart();
 
@@ -69,7 +66,9 @@ export default function Home() {
               key={grupo}
               title={grupo}
               items={lista}
-              sectionPath={`/produtos/${grupo.toLowerCase().replace(/\s+/g, "-")}`}
+              sectionPath={`/produtos/${grupo
+                .toLowerCase()
+                .replace(/\s+/g, "-")}`}
               type="produto"
               onCardClick={handleCardClick}
               onAddClick={handleAddClick}

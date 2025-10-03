@@ -1,22 +1,31 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-export default function useCodigoTimer({ active, duration, onExpire, setTime }) {
+export default function useCodigoTimer({ active, duration, onExpire, setTime, id = "default" }) {
+  const timers = useRef({});
+
   useEffect(() => {
     if (!active || duration <= 0) return;
 
-    setTime(duration);
+    setTime(duration, id);
 
-    const timer = setInterval(() => {
+    if (timers.current[id]) clearInterval(timers.current[id]);
+
+    timers.current[id] = setInterval(() => {
       setTime((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          onExpire();
-          return 0;
+        const novoTempo = typeof prev === "object" ? prev[id] : prev;
+
+        if (novoTempo <= 1) {
+          clearInterval(timers.current[id]);
+          onExpire(id);
+          return typeof prev === "object" ? { ...prev, [id]: 0 } : 0;
         }
-        return prev - 1;
-      });
+
+        return typeof prev === "object"
+          ? { ...prev, [id]: novoTempo - 1 }
+          : novoTempo - 1;
+      }, id);
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [active, duration, onExpire, setTime]);
+    return () => clearInterval(timers.current[id]);
+  }, [active, duration, onExpire, setTime, id]);
 }

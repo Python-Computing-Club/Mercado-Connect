@@ -23,21 +23,39 @@ body,
   align-items: center;
   height: 100%;
   box-sizing: border-box;
+  gap: 10px;
+  flex-wrap: nowrap;
 }
 
 .icon {
   background: none;
   border: none;
   font-size: 20px;
-  font-family:'Times New Roman', Times, serif;
+  font-family: 'Times New Roman', Times, serif;
   color: #044609;
   cursor: pointer;
   position: relative;
   transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .icon:hover {
   color: #e53935;
+}
+
+.icon span {
+  display: none;
+  margin-left: 6px;
+  font-size: 14px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+@media (min-width: 400px) {
+  .icon span {
+    display: inline;
+  }
 }
 
 .cartWrapper {
@@ -62,7 +80,6 @@ body,
   line-height: 1;
   pointer-events: none;
 }
-
 
 .userMenu {
   position: relative;
@@ -120,6 +137,7 @@ body,
   .navbar {
     justify-content: space-between;
     padding: 0 1px;
+    gap: 6px;
   }
 
   .icon {
@@ -127,7 +145,6 @@ body,
     padding: 4px;
   }
 
-  @media (max-width: 440px) {
   .badge {
     top: 15px;
     right: 15px;
@@ -136,7 +153,6 @@ body,
     height: 16px;
     padding: 1px 5px;
   }
-}
 
   .dropdown {
     bottom: 74px;
@@ -158,6 +174,10 @@ body,
   .pageWrapper {
     padding-bottom: 70px;
   }
+
+  .icon span {
+    display: none;
+  }
 }
 
 @media (max-width: 360px) {
@@ -172,6 +192,7 @@ body,
 
   .icon {
     font-size: 20px;
+    padding: 2px 4px;
   }
 
   .dropdown {
@@ -184,17 +205,6 @@ body,
     padding: 6px 10px;
   }
 
-  @media (max-width: 360px) {
-
-  .wrapper {
-    height: 55px;
-    padding: 0 6px;
-  }
-
-  .navbar {
-    gap: 1px;
-  }
-
   .badge {
     top: 15px;
     right: 12px;
@@ -203,7 +213,6 @@ body,
     height: 14px;
     padding: 1px 4px;
   }
-}
 
   .painelOverlay {
     width: calc(100% - 24px);
@@ -214,5 +223,9 @@ body,
   body,
   .pageWrapper {
     padding-bottom: 72px;
+  }
+
+  .icon span {
+    display: none;
   }
 }

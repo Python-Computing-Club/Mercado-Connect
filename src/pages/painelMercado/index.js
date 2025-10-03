@@ -15,6 +15,8 @@ import { atualizarMercado, deletarMercado } from '../../services/firestore/merca
 import { autenticar } from '../../services/authService';
 import { uploadParaCloudinary, excluirImagemCloudinary } from '../../hooks/cloudinaryUpload';
 
+import MarketAddressPicker from '../../hooks/MarketAddressPicker';
+
 let usuario = JSON.parse(localStorage.getItem("entidade"));
 
 export default function PainelMercado() {
@@ -33,7 +35,9 @@ export default function PainelMercado() {
                 cidade: "",
                 estado: "",
                 numero: "",
-                complemento: ""
+                complemento: "",
+                lat: null,
+                lng: null
             }
         }
     );
@@ -161,7 +165,6 @@ export default function PainelMercado() {
         toggleShowToast();
     };
 
-
     const handleDelete = async () => {
         showAlert("Esta ação irá deletar todos os dados do mercado!", "Serão enviados códigos de confirmação para seu email e telefone");
         toggleDeleteMercado();
@@ -215,7 +218,9 @@ export default function PainelMercado() {
                 "endereco.estado": dadosMercado.endereco.estado,
                 "endereco.bairro": dadosMercado.endereco.bairro,
                 "endereco.numero": dadosMercado.endereco.numero,
-                "endereco.complemento": dadosMercado.endereco.complemento ?? ""
+                "endereco.complemento": dadosMercado.endereco.complemento ?? "",
+                "endereco.lat": dadosMercado.endereco.lat,
+                "endereco.lng": dadosMercado.endereco.lng,
             };
 
             const updateMercado = await atualizarMercado(usuario.id, dadosParaAtualizar);
@@ -384,6 +389,34 @@ export default function PainelMercado() {
                                 onChange={handleChange}
                             />
                         </div>
+                        
+                        <div className={styles.formGroup}>
+                        <label>Localização no mapa</label>
+                        <MarketAddressPicker
+                            initialAddress={dadosMercado.endereco?.logradouro || ""}
+                            initialPosition={{
+                            lat: dadosMercado.endereco?.lat ?? -23.55052,
+                            lng: dadosMercado.endereco?.lng ?? -46.633308,
+                            }}
+                            onChange={({ address, position, components }) => {
+                            setDadosMercado(prev => ({
+                                ...prev,
+                                endereco: {
+                                logradouro: components.route || "",
+                                numero: components.street_number || prev.endereco.numero || "",
+                                bairro: components.sublocality || "",
+                                cidade: components.locality || components.administrative_area_level_2 || prev.endereco.cidade || "",
+                                estado: components.administrative_area_level_1 || "",
+                                cep: components.postal_code || "",
+                                complemento: prev.endereco.complemento || "",
+                                lat: position?.lat ?? prev.endereco.lat,
+                                lng: position?.lng ?? prev.endereco.lng,
+                                }
+                            }));
+                            }}
+                        />
+                        </div>
+
                         <div className={styles.formGroup}>
                             <label>Telefone</label>
                             <input
@@ -428,9 +461,14 @@ export default function PainelMercado() {
                                 <Card.Text>
                                     Gerencie seus pedidos em tempo real, veja o status de cada um e mantenha seus clientes informados.
                                 </Card.Text>
-                                <Card.Link className={styles.buttonCard} as="button" href="#">
+                                <Card.Link
+                                    as="button"
+                                    className={styles.buttonCard}
+                                    onClick={() => navigate("/painel-mercado/pedidos")}
+                                >
                                     Gerenciar Pedidos
                                 </Card.Link>
+
                             </Card.Body>
                         </Card>
                         <Card style={{ width: '18rem' }}>

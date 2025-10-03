@@ -15,7 +15,7 @@ import useProdutos from "../../hooks/useProdutos";
 import useMercados from "../../hooks/useMercados";
 import CardHome from "../../components/Cards/CardHome";
 import ProductModal from "../../modal/ProductModal";
-import NavBar from "../../components/Navegation Bar/navbar";
+import NavBar from "../../components/NavegationBar/navbar";
 import styles from "./buscar.module.css";
 
 export default function BuscarPage() {

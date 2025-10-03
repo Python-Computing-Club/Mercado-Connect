@@ -1,0 +1,181 @@
+.container {
+  margin-top: 30px;
+  max-width: 800px;
+  padding: 0 16px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 1.75rem;
+  color: #012E0D;
+  font-weight: 700;
+}
+
+.card {
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+}
+
+.progress {
+  margin-top: 20px;
+  height: 25px;
+  border-radius: 8px;
+}
+
+.etapas {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.etapas li {
+  padding: 6px 0;
+  font-size: 1rem;
+  color: #444;
+}
+
+.ativo {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.backButtonWrapper {
+  margin: 16px 0;
+}
+
+.backButton {
+  background: #0b4d0b;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.backButton:hover {
+  background: #0a3e0a;
+}
+
+.mercadoInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.mercadoLogo {
+  width: 45px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.mercadoNome {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70vw;
+  color: #222;
+}
+
+.linkEntrega {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  width: 100%;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .mercadoLogo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .mercadoNome {
+    font-size: 14px;
+    max-width: 60vw;
+  }
+
+  .progress {
+    height: 22px;
+  }
+
+  .etapas li {
+    font-size: 0.95rem;
+  }
+
+  .backButton {
+    width: 100%;
+    justify-content: center;
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .linkEntrega {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .mercadoLogo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .mercadoNome {
+    font-size: 13px;
+    max-width: 50vw;
+  }
+
+  .progress {
+    height: 20px;
+  }
+
+  .etapas li {
+    font-size: 0.9rem;
+  }
+
+  .linkEntrega {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+}

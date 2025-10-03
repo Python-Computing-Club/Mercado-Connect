@@ -42,6 +42,27 @@
   background-color: #21867a;
 }
 
+.favoriteButton {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 3;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.favoriteButton svg {
+  pointer-events: none;
+}
+
 .image {
   width: 100px;
   height: 100px;
@@ -70,7 +91,6 @@
   white-space: nowrap;
 }
 
-
 .description {
   font-size: 0.85rem;
   color: #666;
@@ -83,7 +103,6 @@
   word-break: break-word;
   line-height: 1.2;
 }
-
 
 .priceBlock {
   display: flex;

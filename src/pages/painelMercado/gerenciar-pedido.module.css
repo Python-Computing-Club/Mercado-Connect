@@ -1,0 +1,249 @@
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.title {
+  text-align: center;
+  font-size: 2rem;
+  color: #012E0D;
+  margin-bottom: 2rem;
+}
+
+.empty {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.card {
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease;
+  background-color: #fff;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.cardTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #012E0D;
+  margin-bottom: 1rem;
+}
+
+.cardText {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: #333;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: flex-start;
+}
+
+.successButton,
+.dangerButton,
+.primaryButton {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  flex: 1 1 150px;
+  min-width: 120px;
+  text-align: center;
+  transition: background-color 0.2s ease;
+}
+
+.successButton {
+  background-color: #012E0D;
+  color: white;
+}
+
+.successButton:hover {
+  background-color: #014d14;
+}
+
+.dangerButton {
+  background-color: red;
+  color: white;
+}
+
+.dangerButton:hover {
+  background-color: #cc0000;
+}
+
+.primaryButton {
+  background-color: #007bff;
+  color: white;
+}
+
+.primaryButton:hover {
+  background-color: #0056b3;
+}
+
+.linkEntrega {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.finalizado {
+  color: green;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.recusado {
+  color: red;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.excluindoAviso {
+  font-size: 0.9rem;
+  color: orange;
+  margin-top: 0.5rem;
+  font-weight: bold;
+}
+
+.aguardando {
+  font-weight: 600;
+  color: #555;
+  margin-top: 1rem;
+}
+
+.backButtonWrapper {
+  margin: 16px 0;
+}
+
+.backButton {
+  background: #0b4d0b;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.backButton:hover {
+  background: #0a3e0a;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  .cardTitle {
+    font-size: 1.2rem;
+  }
+
+  .cardText {
+    font-size: 0.97rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+
+  .cardText {
+    font-size: 0.95rem;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .successButton,
+  .dangerButton,
+  .primaryButton {
+    width: 100%;
+    font-size: 14px;
+    padding: 10px;
+    flex: none;
+  }
+
+  .backButton {
+    width: 100%;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .linkEntrega {
+    width: 100%;
+    display: block;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .cardTitle {
+    font-size: 1rem;
+  }
+
+  .cardText {
+    font-size: 0.9rem;
+  }
+
+  .successButton,
+  .dangerButton,
+  .primaryButton {
+    font-size: 13px;
+  }
+
+  .backButton {
+    font-size: 13px;
+    padding: 10px;
+  }
+}

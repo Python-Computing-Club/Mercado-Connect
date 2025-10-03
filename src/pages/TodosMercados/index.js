@@ -3,7 +3,7 @@ import { listarMercados } from "../../services/firestore/mercados";
 import { useNavigate } from "react-router-dom";
 import Fuse from "fuse.js";
 import Header from "../../components/Header/header";
-import NavBar from "../../components/Navegation Bar/navbar";
+import NavBar from "../../components/NavegationBar/navbar";
 import styles from "./todaslojas.module.css";
 
 export default function TodasLojas() {

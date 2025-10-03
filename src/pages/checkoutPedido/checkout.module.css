@@ -1,0 +1,209 @@
+.headerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 1rem;
+}
+
+.title {
+  font-size: 1.7rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding-bottom: 2rem;
+  color: #012e0d;
+  font-weight: 700;
+}
+
+.resumeTitle {
+  font-size: 1.25rem;
+  padding-left: 1rem;
+  padding-top: 1rem;
+  color: #222;
+  font-weight: 600;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(6px);
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.modalDialog {
+  max-width: 600px;
+  width: 100%;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+}
+
+.selectedAddress {
+  margin: 1rem;
+  border: 1.5px solid #004d00;
+  border-radius: 8px;
+}
+
+.entregaOptions {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem;
+  flex-wrap: wrap;
+}
+
+.totalAccordion {
+  margin: 1rem;
+  border: 1.5px solid #004d00;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.itemsContainer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 15px;
+  padding: 0 1rem;
+}
+
+.infoItemContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.95rem;
+}
+
+.itemNome {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #333;
+}
+
+.entregaResumo {
+  padding: 1rem;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.voltarHomeBtn {
+  background-color: #004d00;
+  color: white;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.voltarHomeBtn:hover {
+  background-color: #003800;
+}
+
+.btnPagamento {
+  background-color: #004d00;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin: 1.5rem auto;
+  display: block;
+  width: calc(100% - 2rem);
+  max-width: 400px;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.btnPagamento:hover {
+  background-color: #003800;
+}
+
+.total {
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding-left: 1rem;
+  color: #111;
+}
+
+.itemsContainer img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.4rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .resumeTitle {
+    font-size: 1.1rem;
+  }
+
+  .itemsContainer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .itemsContainer img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+  }
+
+  .voltarHomeBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .btnPagamento {
+  width: 100%;
+  display: block;
+  margin: 1.5rem auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .resumeTitle {
+    font-size: 1rem;
+  }
+
+  .infoItemContainer {
+    font-size: 0.9rem;
+  }
+
+  .total {
+    font-size: 1rem;
+  }
+
+  .entregaOptions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btnPagamento {
+  width: 100%;
+  display: block;
+  margin: 1.5rem auto;
+  }
+}

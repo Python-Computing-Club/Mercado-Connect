@@ -230,7 +230,7 @@ export default function DadosEndereco({ onClose }) {
               <h2>Confirme no mapa</h2>
 
               <AddressPicker
-                initialAddress={endereco.rua}
+                initialAddress={`${endereco.rua} ${endereco.numero}, ${endereco.bairro}, ${endereco.cidade} - ${endereco.estado}`}
                 initialPosition={
                   endereco.lat && endereco.lng
                     ? { lat: endereco.lat, lng: endereco.lng }

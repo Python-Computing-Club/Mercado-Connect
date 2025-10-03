@@ -230,4 +230,10 @@ input:focus {
   .submitBtn, .backBtn, .skipBtn {
     width: 100%;
   }
+
+  .addressPickerContainer {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 }
