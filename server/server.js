@@ -20,7 +20,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-app.use(cors({ origin: "http://localhost:3000" })); 
+app.use(cors()); 
 
 
 app.use(express.json());
