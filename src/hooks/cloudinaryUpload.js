@@ -33,7 +33,7 @@ export const excluirImagemCloudinary = async (publicId) => {
   try {
     console.log("Iniciando exclusão da imagem:", publicId);
 
-    const res = await fetch("http://localhost:5000/api/cloudinary/delete", {
+    const res = await fetch("https://mercado-connect-server.onrender.com/api/cloudinary/delete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ public_id: publicId }),

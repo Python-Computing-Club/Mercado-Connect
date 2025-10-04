@@ -1,6 +1,6 @@
 export async function generateQuote(payload) {
   try {
-    const res = await fetch("http://localhost:5000/api/uber-quote", {
+    const res = await fetch("https://mercado-connect-server.onrender.com/api/uber-quote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)

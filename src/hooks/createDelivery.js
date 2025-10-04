@@ -155,7 +155,7 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
   console.log("📦 Payload enviado para o backend:", JSON.stringify(body, null, 2));
 
   try {
-    const res = await fetch("http://localhost:5000/api/uber-delivery", {
+    const res = await fetch("https://mercado-connect-server.onrender.com/api/uber-delivery", {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
