@@ -17,22 +17,15 @@ const app = express();
 // 🧠 JSON parser antes das rotas
 app.use(express.json());
 
-// 🌍 CORS completo e seguro
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://mercado-connect.vercel.app",
-];
-
+// 🌍 CORS totalmente liberado
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "*"); // Libera para qualquer origem
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
-
-
 
 // ☁️ Cloudinary
 cloudinary.config({
@@ -46,7 +39,7 @@ app.use("/api/cloudinary", cloudinaryDeleteRouter);
 
 // 🔍 Rota raiz
 app.get("/", (req, res) => {
-  res.send("✅ Backend rodando e CORS habilitado!");
+  res.send("✅ Backend rodando e CORS habilitado para todos!");
 });
 
 // 💰 Cotação Uber
