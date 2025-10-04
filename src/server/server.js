@@ -4,6 +4,8 @@ import cors from "cors";
 import fetch from "node-fetch";
 import { v2 as cloudinary } from "cloudinary";
 import cloudinaryDeleteRouter from "./cloudinaryDelete.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config({ path: ".env" });
 
@@ -18,14 +20,15 @@ const app = express();
 // 🧠 JSON parser antes das rotas
 app.use(express.json());
 
-// 🌍 Configuração de CORS
+// 🌍 Configuração de CORS (permitindo Vercel e localhost)
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://mercado-connect.vercel.app",
+];
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      const allowedOrigins = [
-        "http://localhost:3000",
-        "https://mercado-connect.vercel.app",
-      ];
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -39,8 +42,8 @@ app.use(
   })
 );
 
-// ✅ Responde preflight requests
-app.options("*", cors());
+// ✅ Responde preflight requests corretamente (sem erro “Missing parameter name”)
+app.options("/*", cors());
 
 // ☁️ Cloudinary
 cloudinary.config({
@@ -123,7 +126,16 @@ app.post("/api/uber-delivery", async (req, res) => {
   }
 });
 
+// 🚀 Servir React build (caso queira hospedar tudo no Render)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, "../build")));
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../build", "index.html"));
+});
+
+// 🟢 Inicializa servidor
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
