@@ -1,6 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";
 import fetch from "node-fetch";
 import { v2 as cloudinary } from "cloudinary";
 import cloudinaryDeleteRouter from "./cloudinaryDelete.js";
@@ -18,37 +17,25 @@ const app = express();
 // 🧠 JSON parser antes das rotas
 app.use(express.json());
 
-// 🌍 Configuração de CORS (permitindo Vercel e localhost)
+// 🌍 CORS completo e seguro
 const allowedOrigins = [
   "http://localhost:3000",
   "https://mercado-connect.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn("🚫 Bloqueado por CORS:", origin);
-        callback(new Error("CORS não permitido para essa origem: " + origin));
-      }
-    },
-    credentials: true,
-  })
-);
-
-// ✅ Middleware manual para OPTIONS sem conflito com path-to-regexp
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
     res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") return res.sendStatus(204);
+    return next();
+  } else {
+    console.warn("🚫 Bloqueado por CORS:", origin);
+    return res.status(403).send("CORS não permitido para essa origem.");
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") return res.sendStatus(204);
-  next();
 });
 
 // ☁️ Cloudinary
