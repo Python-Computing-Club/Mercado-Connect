@@ -5,7 +5,6 @@ export async function generateQuote(payload) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       mode: "cors",
-      credentials: "include"
     });
 
 

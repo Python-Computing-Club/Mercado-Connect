@@ -160,7 +160,6 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
       mode: "cors",
-      credentials: "include"
     });
 
     const data = await res.json();
