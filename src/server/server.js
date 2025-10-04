@@ -20,10 +20,13 @@ app.use(express.json());
 // 🌍 CORS totalmente liberado
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*"); // Libera para qualquer origem
-  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") return res.sendStatus(204);
+  res.setHeader("Access-Control-Allow-Headers", "*"); // Aceita qualquer header
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204); // Preflight resolvido
+  }
+
   next();
 });
 
