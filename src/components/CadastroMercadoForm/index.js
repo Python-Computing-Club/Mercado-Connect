@@ -9,7 +9,6 @@ import consultarCEP from "../../hooks/useValidarEndereco";
 import FormatCEP from "../../hooks/FormatCEP";
 import { criarMercado } from "../../services/firestore/mercados";
 import verificaCNPJ from "../../hooks/verificaCNPJ";
-import AddressPicker from "../../hooks/AddressPicker";   // importa o AddressPicker
 
 export default function CadastroMercadoForm() {
   const [form, setForm] = useState({

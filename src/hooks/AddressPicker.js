@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "../components/AtualizarDadosUser/DadosEndereco.module.css";
 
 const DEFAULT_LOCATION = { lat: -23.55052, lng: -46.633308 };
@@ -80,7 +80,8 @@ export default function AddressPicker({ initialAddress = "", initialPosition = n
     });
   }
 
-  async function initMap(pos) {
+  // *** Envolvendo initMap em useCallback ***
+  const initMap = useCallback(async (pos) => {
     try {
       await loadGoogleMapsScript(GOOGLE_MAPS_API_KEY);
 
@@ -147,13 +148,14 @@ export default function AddressPicker({ initialAddress = "", initialPosition = n
       setError(err.message || "Erro ao carregar o Google Maps.");
       setLoading(false);
     }
-  }
+  }, [onChange]);
 
+  // *** Agora inclui initMap nas dependências ***
   useEffect(() => {
     if (!showModal) {
       initMap(position);
     }
-  }, [showModal, position]);
+  }, [showModal, position, initMap]);
 
   async function handlePermissionResponse(accepted) {
     setShowModal(false);

@@ -22,24 +22,22 @@ export default function CheckoutPedido() {
   const [carrinho, setCarrinho] = useState([]);
   const [cotacaoUber, setCotacaoUber] = useState(null);
   const [retirarNaLoja, setRetirarNaLoja] = useState(false);
-  const [mercado, setMercado] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userStorage = JSON.parse(localStorage.getItem('userSession')) || {};
-    const cartStorage = JSON.parse(localStorage.getItem('carrinho')) || [];
+  const userStorage = JSON.parse(localStorage.getItem('userSession')) || {};
+  const cartStorage = JSON.parse(localStorage.getItem('carrinho')) || [];
 
-    setUsuario(userStorage);
-    setCarrinho(cartStorage);
+  setUsuario(userStorage);
+  setCarrinho(cartStorage);
 
-    if (userStorage.enderecos && Array.isArray(userStorage.enderecos)) {
-      setEnderecos(userStorage.enderecos);
-      if (!enderecoSelecionado && userStorage.enderecos.length > 0) {
-        setEnderecoSelecionado(userStorage.enderecos[0]);
-      }
-    }
-  }, []);
+  if (userStorage.enderecos && Array.isArray(userStorage.enderecos)) {
+    setEnderecos(userStorage.enderecos);
+    // Ao inicializar, só defina enderecoSelecionado se estiver null:
+    setEnderecoSelecionado(prev => prev || userStorage.enderecos[0]);
+  }
+}, []);
 
   useEffect(() => {
     async function cotarEntrega() {
@@ -156,7 +154,7 @@ export default function CheckoutPedido() {
       quote_id: !retirarNaLoja && cotacaoUber?.quoteId ? cotacaoUber.quoteId : null,
       entrega: retirarNaLoja ? "Retirada na loja" : "Entrega via Uber",
       valor_entrega_visual: !retirarNaLoja && cotacaoUber?.fee ? (cotacaoUber.fee / 100).toFixed(2) : "0.00",
-      external_store_id: cotacaoUber?.storeId || mercado?.storeId || "STORE-SP-001",
+      external_store_id: cotacaoUber?.storeId || "STORE-SP-001",
 
       nome_cliente: nomeCliente,
       telefone_cliente: telefoneCliente,
@@ -176,7 +174,6 @@ export default function CheckoutPedido() {
         unidade_de_medida: item.unidade_de_medida || "un"
       }))
     };
-
 
     console.log("📝 Criando pedido:", pedido);
 
@@ -270,7 +267,7 @@ export default function CheckoutPedido() {
         </Button>
       </div>
 
-            {!retirarNaLoja && cotacaoUber && (
+      {!retirarNaLoja && cotacaoUber && (
         <Card className={styles.selectedAddress}>
           <Card.Body>
             <Card.Title>Entrega via Uber</Card.Title>

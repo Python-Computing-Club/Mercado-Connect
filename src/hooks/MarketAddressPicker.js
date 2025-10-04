@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "../components/AtualizarDadosUser/DadosEndereco.module.css";
 
 const DEFAULT_LOCATION = { lat: -23.55052, lng: -46.633308 };
@@ -93,7 +93,7 @@ export default function MarketAddressPicker({ initialAddress = "", initialPositi
     });
   }
 
-  async function initMap(pos) {
+  const initMap = useCallback(async (pos) => {
     try {
       await loadGoogleMapsScript(GOOGLE_MAPS_API_KEY);
       const google = window.google;
@@ -162,11 +162,11 @@ export default function MarketAddressPicker({ initialAddress = "", initialPositi
       setError(err.message || "Erro ao inicializar mapa.");
       setLoading(false);
     }
-  }
+  }, [onChange]);
 
   useEffect(() => {
     initMap(position);
-  }, []);
+  }, [initMap, position]);
 
   async function buscarEnderecoManual() {
     if (!address.trim()) return;
