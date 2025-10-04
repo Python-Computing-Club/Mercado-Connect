@@ -42,8 +42,14 @@ app.use(
   })
 );
 
-// ✅ Responde preflight requests corretamente (sem erro “Missing parameter name”)
-app.options("/*", cors());
+// ✅ Preflight universal (Express 4 e 5)
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
 
 // ☁️ Cloudinary
 cloudinary.config({
@@ -130,7 +136,7 @@ app.post("/api/uber-delivery", async (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, "../build")));
-app.get("/*", (req, res) => {
+app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../build", "index.html"));
 });
 
