@@ -41,7 +41,7 @@ app.use(
 );
 
 // ✅ Trata requisições OPTIONS automaticamente
-app.options("*", cors());
+app.options(/^\/.*$/, cors());
 
 // ☁️ Cloudinary
 cloudinary.config({
