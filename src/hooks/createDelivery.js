@@ -47,7 +47,6 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
     dropoff_address: `${enderecoUsuario.rua}, ${enderecoUsuario.numero}, ${enderecoUsuario.bairro}, ${enderecoUsuario.cidade} - ${enderecoUsuario.estado}`,
     dropoff_name: enderecoUsuario.nome,
     dropoff_phone_number: enderecoUsuario.telefone,
-
     manifest_items: (pedido.itens || []).map(item => {
       const peso = calcularPeso(item.volume, item.unidade_de_medida);
       return {
@@ -61,8 +60,6 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
         vat_percentage: 12
       };
     }),
-
-
     pickup_address: `${mercado.endereco.logradouro}, ${mercado.endereco.numero}, ${mercado.endereco.bairro}, ${mercado.endereco.cidade} - ${mercado.endereco.estado}`,
     pickup_name: mercado.estabelecimento || "Mercado Connect",
     pickup_phone_number: mercado.telefone || "+5511944806873",
@@ -83,7 +80,6 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
       ],
       picture: true
     },
-
     dropoff_business_name: "Residencial Jardim",
     dropoff_latitude: enderecoUsuario.lat,
     dropoff_longitude: enderecoUsuario.lng,
@@ -104,7 +100,6 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
       identification: { min_age: 18 },
       picture: true
     },
-
     deliverable_action: "deliverable_action_meet_at_door",
     manifest_reference: pedido.id || "ORD-20251003-SP",
     manifest_total_value: Number(pedido.valor_total),
@@ -119,7 +114,6 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
     tip: 25,
     idempotency_key: `entrega-${pedido.id}`,
     external_store_id: pedido.external_store_id,
-
     return_verification: {
       signature: true,
       signature_requirement: {
@@ -133,7 +127,6 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
       ],
       picture: true
     },
-
     external_user_info: {
       merchant_account: {
         account_created_at: "2022-05-10T14:00:00-03:00",
@@ -143,7 +136,6 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
         id: "device_mercado_001"
       }
     },
-
     external_id: `entrega_${pedido.id}`,
     test_specifications: {
       robo_courier_specification: {
@@ -154,12 +146,13 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
 
   console.log("📦 Payload enviado para o backend:", JSON.stringify(body, null, 2));
 
+  const baseURL = process.env.REACT_APP_API_BASE || ""; // ← define no .env.local para uso local
+
   try {
-    const res = await fetch("https://mercado-connect-server.onrender.com/api/uber-delivery", {
+    const res = await fetch(`${baseURL}/api/uber-delivery`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      mode: "cors",
+      body: JSON.stringify(body)
     });
 
     const data = await res.json();

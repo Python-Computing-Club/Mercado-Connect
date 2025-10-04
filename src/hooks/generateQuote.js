@@ -1,12 +1,12 @@
 export async function generateQuote(payload) {
+  const baseURL = process.env.REACT_APP_API_BASE || ""; // Define no .env.local para uso local
+
   try {
-    const res = await fetch("https://mercado-connect-server.onrender.com/api/uber-quote", {
+    const res = await fetch(`${baseURL}/api/uber-quote`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      mode: "cors",
+      body: JSON.stringify(payload)
     });
-
 
     const data = await res.json();
     console.log("📬 Resposta da Uber:", data);
