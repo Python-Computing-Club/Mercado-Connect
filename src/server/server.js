@@ -136,7 +136,9 @@ app.post("/api/uber-delivery", async (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, "../build")));
-app.get("*", (req, res) => {
+
+// 🛠️ Fallback para qualquer rota não tratada
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../build", "index.html"));
 });
 
