@@ -3,8 +3,11 @@ export async function generateQuote(payload) {
     const res = await fetch("https://mercado-connect-server.onrender.com/api/uber-quote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      mode: "cors",
+      credentials: "include"
     });
+
 
     const data = await res.json();
     console.log("📬 Resposta da Uber:", data);

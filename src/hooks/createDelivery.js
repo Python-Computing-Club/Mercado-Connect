@@ -156,9 +156,11 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
 
   try {
     const res = await fetch("https://mercado-connect-server.onrender.com/api/uber-delivery", {
-      method: 'POST',
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      mode: "cors",
+      credentials: "include"
     });
 
     const data = await res.json();
