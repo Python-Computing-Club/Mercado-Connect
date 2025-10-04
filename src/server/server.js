@@ -4,8 +4,6 @@ import cors from "cors";
 import fetch from "node-fetch";
 import { v2 as cloudinary } from "cloudinary";
 import cloudinaryDeleteRouter from "./cloudinaryDelete.js";
-import path from "path";
-import { fileURLToPath } from "url";
 
 dotenv.config({ path: ".env" });
 
@@ -44,9 +42,13 @@ app.use(
 
 // ✅ Preflight universal (Express 4 e 5)
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
@@ -130,16 +132,6 @@ app.post("/api/uber-delivery", async (req, res) => {
     console.error("Erro ao criar entrega Uber:", err);
     res.status(500).json({ error: "Falha na criação de entrega Uber" });
   }
-});
-
-// 🚀 Servir React build (caso queira hospedar tudo no Render)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "../build")));
-
-// 🛠️ Fallback para qualquer rota não tratada
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "../build", "index.html"));
 });
 
 // 🟢 Inicializa servidor
