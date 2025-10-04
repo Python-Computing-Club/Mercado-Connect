@@ -15,31 +15,39 @@ console.log("Cloudinary env:", {
 
 const app = express();
 
-const port = 3000;
+// 🧠 JSON parser antes das rotas
+app.use(express.json());
 
+// 🌍 Configuração de CORS
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "https://mercado-connect.vercel.app",
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn("🚫 Bloqueado por CORS:", origin);
+        callback(new Error("CORS não permitido para essa origem: " + origin));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+// ✅ Responde preflight requests
+app.options("*", cors());
+
+// ☁️ Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
-// ✅ CORS configurado corretamente para dev + produção
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://mercado-connect.vercel.app",
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS não permitido para essa origem: " + origin));
-    }
-  }
-}));
-
-app.use(express.json());
 
 // 🌩️ Cloudinary delete
 app.use("/api/cloudinary", cloudinaryDeleteRouter);
@@ -117,5 +125,5 @@ app.post("/api/uber-delivery", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
