@@ -14,14 +14,11 @@ console.log("Cloudinary env:", {
 
 const app = express();
 
-// 🧠 JSON parser antes das rotas
-app.use(express.json());
-
-// 🌍 CORS totalmente liberado
+// 🌍 CORS totalmente liberado — precisa vir antes de qualquer outro middleware
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*"); // Libera para qualquer origem
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "*"); // Aceita qualquer header
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization"); // Corrigido
 
   if (req.method === "OPTIONS") {
     return res.sendStatus(204); // Preflight resolvido
@@ -29,6 +26,9 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// 🧠 JSON parser depois do CORS
+app.use(express.json());
 
 // ☁️ Cloudinary
 cloudinary.config({
