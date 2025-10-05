@@ -26,6 +26,8 @@ export default function useCodigoTimer({ active, duration, onExpire, setTime, id
       }, id);
     }, 1000);
 
-    return () => clearInterval(timers.current[id]);
+    const timerId = timers.current[id];
+    return () => clearInterval(timerId);
+
   }, [active, duration, onExpire, setTime, id]);
 }

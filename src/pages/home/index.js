@@ -9,18 +9,21 @@ import useMercados from "../../hooks/useMercados";
 import { useCart } from "../../Context/CartContext";
 
 export default function Home() {
-  const produtos = useProdutos();
-  const { mercados } = useMercados(); // ✅ removido 'loading'
+  const produtos = useProdutos() || {};
+  const { mercados = [] } = useMercados() || {}; // garantia de array padrão
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const { addItem } = useCart();
 
-  const handleCardClick = (produto) => {
+  // Função única para selecionar produto (substitui handleCardClick e handleAddClick)
+  const handleSelectProduto = (produto) => {
     setProdutoSelecionado(produto);
   };
 
-  const handleAddClick = (produto) => {
-    setProdutoSelecionado(produto);
-  };
+  // Criando variáveis para slices dos arrays (evita fazer slice direto no JSX)
+  const destaques = produtos.destaque?.slice(0, 10) || [];
+  const produtosPopulares = produtos.popular?.slice(0, 10) || [];
+  const mercadosPerto = mercados.slice(0, 10);
+  const todosMercados = mercados.slice(0, 20);
 
   return (
     <div className={styles.pageWrapper}>
@@ -30,32 +33,32 @@ export default function Home() {
       <div className={styles.contentArea}>
         <CarouselUniversal
           title="Ofertas em Destaque"
-          items={produtos.destaque?.slice(0, 10) || []}
+          items={destaques}
           sectionPath="/produtos/destaque"
           type="produto"
-          onCardClick={handleCardClick}
-          onAddClick={handleAddClick}
+          onCardClick={handleSelectProduto}
+          onAddClick={handleSelectProduto}
         />
 
         <CarouselUniversal
           title="Mercados perto de você"
-          items={mercados?.slice(0, 10) || []}
+          items={mercadosPerto}
           sectionPath="/mercados"
           type="mercado"
         />
 
         <CarouselUniversal
           title="Produtos Populares"
-          items={produtos.popular?.slice(0, 10) || []}
+          items={produtosPopulares}
           sectionPath="/produtos/popular"
           type="produto"
-          onCardClick={handleCardClick}
-          onAddClick={handleAddClick}
+          onCardClick={handleSelectProduto}
+          onAddClick={handleSelectProduto}
         />
 
         <CarouselUniversal
           title="Todos os Mercados"
-          items={mercados?.slice(0, 20) || []}
+          items={todosMercados}
           sectionPath="/mercados"
           type="mercado"
         />
@@ -66,12 +69,10 @@ export default function Home() {
               key={grupo}
               title={grupo}
               items={lista}
-              sectionPath={`/produtos/${grupo
-                .toLowerCase()
-                .replace(/\s+/g, "-")}`}
+              sectionPath={`/produtos/${grupo.toLowerCase().replace(/\s+/g, "-")}`}
               type="produto"
-              onCardClick={handleCardClick}
-              onAddClick={handleAddClick}
+              onCardClick={handleSelectProduto}
+              onAddClick={handleSelectProduto}
             />
           ))}
       </div>

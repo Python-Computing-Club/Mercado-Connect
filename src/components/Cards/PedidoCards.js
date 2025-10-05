@@ -43,34 +43,28 @@ export default function PedidoCard({ pedido, historico = false, onAceitar, onRec
 
         {!historico && (
           <>
-            {statusLower === "aguardando confirmação" || statusLower === "aguardando confirmação da loja" ? (
+            {(statusLower === "aguardando confirmação" || statusLower === "aguardando confirmação da loja") && (
               <>
                 <Button
                   variant="success"
                   className="me-2"
-                  onClick={() => {
-                    if (onAceitar) onAceitar(pedido);
-                  }}
+                  onClick={() => onAceitar?.(pedido)}
                 >
                   Aceitar
                 </Button>
                 <Button
                   variant="danger"
-                  onClick={() => {
-                    if (onRecusar) onRecusar(pedido);
-                  }}
+                  onClick={() => onRecusar?.(pedido)}
                 >
                   Recusar
                 </Button>
               </>
-            ) : null}
+            )}
 
             {statusLower === "confirmado" && (
               <Button
                 variant="primary"
-                onClick={() => {
-                  if (onAceitar) onAceitar(pedido);
-                }}
+                onClick={() => onAceitar?.(pedido)}
               >
                 Montar Pedido
               </Button>
@@ -79,18 +73,38 @@ export default function PedidoCard({ pedido, historico = false, onAceitar, onRec
             {statusLower === "loja está montando seu pedido" && (
               <Button
                 variant="primary"
-                onClick={() => {
-                  if (onAceitar) onAceitar(pedido);
-                }}
+                onClick={() => onAceitar?.(pedido)}
               >
                 Enviar Pedido
               </Button>
             )}
 
-            {statusLower === "produto está a caminho" && (
-              <p className={styles.finalizado}>
-                Pedido finalizado e a caminho do cliente.
+            {statusLower === "aguardando aceite do entregador" && (
+              <p className={styles.aguardando}>
+                Pedido enviado à Uber. Aguardando aceite do entregador.
               </p>
+            )}
+
+            {statusLower === "produto está a caminho" && (
+              <>
+                <p className={styles.finalizado}>
+                  Pedido finalizado e a caminho do cliente.
+                </p>
+            {pedido.tracking_url && (
+                  <div className="mt-3">
+                    <h6>Entrega em tempo real:</h6>
+                    <Button
+                      variant="outline-primary"
+                      href={pedido.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.linkEntrega}
+                    >
+                      Ver rastreamento da entrega
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
 
             {deveRemover && (

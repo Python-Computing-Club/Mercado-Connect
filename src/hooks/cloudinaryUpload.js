@@ -30,13 +30,15 @@ export const uploadParaCloudinary = async (file) => {
 };
 
 export const excluirImagemCloudinary = async (publicId) => {
+  const baseURL = process.env.REACT_APP_API_BASE || ""; // Define no .env.local para uso local
+
   try {
     console.log("Iniciando exclusão da imagem:", publicId);
 
-    const res = await fetch("http://localhost:5000/api/cloudinary/delete", {
+    const res = await fetch(`${baseURL}/api/cloudinary-delete`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ public_id: publicId }),
+      body: JSON.stringify({ public_id: publicId })
     });
 
     console.log("Resposta do servidor:", res);

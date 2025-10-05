@@ -20,14 +20,14 @@ export default function AcompanhamentoPedido() {
   const usuario = JSON.parse(localStorage.getItem("userSession"));
   const sendSms = useTextBeeSms();
 
-  const statusEtapas = [
+  const statusEtapasBase = [
     "Aguardando confirmação da loja",
     "Confirmado",
     "Loja está montando seu pedido",
     "Produto está a caminho",
-    "Pedido recusado — reembolso iniciado",
     "Pedido finalizado"
   ];
+
 
   const enviarAtualizacaoPedido = async (status) => {
     let contato = ""
@@ -58,6 +58,10 @@ export default function AcompanhamentoPedido() {
 
 
   }
+  
+  const statusEtapas = pedido?.reembolso
+    ? [...statusEtapasBase, "Pedido recusado — reembolso iniciado"]
+    : statusEtapasB
 
   useEffect(() => {
     if (!id || typeof id !== "string" || id.trim() === "") {
@@ -236,6 +240,22 @@ export default function AcompanhamentoPedido() {
                 {confirmando ? "Confirmando..." : "Confirmar entrega"}
               </Button>
             )}
+
+            {pedido.tracking_url && (
+                  <div className="mt-3">
+                    <h6>Entrega em tempo real:</h6>
+                    <Button
+                      variant="outline-primary"
+                      href={pedido.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.linkEntrega}
+                    >
+                      Ver rastreamento da entrega
+                    </Button>
+                  </div>
+                )}
+
 
             {ultimaAtualizacao && (
               <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#666" }}>
