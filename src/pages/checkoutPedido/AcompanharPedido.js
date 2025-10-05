@@ -4,7 +4,9 @@ import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import { atualizarPedido } from "../../services/firestore/pedidos";
 import { Container, ProgressBar, Card, Button } from "react-bootstrap";
+import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import styles from "./acompanhar-pedido.module.css";
+import emailjs from "@emailjs/browser";
 
 export default function AcompanhamentoPedido() {
   const { id } = useParams();
@@ -15,6 +17,8 @@ export default function AcompanhamentoPedido() {
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null);
   const [erro, setErro] = useState(null);
   const [confirmando, setConfirmando] = useState(false);
+  const usuario = JSON.parse(localStorage.getItem("userSession"));
+  const sendSms = useTextBeeSms();
 
   const statusEtapasBase = [
     "Aguardando confirmação da loja",
@@ -24,9 +28,40 @@ export default function AcompanhamentoPedido() {
     "Pedido finalizado"
   ];
 
+
+  const enviarAtualizacaoPedido = async (status) => {
+    let contato = ""
+    // Verifica o tipo de contato cadastrado pelo usuario e envia o status do pedido
+    if(usuario.email == ""){
+      contato = usuario.telefone
+      sendSms(contato, status);
+      return console.log("Atualização de status de pedido enviada ao usuário!")
+    }else if (usuario.telefone == ""){
+      contato = usuario.email
+      try {
+        await emailjs.send(
+          process.env.REACT_APP_EMAILJS_SERVICE_ID,
+          process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+          { to_email: contato, status },
+          process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+        );
+        return console.log("Atualização de status de pedido enviada ao usuário!")
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    }else{
+      contato = usuario.telefone
+      sendSms(contato, status);
+      return console.log("Atualização de status de pedido enviada ao usuário!")
+    }
+
+
+  }
+  
   const statusEtapas = pedido?.reembolso
     ? [...statusEtapasBase, "Pedido recusado — reembolso iniciado"]
-    : statusEtapasBase;
+    : statusEtapasB
 
   useEffect(() => {
     if (!id || typeof id !== "string" || id.trim() === "") {
@@ -43,6 +78,28 @@ export default function AcompanhamentoPedido() {
           const pedidoData = snapshot.data();
           setPedido(pedidoData);
           setUltimaAtualizacao(new Date());
+
+          // Comparando o status anterior com o novo
+          if(pedido?.status != pedidoData.status){
+            let mensagem = ""
+            //Envio de mensagem personalizada de acordo com o status
+            switch(pedidoData.status){
+              case "Confirmado":
+                mensagem = "Seu pedido já foi confirmado pela loja!"
+                enviarAtualizacaoPedido(mensagem);
+              case "Loja está montando seu pedido":
+                mensagem = "Seu pedido já está sendo preparado!"
+                enviarAtualizacaoPedido(mensagem)
+              case "Produto está a caminho":
+                mensagem = "Seu pedido já está pronto e está a caminho!"
+                enviarAtualizacaoPedido(mensagem)
+              case "Pedido recusado - reembolso iniciado":
+                mensagem = "Já recebemos a recusa de seu pedido e estamos aplicando o reembolso"
+                enviarAtualizacaoPedido(mensagem)
+              case "Pedido finalizado":
+                mensagem = "Seu pedido foi entregue! Obrigado por comprar com Mercado Connect :)"
+            }
+          }
 
           if (pedidoData.id_mercado) {
             try {
