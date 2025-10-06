@@ -7,6 +7,7 @@ import { Container, ProgressBar, Card, Button } from "react-bootstrap";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import styles from "./acompanhar-pedido.module.css";
 import emailjs from "@emailjs/browser";
+import emiteNFE from "../../utils/emiteNFE";
 
 export default function AcompanhamentoPedido() {
   const { id } = useParams();
@@ -84,8 +85,10 @@ export default function AcompanhamentoPedido() {
 
           //Envio de mensagem personalizada de acordo com o status
           switch (pedidoData.status) {
+            // Na confirmação do pedido, é gerada a nota fiscal
             case "Confirmado":
               mensagem = "Seu pedido já foi confirmado pela loja!"
+              emiteNFE(pedidoData, snapshot.id);
               enviarAtualizacaoPedido(mensagem);
               break;
             case "Loja está montando seu pedido":

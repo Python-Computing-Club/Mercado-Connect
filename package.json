@@ -24,6 +24,7 @@
     "firebase": "^12.2.1",
     "firebase-admin": "^13.5.0",
     "fuse.js": "^7.1.0",
+    "jspdf": "^3.0.3",
     "jwt-decode": "^4.0.0",
     "mercadopago": "^2.9.0",
     "node-fetch": "^2.7.0",
@@ -67,5 +68,4 @@
       "last 1 safari version"
     ]
   }
-  
 }
