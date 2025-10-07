@@ -19,8 +19,9 @@ import { db } from "../../services/firebase";
 import PedidoCard from "../../components/Cards/PedidoCards";
 import styles from "./gerenciar-pedido.module.css";
 import { criarReembolso } from "../../services/MercadoPago";
-
 import { createDelivery } from "../../hooks/createDelivery";
+import { consultarEntregaUber } from "../../hooks/consultarEntregaUber";
+import { atualizarPedido } from "../../services/firestore/pedidos";
 
 export default function GerenciarPedidos() {
   const [pedidos, setPedidos] = useState([]);
@@ -99,6 +100,40 @@ export default function GerenciarPedidos() {
     setHistorico(historicos);
   }, [pedidos]);
 
+  useEffect(() => {
+    const sincronizarTodosPedidosUber = async () => {
+      const statusMap = {
+        pending: "Aguardando confirmação da loja",
+        accepted: "Confirmado",
+        en_route_to_pickup: "Loja está montando seu pedido",
+        picked_up: "Produto está a caminho",
+        delivered: "Pedido finalizado",
+        returned: "Pedido devolvido",
+        cancelled: "Pedido cancelado"
+      };
+
+      const pedidosUber = pedidos.filter(p =>
+        p.entrega === "Entrega via Uber" &&
+        p.delivery_id &&
+        p.status !== "Pedido finalizado"
+      );
+
+      for (const pedido of pedidosUber) {
+        const statusUber = await consultarEntregaUber(pedido.delivery_id);
+        const statusLocal = statusMap[statusUber] || pedido.status;
+
+        if (statusLocal !== pedido.status) {
+          await atualizarPedido(pedido.id, { status: statusLocal });
+          console.log(`🔄 Pedido ${pedido.id} sincronizado: ${statusUber} → ${statusLocal}`);
+        }
+      }
+    };
+
+    if (pedidos.length > 0) {
+      sincronizarTodosPedidosUber();
+    }
+  }, [pedidos]);
+
   const atualizarStatus = async (idPedido, novoStatus) => {
     try {
       const pedidoRef = doc(db, "pedidos", idPedido);
@@ -132,8 +167,6 @@ export default function GerenciarPedidos() {
 
         if (!mercado || !mercado.endereco || !enderecoUsuario) {
           console.warn("❌ Dados ausentes: mercado ou endereço do cliente não disponíveis.");
-          console.log("mercado:", mercado);
-          console.log("enderecoUsuario:", enderecoUsuario);
           return;
         }
 
@@ -212,7 +245,7 @@ export default function GerenciarPedidos() {
         </button>
       </div>
 
-      <h2 className={styles.title}>Gerenciar Pedidos</h2>
+            <h2 className={styles.title}>Gerenciar Pedidos</h2>
 
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
         <Tab eventKey="ativos" title="Pedidos Ativos">
