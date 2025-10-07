@@ -262,19 +262,22 @@ export default function AcompanhamentoPedido() {
             )}
 
             {pedido.tracking_url && (
-              <div className="mt-3">
-                <h6>Entrega em tempo real:</h6>
-                <Button
-                  variant="outline-primary"
-                  href={pedido.tracking_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.linkEntrega}
-                >
-                  Ver rastreamento da entrega
-                </Button>
-              </div>
+              ["Entregador aceitou a corrida", "Entregador saiu para entrega", "Pedido finalizado"].includes(pedido.status) && (
+                <div className="mt-3">
+                  <h6>Entrega em tempo real:</h6>
+                  <Button
+                    variant="outline-primary"
+                    href={pedido.tracking_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.linkEntrega}
+                  >
+                    Ver rastreamento da entrega
+                  </Button>
+                </div>
+              )
             )}
+
 
             {ultimaAtualizacao && (
               <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#666" }}>

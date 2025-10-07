@@ -4,7 +4,8 @@ import {
   Container,
   Spinner,
   Tabs,
-  Tab
+  Tab,
+  Card
 } from "react-bootstrap";
 import {
   collection,
@@ -136,7 +137,6 @@ export default function GerenciarPedidos() {
     }
   }, [pedidos]);
 
-
   const atualizarStatus = async (idPedido, novoStatus) => {
     try {
       const pedidoRef = doc(db, "pedidos", idPedido);
@@ -164,8 +164,6 @@ export default function GerenciarPedidos() {
       } else if (pedido.status === "Confirmado") {
         await atualizarStatus(pedido.id, "Loja está montando seu pedido");
       } else if (pedido.status === "Loja está montando seu pedido") {
-        await atualizarStatus(pedido.id, "Produto está a caminho");
-
         const enderecoUsuario = pedido.endereco_usuario;
 
         if (!mercado || !mercado.endereco || !enderecoUsuario) {
@@ -234,13 +232,29 @@ export default function GerenciarPedidos() {
     }
   };
 
-  const pedidosAtivos = pedidos.filter((pedido) =>
-    pedido.status !== "Pedido recusado — reembolso iniciado" &&
-    pedido.status !== "Pedido finalizado" &&
-    pedido.status !== "Entregue"
-  );
+  const pedidosAtivos = pedidos.filter((pedido) => {
+    const status = pedido.status?.toLowerCase();
+    const statusUber = [
+      "entregador aceitou a corrida",
+      "entregador saiu para entrega",
+      "pedido finalizado",
+      "entregue"
+    ];
+    return (
+      !statusUber.includes(status) &&
+      status !== "pedido recusado — reembolso iniciado"
+    );
+  });
 
-  return (
+    const statusMensagens = {
+    "Entregador aceitou a corrida": "O entregador parceiro aceitou a corrida.",
+    "Entregador saiu para entrega": "O entregador saiu para buscar o pedido.",
+    "Produto está a caminho": "O pedido está a caminho do cliente.",
+    "Pedido finalizado": "O cliente recebeu o pedido com sucesso.",
+    "Pedido recusado — reembolso iniciado": "O pedido foi recusado e o reembolso está em andamento.",
+    "Entregue": "O pedido foi entregue."
+  };
+    return (
     <Container className={styles.container}>
       <div className={styles.backButtonWrapper}>
         <button onClick={() => navigate("/painel-mercado")} className={styles.backButton}>
@@ -248,7 +262,7 @@ export default function GerenciarPedidos() {
         </button>
       </div>
 
-            <h2 className={styles.title}>Gerenciar Pedidos</h2>
+      <h2 className={styles.title}>Gerenciar Pedidos</h2>
 
       <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
         <Tab eventKey="ativos" title="Pedidos Ativos">
@@ -272,9 +286,35 @@ export default function GerenciarPedidos() {
           {historico.length === 0 ? (
             <p>Sem pedidos finalizados ou recusados.</p>
           ) : (
-            historico.map((pedido) => (
-              <PedidoCard key={pedido.id} pedido={pedido} historico />
-            ))
+            historico.map((pedido) => {
+              const status = pedido.status;
+              const resumo = statusMensagens[status] || "Status não identificado.";
+
+              return (
+                <Card key={pedido.id} className={styles.card}>
+                  <Card.Body>
+                    <Card.Title className={styles.cardTitle}>
+                      Pedido de {pedido.id_usuario}
+                    </Card.Title>
+                    <Card.Text>
+                      <strong>Status:</strong> {status}
+                    </Card.Text>
+                    <Card.Text>
+                      <strong>Resumo:</strong> {resumo}
+                    </Card.Text>
+                    <Card.Text>
+                      <strong>Data:</strong> {pedido.data_pedido}
+                    </Card.Text>
+                    <Card.Text>
+                      <strong>Valor:</strong>{" "}
+                      {typeof pedido.valor_total === "number"
+                        ? `R$ ${pedido.valor_total.toFixed(2)}`
+                        : pedido.valor_total}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              );
+            })
           )}
         </Tab>
       </Tabs>
