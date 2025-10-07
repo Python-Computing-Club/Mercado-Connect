@@ -146,7 +146,7 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
 
   console.log("📦 Payload enviado para o backend:", JSON.stringify(body, null, 2));
 
-  const baseURL = process.env.REACT_APP_API_BASE || ""; // ← define no .env.local para uso local
+  const baseURL = process.env.REACT_APP_UBER_DELIVERY || "";
 
   try {
     const res = await fetch(`${baseURL}/api/uber-delivery`, {
