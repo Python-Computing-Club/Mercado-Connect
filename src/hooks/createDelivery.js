@@ -38,7 +38,7 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
   }
 
   const now = new Date();
-  const pickupReady = new Date(now.getTime() + 5 * 60000);
+  const pickupReady = new Date(); // imediatamente
   const pickupDeadline = new Date(now.getTime() + 30 * 60000);
   const dropoffReady = new Date(now.getTime() + 10 * 60000);
   const dropoffDeadline = new Date(dropoffReady.getTime() + 60 * 60000);
@@ -110,7 +110,7 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
     manifest_total_value: manifestTotalValue,
     quote_id: quoteId,
     undeliverable_action: "return",
-    pickup_ready_dt: pickupReady.toISOString(),
+    pickup_ready_dt: new Date().toISOString(),
     pickup_deadline_dt: pickupDeadline.toISOString(),
     dropoff_ready_dt: dropoffReady.toISOString(),
     dropoff_deadline_dt: dropoffDeadline.toISOString(),

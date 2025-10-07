@@ -1,33 +1,54 @@
-export async function trackDelivery(deliveryId) {
-  const token = process.env.REACT_APP_UBER_TOKEN;
-  const customerId = process.env.REACT_APP_UBER_CUSTOMER_ID;
-  const env = process.env.REACT_APP_UBER_ENV || "sandbox";
+import React, { useEffect, useState } from "react";
+import { Button, Card, Spinner } from "react-bootstrap";
+import { trackDelivery } from "../../hooks/trackDelivery";
 
-  const url = `https://${env}-api.uber.com/v1/customers/${customerId}/deliveries/${deliveryId}`;
+export default function RastreamentoEntrega({ pedido }) {
+  const [statusUber, setStatusUber] = useState(null);
+  const [trackingUrl, setTrackingUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+  useEffect(() => {
+    const fetchStatus = async () => {
+      if (!pedido?.delivery_id) return;
+
+      const result = await trackDelivery(pedido.delivery_id);
+      if (result) {
+        setStatusUber(result.status);
+        setTrackingUrl(result.trackingUrl);
       }
-    });
+      setLoading(false);
+    };
 
-    const data = await res.json();
-    if (data.status) {
-      return {
-        status: data.status,
-        courier: data.courier || null,
-        eta: data.dropoff_eta || null,
-        trackingUrl: data.tracking_url || null
-      };
-    } else {
-      console.warn("Erro ao rastrear entrega Uber:", data);
-      return null;
-    }
-  } catch (err) {
-    console.error("Erro ao consultar entrega Uber:", err);
-    return null;
-  }
+    fetchStatus();
+  }, [pedido?.delivery_id]);
+
+  const podeMostrar =
+    statusUber === "accepted" ||
+    statusUber === "en_route_to_pickup" ||
+    statusUber === "delivered";
+
+  return (
+    <Card className="mt-3">
+      <Card.Body>
+        <h5>Entrega em tempo real</h5>
+
+        {loading ? (
+          <Spinner animation="border" />
+        ) : podeMostrar && trackingUrl ? (
+          <Button
+            variant="outline-primary"
+            href={trackingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Ver rastreamento da entrega
+          </Button>
+        ) : (
+          <p>
+            Estamos aguardando o entregador parceiro aceitar a corrida. Assim que ele estiver a caminho, você poderá acompanhar a entrega em tempo real.
+          </p>
+        )}
+      </Card.Body>
+    </Card>
+  );
 }
