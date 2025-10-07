@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Spinner } from "react-bootstrap";
 import { doc, deleteDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import useCodigoTimer from "../../hooks/useCodigoTimer";
 import styles from "../../pages/painelMercado/gerenciar-pedido.module.css";
 
-export default function PedidoCard({ pedido, historico = false, onAceitar, onRecusar }) {
+export default function PedidoCard({ pedido, historico = false, onAceitar, onRecusar, chamandoMotorista = false }) {
   const [tempo, setTempo] = useState(10);
   const [removido, setRemovido] = useState(false);
 
@@ -49,12 +49,14 @@ export default function PedidoCard({ pedido, historico = false, onAceitar, onRec
                   variant="success"
                   className="me-2"
                   onClick={() => onAceitar?.(pedido)}
+                  disabled={chamandoMotorista}
                 >
                   Aceitar
                 </Button>
                 <Button
                   variant="danger"
                   onClick={() => onRecusar?.(pedido)}
+                  disabled={chamandoMotorista}
                 >
                   Recusar
                 </Button>
@@ -65,6 +67,7 @@ export default function PedidoCard({ pedido, historico = false, onAceitar, onRec
               <Button
                 variant="primary"
                 onClick={() => onAceitar?.(pedido)}
+                disabled={chamandoMotorista}
               >
                 Montar Pedido
               </Button>
@@ -74,11 +77,25 @@ export default function PedidoCard({ pedido, historico = false, onAceitar, onRec
               <Button
                 variant="primary"
                 onClick={() => onAceitar?.(pedido)}
+                disabled={chamandoMotorista}
               >
-                Pedir Corrida
+                {chamandoMotorista ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      className="me-2"
+                    />
+                    Chamando o motorista...
+                  </>
+                ) : (
+                  "Pedir Corrida"
+                )}
               </Button>
             )}
-
 
             {statusLower === "aguardando aceite do entregador" && (
               <p className={styles.aguardando}>
@@ -91,20 +108,6 @@ export default function PedidoCard({ pedido, historico = false, onAceitar, onRec
                 <p className={styles.finalizado}>
                   Pedido finalizado e a caminho do cliente.
                 </p>
-            {pedido.tracking_url && (
-                  <div className="mt-3">
-                    <h6>Entrega em tempo real:</h6>
-                    <Button
-                      variant="outline-primary"
-                      href={pedido.tracking_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.linkEntrega}
-                    >
-                      Ver rastreamento da entrega
-                    </Button>
-                  </div>
-                )}
               </>
             )}
 
