@@ -26,9 +26,12 @@ export default function AcompanhamentoPedido() {
     "Aguardando confirmação da loja",
     "Confirmado",
     "Loja está montando seu pedido",
+    "Entregador aceitou a corrida",
+    "Entregador saiu para entrega",
     "Produto está a caminho",
     "Pedido finalizado"
   ];
+
 
   const enviarAtualizacaoPedido = async (status) => {
     let contato = "";
@@ -138,20 +141,21 @@ export default function AcompanhamentoPedido() {
         const statusUber = await consultarEntregaUber(pedido.delivery_id);
 
         const statusMap = {
-          pending: "Aguardando confirmação da loja",
-          accepted: "Confirmado",
-          en_route_to_pickup: "Loja está montando seu pedido",
-          picked_up: "Produto está a caminho",
-          delivered: "Pedido finalizado",
-          returned: "Pedido devolvido",
-          cancelled: "Pedido cancelado"
+          accepted: "Entregador aceitou a corrida",
+          en_route_to_pickup: "Entregador saiu para entrega",
+          delivered: "Pedido finalizado"
         };
 
-        const statusLocal = statusMap[statusUber] || pedido.status;
+        if (!statusUber || !statusMap[statusUber]) {
+          console.log(`🔒 Status da Uber ignorado: ${statusUber}`);
+          return;
+        }
 
-        if (statusLocal !== pedido.status) {
-          await atualizarPedido(id, { status: statusLocal });
-          console.log(`🔄 Status sincronizado com Uber: ${statusUber} → ${statusLocal}`);
+        const statusTraduzido = statusMap[statusUber];
+
+        if (statusTraduzido !== pedido.status) {
+          await atualizarPedido(id, { status: statusTraduzido });
+          console.log(`🔄 Status sincronizado com Uber: ${statusUber} → ${statusTraduzido}`);
         }
       }
     };
@@ -159,6 +163,7 @@ export default function AcompanhamentoPedido() {
     const interval = setInterval(verificarStatusUber, 30000);
     return () => clearInterval(interval);
   }, [pedido]);
+
 
   const progresso = () => {
     if (!pedido || !pedido.status) return 0;

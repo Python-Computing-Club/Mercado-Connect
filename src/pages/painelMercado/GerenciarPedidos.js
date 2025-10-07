@@ -103,13 +103,9 @@ export default function GerenciarPedidos() {
   useEffect(() => {
     const sincronizarTodosPedidosUber = async () => {
       const statusMap = {
-        pending: "Aguardando confirmação da loja",
-        accepted: "Confirmado",
-        en_route_to_pickup: "Loja está montando seu pedido",
-        picked_up: "Produto está a caminho",
-        delivered: "Pedido finalizado",
-        returned: "Pedido devolvido",
-        cancelled: "Pedido cancelado"
+        accepted: "Entregador aceitou a corrida",
+        en_route_to_pickup: "Entregador saiu para entrega",
+        delivered: "Pedido finalizado"
       };
 
       const pedidosUber = pedidos.filter(p =>
@@ -120,11 +116,17 @@ export default function GerenciarPedidos() {
 
       for (const pedido of pedidosUber) {
         const statusUber = await consultarEntregaUber(pedido.delivery_id);
-        const statusLocal = statusMap[statusUber] || pedido.status;
 
-        if (statusLocal !== pedido.status) {
-          await atualizarPedido(pedido.id, { status: statusLocal });
-          console.log(`🔄 Pedido ${pedido.id} sincronizado: ${statusUber} → ${statusLocal}`);
+        if (!statusUber || !statusMap[statusUber]) {
+          console.log(`🔒 Status da Uber ignorado: ${statusUber}`);
+          continue;
+        }
+
+        const statusTraduzido = statusMap[statusUber];
+
+        if (statusTraduzido !== pedido.status) {
+          await atualizarPedido(pedido.id, { status: statusTraduzido });
+          console.log(`🔄 Pedido ${pedido.id} sincronizado: ${statusUber} → ${statusTraduzido}`);
         }
       }
     };
@@ -133,6 +135,7 @@ export default function GerenciarPedidos() {
       sincronizarTodosPedidosUber();
     }
   }, [pedidos]);
+
 
   const atualizarStatus = async (idPedido, novoStatus) => {
     try {

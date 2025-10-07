@@ -63,7 +63,10 @@ router.get("/status/:deliveryId", async (req, res) => {
       return res.status(response.status).json(data);
     }
 
-    res.status(200).json({ status: data.status });
+    res.status(200).json({
+      deliveryId,
+      status: data.status
+    });
   } catch (err) {
     console.error("❌ Erro ao consultar status da entrega Uber:", err);
     res.status(500).json({ error: "Falha ao consultar status da entrega Uber" });

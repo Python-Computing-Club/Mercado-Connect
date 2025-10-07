@@ -75,9 +75,10 @@ export default function PedidoCard({ pedido, historico = false, onAceitar, onRec
                 variant="primary"
                 onClick={() => onAceitar?.(pedido)}
               >
-                Enviar Pedido
+                Pedir Corrida
               </Button>
             )}
+
 
             {statusLower === "aguardando aceite do entregador" && (
               <p className={styles.aguardando}>
