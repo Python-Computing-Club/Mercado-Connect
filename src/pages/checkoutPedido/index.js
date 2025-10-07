@@ -22,79 +22,93 @@ export default function CheckoutPedido() {
   const [carrinho, setCarrinho] = useState([]);
   const [cotacaoUber, setCotacaoUber] = useState(null);
   const [retirarNaLoja, setRetirarNaLoja] = useState(false);
+  const [cotandoEntrega, setCotandoEntrega] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-  const userStorage = JSON.parse(localStorage.getItem('userSession')) || {};
-  const cartStorage = JSON.parse(localStorage.getItem('carrinho')) || [];
+    const userStorage = JSON.parse(localStorage.getItem('userSession')) || {};
+    const cartStorage = JSON.parse(localStorage.getItem('carrinho')) || [];
 
-  setUsuario(userStorage);
-  setCarrinho(cartStorage);
+    setUsuario(userStorage);
+    setCarrinho(cartStorage);
 
-  if (userStorage.enderecos && Array.isArray(userStorage.enderecos)) {
-    setEnderecos(userStorage.enderecos);
-    setEnderecoSelecionado(prev => prev || userStorage.enderecos[0]);
-  }
-}, []);
+    if (userStorage.enderecos && Array.isArray(userStorage.enderecos)) {
+      setEnderecos(userStorage.enderecos);
+      setEnderecoSelecionado(prev => prev || userStorage.enderecos[0]);
+    }
+  }, []);
 
   useEffect(() => {
     async function cotarEntrega() {
-      if (retirarNaLoja || !usuario || !carrinho.length || !enderecoSelecionado) {
-        console.log("ℹ️ Cotação ignorada: retirada na loja ou dados incompletos.");
+      if (retirarNaLoja) {
+        setCotacaoUber(null);
+        setCotandoEntrega(false);
         return;
       }
 
-      console.log("🚀 Iniciando cotação Uber...");
-
-      const idMercado = carrinho[0]?.id_mercado;
-      if (!idMercado) {
-        console.warn("⚠️ Carrinho sem id_mercado.");
+      if (!usuario?.id || !carrinho.length || !enderecoSelecionado) {
+        setCotandoEntrega(false);
         return;
       }
 
-      const mercadoRef = doc(db, "mercados", idMercado);
-      const mercadoSnap = await getDoc(mercadoRef);
-      if (!mercadoSnap.exists()) {
-        console.warn("⚠️ Mercado não encontrado no Firestore.");
-        return;
-      }
+      setCotandoEntrega(true);
 
-      const mercado = mercadoSnap.data();
-      console.log("🏪 Mercado carregado:", mercado);
+      try {
+        const idMercado = carrinho[0]?.id_mercado;
+        if (!idMercado) {
+          console.warn("⚠️ Carrinho sem id_mercado.");
+          setCotandoEntrega(false);
+          return;
+        }
 
-      const { total } = carrinho.reduce(
-        (acc, item) => {
-          const precoUsado = typeof item.preco_final === "number" && item.preco_final < item.preco
-            ? item.preco_final
-            : item.preco || 0;
-          acc.total += precoUsado * item.quantidade;
-          return acc;
-        },
-        { total: 0 }
-      );
+        const mercadoRef = doc(db, "mercados", idMercado);
+        const mercadoSnap = await getDoc(mercadoRef);
+        if (!mercadoSnap.exists()) {
+          console.warn("⚠️ Mercado não encontrado no Firestore.");
+          setCotandoEntrega(false);
+          return;
+        }
 
-      const payload = formatUberPayload({
-        usuario,
-        endereco: enderecoSelecionado,
-        mercado,
-        carrinho,
-        valorTotal: total
-      });
+        const mercado = mercadoSnap.data();
 
-      if (!payload) {
-        console.warn("⚠️ Payload inválido para cotação Uber.");
-        return;
-      }
+        const { total } = carrinho.reduce(
+          (acc, item) => {
+            const precoUsado = typeof item.preco_final === "number" && item.preco_final < item.preco
+              ? item.preco_final
+              : item.preco || 0;
+            acc.total += precoUsado * item.quantidade;
+            return acc;
+          },
+          { total: 0 }
+        );
 
-      console.log("📦 Payload Uber:", payload);
+        const payload = formatUberPayload({
+          usuario,
+          endereco: enderecoSelecionado,
+          mercado,
+          carrinho,
+          valorTotal: total
+        });
 
-      const cotacao = await generateQuote(payload);
-      if (cotacao) {
-        console.log("📬 Cotação Uber recebida:", cotacao);
-        setCotacaoUber(cotacao);
-      } else {
-        console.warn("⚠️ Cotação Uber falhou ou veio nula.");
+        if (!payload) {
+          console.warn("⚠️ Payload inválido para cotação Uber.");
+          setCotandoEntrega(false);
+          return;
+        }
+
+        const cotacao = await generateQuote(payload);
+        if (cotacao) {
+          setCotacaoUber(cotacao);
+        } else {
+          setCotacaoUber(null);
+          console.warn("⚠️ Cotação Uber falhou ou veio nula.");
+        }
+      } catch (error) {
+        console.error("❌ Erro durante cotação Uber:", error);
+        setCotacaoUber(null);
+      } finally {
+        setCotandoEntrega(false);
       }
     }
 
@@ -179,23 +193,17 @@ export default function CheckoutPedido() {
       }))
     };
 
-    console.log("📝 Criando pedido:", pedido);
-
     try {
       const idDoPedido = await criarPedido(pedido);
-      console.log("✅ Pedido criado com ID:", idDoPedido);
       clearCart();
 
       if (produtosPagos.length === 0) {
-        console.log("🛒 Produtos gratuitos — pulando pagamento.");
         navigate(`/acompanhar-pedido/${idDoPedido}`);
         return;
       }
 
       setLoading(true);
-      console.log("💳 Iniciando pagamento via Mercado Pago...");
       const urlPagamento = await criarPreferencia(produtosPagos, usuario.email);
-
       window.location.href = urlPagamento;
 
     } catch (error) {
@@ -283,6 +291,12 @@ export default function CheckoutPedido() {
         </Card>
       )}
 
+      {cotandoEntrega && !retirarNaLoja && (
+        <p style={{ color: 'orange', marginTop: '10px' }}>
+          Cotando valor de entrega via Uber...
+        </p>
+      )}
+
       <Accordion className={styles.totalAccordion}>
         <Accordion.Item eventKey="0">
           <Accordion.Header>
@@ -320,9 +334,9 @@ export default function CheckoutPedido() {
         variant="success"
         className={styles.btnPagamento}
         onClick={handlePagamento}
-        disabled={loading || (!retirarNaLoja && !cotacaoUber?.quoteId)}
+        disabled={loading || (!retirarNaLoja && (cotandoEntrega || !cotacaoUber?.quoteId))}
       >
-        {loading ? 'Redirecionando ...' : 'Realizar Pagamento'}
+        {loading ? 'Redirecionando ...' : (cotandoEntrega ? 'Cotando valor de entrega...' : 'Realizar Pagamento')}
       </Button>
     </>
   );

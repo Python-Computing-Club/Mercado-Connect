@@ -7,7 +7,14 @@ export async function consultarEntregaUber(deliveryId) {
 
     const statusUber = data.status || null;
 
-    const statusPermitidos = ["accepted", "en_route_to_pickup", "delivered"];
+    const statusPermitidos = [
+      "accepted",
+      "en_route_to_pickup",
+      "arrived_at_pickup",
+      "picked_up",
+      "en_route_to_dropoff",
+      "delivered"
+    ];
 
     if (!statusPermitidos.includes(statusUber)) {
       console.log("🔒 Status da Uber ignorado:", statusUber);
@@ -19,4 +26,22 @@ export async function consultarEntregaUber(deliveryId) {
     console.error("❌ Erro ao consultar status da entrega Uber:", err);
     return null;
   }
+}
+
+export function consultarEntregaUberPolling(deliveryId, setStatus, interval = 10000) {
+  let ativo = true;
+
+  async function buscar() {
+    if (!ativo) return;
+    const status = await consultarEntregaUber(deliveryId);
+    if (status) setStatus(status);
+  }
+
+  buscar();
+  const timerId = setInterval(buscar, interval);
+
+  return () => {
+    ativo = false;
+    clearInterval(timerId);
+  };
 }

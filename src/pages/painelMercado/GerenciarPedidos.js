@@ -108,7 +108,10 @@ export default function GerenciarPedidos() {
       (pedido) =>
         pedido.status === "Pedido recusado — reembolso iniciado" ||
         pedido.status === "Entregue" ||
-        pedido.status === "Pedido finalizado"
+        pedido.status === "Pedido finalizado" ||
+        pedido.status === "Entregador aceitou a corrida" ||
+        pedido.status === "Entregador saiu para entrega" ||
+        pedido.status === "Produto está a caminho"
     );
     setHistorico(historicos);
   }, [pedidos]);

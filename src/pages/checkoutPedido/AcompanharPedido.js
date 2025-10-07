@@ -22,16 +22,30 @@ export default function AcompanhamentoPedido() {
   const usuario = JSON.parse(localStorage.getItem("userSession"));
   const { sendSms } = useTextBeeSms();
 
+  // Status base da loja (Firebase)
   const statusEtapasBase = [
     "Aguardando confirmação da loja",
     "Confirmado",
-    "Loja está montando seu pedido",
-    "Entregador aceitou a corrida",
-    "Entregador saiu para entrega",
-    "Produto está a caminho",
-    "Pedido finalizado"
+    "Loja está montando seu pedido"
   ];
 
+  // Status da entrega Uber, mapeados para status amigáveis na loja
+  const statusUberParaLoja = {
+    accepted: "Entregador aceitou a corrida",
+    en_route_to_pickup: "Entregador a caminho da loja",
+    arrived_at_pickup: "Entregador chegou na loja",
+    picked_up: "Pedido retirado pelo entregador",
+    en_route_to_dropoff: "Entregador saiu para entrega",
+    delivered: "Pedido finalizado"
+  };
+
+  const statusEtapas = pedido?.reembolso
+    ? [
+        ...statusEtapasBase,
+        ...Object.values(statusUberParaLoja),
+        "Pedido recusado — reembolso iniciado"
+      ]
+    : [...statusEtapasBase, ...Object.values(statusUberParaLoja)];
 
   const enviarAtualizacaoPedido = async (status) => {
     let contato = "";
@@ -56,10 +70,6 @@ export default function AcompanhamentoPedido() {
     }
     console.log("Atualização de status de pedido enviada ao usuário!");
   };
-
-  const statusEtapas = pedido?.reembolso
-    ? [...statusEtapasBase, "Pedido recusado — reembolso iniciado"]
-    : statusEtapasBase;
 
   useEffect(() => {
     if (!id || typeof id !== "string" || id.trim() === "") {
@@ -92,7 +102,7 @@ export default function AcompanhamentoPedido() {
               mensagem = "Seu pedido já está pronto e está a caminho!";
               enviarAtualizacaoPedido(mensagem);
               break;
-            case "Pedido recusado - reembolso iniciado":
+            case "Pedido recusado — reembolso iniciado":
               mensagem = "Já recebemos a recusa de seu pedido e estamos aplicando o reembolso";
               enviarAtualizacaoPedido(mensagem);
               break;
@@ -132,38 +142,48 @@ export default function AcompanhamentoPedido() {
   }, [id]);
 
   useEffect(() => {
-    const verificarStatusUber = async () => {
-      if (
-        pedido?.entrega === "Entrega via Uber" &&
-        pedido?.delivery_id &&
-        pedido?.status !== "Pedido finalizado"
-      ) {
+    if (
+      !pedido ||
+      pedido.entrega !== "Entrega via Uber" ||
+      !pedido.delivery_id ||
+      pedido.status === "Pedido finalizado" ||
+      pedido.status === "Pedido recusado — reembolso iniciado"
+    )
+      return;
+
+    let ativo = true;
+
+    const polling = async () => {
+      if (!ativo) return;
+      try {
         const statusUber = await consultarEntregaUber(pedido.delivery_id);
 
-        const statusMap = {
-          accepted: "Entregador aceitou a corrida",
-          en_route_to_pickup: "Entregador saiu para entrega",
-          delivered: "Pedido finalizado"
-        };
+        if (!statusUber) return;
 
-        if (!statusUber || !statusMap[statusUber]) {
-          console.log(`🔒 Status da Uber ignorado: ${statusUber}`);
+        const statusLoja = statusUberParaLoja[statusUber];
+
+        if (!statusLoja) {
+          console.log(`🔒 Status Uber ignorado no mapeamento: ${statusUber}`);
           return;
         }
 
-        const statusTraduzido = statusMap[statusUber];
-
-        if (statusTraduzido !== pedido.status) {
-          await atualizarPedido(id, { status: statusTraduzido });
-          console.log(`🔄 Status sincronizado com Uber: ${statusUber} → ${statusTraduzido}`);
+        if (statusLoja !== pedido.status) {
+          await atualizarPedido(id, { status: statusLoja });
+          console.log(`🔄 Status sincronizado com Uber: ${statusUber} → ${statusLoja}`);
         }
+      } catch (err) {
+        console.error("Erro ao consultar status Uber:", err);
       }
     };
 
-    const interval = setInterval(verificarStatusUber, 10000);
-    return () => clearInterval(interval);
-  }, [pedido]);
+    polling();
+    const intervalId = setInterval(polling, 10000);
 
+    return () => {
+      ativo = false;
+      clearInterval(intervalId);
+    };
+  }, [pedido, id]);
 
   const progresso = () => {
     if (!pedido || !pedido.status) return 0;
@@ -261,8 +281,8 @@ export default function AcompanhamentoPedido() {
               </Button>
             )}
 
-            {pedido.tracking_url && (
-              ["Entregador aceitou a corrida", "Entregador saiu para entrega", "Pedido finalizado"].includes(pedido.status) && (
+            {pedido.tracking_url &&
+              ["Entregador aceitou a corrida", "Entregador a caminho da loja", "Entregador chegou na loja", "Pedido retirado pelo entregador", "Entregador saiu para entrega", "Pedido finalizado"].includes(pedido.status) && (
                 <div className="mt-3">
                   <h6>Entrega em tempo real:</h6>
                   <Button
@@ -275,9 +295,7 @@ export default function AcompanhamentoPedido() {
                     Ver rastreamento da entrega
                   </Button>
                 </div>
-              )
-            )}
-
+              )}
 
             {ultimaAtualizacao && (
               <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#666" }}>
