@@ -34,7 +34,6 @@ export default function CheckoutPedido() {
 
   if (userStorage.enderecos && Array.isArray(userStorage.enderecos)) {
     setEnderecos(userStorage.enderecos);
-    // Ao inicializar, só defina enderecoSelecionado se estiver null:
     setEnderecoSelecionado(prev => prev || userStorage.enderecos[0]);
   }
 }, []);

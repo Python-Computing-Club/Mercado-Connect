@@ -1,5 +1,5 @@
 export async function generateQuote(payload) {
-  const baseURL = process.env.REACT_APP_API_BASE || ""; // Define no .env.local para uso local
+  const baseURL = process.env.REACT_APP_UBER_QUOTE || "";
 
   try {
     const res = await fetch(`${baseURL}/api/uber-quote`, {
