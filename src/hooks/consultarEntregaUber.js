@@ -8,16 +8,12 @@ export async function consultarEntregaUber(deliveryId) {
     const statusUber = data.status || null;
 
     const statusPermitidos = [
-      "pending",            // aguardando aceitação
-      "accepted",           // entregador aceitou
-      "pickup",             // pedido está sendo retirado pelo entregador
-      "en_route_to_pickup", // indo buscar pedido
-      "arrived_at_pickup",  // chegou para pegar
-      "picked_up",          // pedido retirado
-      "dropoff",            // pedido está sendo entregue
-      "en_route_to_dropoff",// indo entregar
-      "delivered"           // entregue
-    ];
+       "pending",    // aguardando aceitação
+       "accepted",   // entregador aceitou
+       "pickup",     // pedido está sendo retirado
+       "dropoff",    // pedido está sendo entregue
+       "delivered"   // entregue
+     ];
 
     if (!statusPermitidos.includes(statusUber)) {
       console.log("🔒 Status da Uber ignorado:", statusUber);

@@ -29,26 +29,21 @@ export default function AcompanhamentoPedido() {
     "Loja está montando seu pedido"
   ];
 
-  // Status da entrega Uber, mapeados para status
-  const statusUberParaLoja = {
+  const statusUberParaUsuario = {
     pending: "Aguardando aceitação do entregador",
     accepted: "Entregador aceitou a corrida",
     pickup: "Entregador está retirando seu pedido",
-    en_route_to_pickup: "Entregador a caminho da loja",
-    arrived_at_pickup: "Entregador chegou na loja",
-    picked_up: "Pedido retirado pelo entregador",
     dropoff: "Entregador está entregando seu pedido",
-    en_route_to_dropoff: "Entregador saiu para entrega",
     delivered: "Pedido entregue"
   };
 
   const statusEtapas = pedido?.reembolso
     ? [
         ...statusEtapasBase,
-        ...Object.values(statusUberParaLoja),
+        ...Object.values(statusUberParaUsuario),
         "Pedido recusado — reembolso iniciado"
       ]
-    : [...statusEtapasBase, ...Object.values(statusUberParaLoja)];
+    : [...statusEtapasBase, ...Object.values(statusUberParaUsuario)];
 
   const enviarAtualizacaoPedido = async (status) => {
     let contato = "";
@@ -163,7 +158,7 @@ export default function AcompanhamentoPedido() {
 
         if (!statusUber) return;
 
-        const statusLoja = statusUberParaLoja[statusUber];
+        const statusLoja = statusUberParaUsuario[statusUber];
 
         if (!statusLoja) {
           console.log(`🔒 Status Uber ignorado no mapeamento: ${statusUber}`);
@@ -285,7 +280,13 @@ export default function AcompanhamentoPedido() {
             )}
 
             {pedido.tracking_url &&
-              ["Entregador aceitou a corrida", "Entregador a caminho da loja", "Entregador chegou na loja", "Pedido retirado pelo entregador", "Entregador saiu para entrega", "Pedido finalizado"].includes(pedido.status) && (
+              [
+                "Aguardando aceitação do entregador",
+                "Entregador aceitou a corrida",
+                "Entregador está retirando seu pedido",
+                "Entregador está entregando seu pedido",
+                "Pedido entregue"
+              ].includes(pedido.status) && (
                 <div className="mt-3">
                   <h6>Entrega em tempo real:</h6>
                   <Button
@@ -298,7 +299,7 @@ export default function AcompanhamentoPedido() {
                     Ver rastreamento da entrega
                   </Button>
                 </div>
-              )}
+            )}
 
             {ultimaAtualizacao && (
               <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#666" }}>
