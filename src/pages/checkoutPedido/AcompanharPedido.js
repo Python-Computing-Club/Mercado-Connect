@@ -29,14 +29,17 @@ export default function AcompanhamentoPedido() {
     "Loja está montando seu pedido"
   ];
 
-  // Status da entrega Uber, mapeados para status amigáveis na loja
+  // Status da entrega Uber, mapeados para status
   const statusUberParaLoja = {
+    pending: "Aguardando aceitação do entregador",
     accepted: "Entregador aceitou a corrida",
+    pickup: "Entregador está retirando seu pedido",
     en_route_to_pickup: "Entregador a caminho da loja",
     arrived_at_pickup: "Entregador chegou na loja",
     picked_up: "Pedido retirado pelo entregador",
+    dropoff: "Entregador está entregando seu pedido",
     en_route_to_dropoff: "Entregador saiu para entrega",
-    delivered: "Pedido finalizado"
+    delivered: "Pedido entregue"
   };
 
   const statusEtapas = pedido?.reembolso
