@@ -160,7 +160,7 @@ export default function AcompanhamentoPedido() {
       }
     };
 
-    const interval = setInterval(verificarStatusUber, 30000);
+    const interval = setInterval(verificarStatusUber, 10000);
     return () => clearInterval(interval);
   }, [pedido]);
 
