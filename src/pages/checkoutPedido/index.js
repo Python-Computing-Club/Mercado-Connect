@@ -131,6 +131,11 @@ export default function CheckoutPedido() {
   const handlePagamento = async () => {
     const data_hora = new Date();
 
+    if (!retirarNaLoja && !cotacaoUber?.quoteId) {
+      alert("A cotação da entrega via Uber ainda está carregando. Aguarde alguns segundos.");
+      return;
+    }
+
     if (!usuario?.nome || !usuario?.telefone) {
       alert("Por favor, preencha seu nome e telefone no perfil antes de continuar com o pedido.");
       return;
@@ -315,7 +320,7 @@ export default function CheckoutPedido() {
         variant="success"
         className={styles.btnPagamento}
         onClick={handlePagamento}
-        disabled={loading}
+        disabled={loading || (!retirarNaLoja && !cotacaoUber?.quoteId)}
       >
         {loading ? 'Redirecionando ...' : 'Realizar Pagamento'}
       </Button>

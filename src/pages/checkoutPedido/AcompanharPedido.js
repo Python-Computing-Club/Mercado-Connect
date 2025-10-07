@@ -8,6 +8,7 @@ import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import styles from "./acompanhar-pedido.module.css";
 import emailjs from "@emailjs/browser";
 import emiteNFE from "../../utils/emiteNFE";
+import { consultarEntregaUber } from "../../hooks/consultarEntregaUber";
 
 export default function AcompanhamentoPedido() {
   const { id } = useParams();
@@ -29,16 +30,13 @@ export default function AcompanhamentoPedido() {
     "Pedido finalizado"
   ];
 
-
   const enviarAtualizacaoPedido = async (status) => {
-    let contato = ""
-    // Verifica o tipo de contato cadastrado pelo usuario e envia o status do pedido
-    if (usuario.email == "") {
-      contato = usuario.telefone
+    let contato = "";
+    if (usuario.email === "") {
+      contato = usuario.telefone;
       sendSms(contato, status);
-      return console.log("Atualização de status de pedido enviada ao usuário!")
-    } else if (usuario.telefone == "") {
-      contato = usuario.email
+    } else if (usuario.telefone === "") {
+      contato = usuario.email;
       try {
         await emailjs.send(
           process.env.REACT_APP_EMAILJS_SERVICE_ID,
@@ -46,23 +44,19 @@ export default function AcompanhamentoPedido() {
           { to_email: contato, status },
           process.env.REACT_APP_EMAILJS_PUBLIC_KEY
         );
-        return console.log("Atualização de status de pedido enviada ao usuário!")
       } catch (err) {
         console.error(err);
-        return null;
       }
     } else {
-      contato = usuario.telefone
+      contato = usuario.telefone;
       sendSms(contato, status);
-      return console.log("Atualização de status de pedido enviada ao usuário!")
     }
-
-
-  }
+    console.log("Atualização de status de pedido enviada ao usuário!");
+  };
 
   const statusEtapas = pedido?.reembolso
     ? [...statusEtapasBase, "Pedido recusado — reembolso iniciado"]
-    : statusEtapasBase
+    : statusEtapasBase;
 
   useEffect(() => {
     if (!id || typeof id !== "string" || id.trim() === "") {
@@ -80,198 +74,211 @@ export default function AcompanhamentoPedido() {
           setPedido(pedidoData);
           setUltimaAtualizacao(new Date());
 
-          let mensagem = ""
-          console.log(pedidoData.status)
-
-          //Envio de mensagem personalizada de acordo com o status
+          let mensagem = "";
           switch (pedidoData.status) {
-            // Na confirmação do pedido, é gerada a nota fiscal
             case "Confirmado":
-              mensagem = "Seu pedido já foi confirmado pela loja!"
+              mensagem = "Seu pedido já foi confirmado pela loja!";
               emiteNFE(pedidoData, snapshot.id);
               enviarAtualizacaoPedido(mensagem);
               break;
             case "Loja está montando seu pedido":
-              mensagem = "Seu pedido já está sendo preparado!"
-              enviarAtualizacaoPedido(mensagem)
+              mensagem = "Seu pedido já está sendo preparado!";
+              enviarAtualizacaoPedido(mensagem);
               break;
             case "Produto está a caminho":
-              mensagem = "Seu pedido já está pronto e está a caminho!"
-              enviarAtualizacaoPedido(mensagem)
+              mensagem = "Seu pedido já está pronto e está a caminho!";
+              enviarAtualizacaoPedido(mensagem);
               break;
             case "Pedido recusado - reembolso iniciado":
-              mensagem = "Já recebemos a recusa de seu pedido e estamos aplicando o reembolso"
-              enviarAtualizacaoPedido(mensagem)
+              mensagem = "Já recebemos a recusa de seu pedido e estamos aplicando o reembolso";
+              enviarAtualizacaoPedido(mensagem);
               break;
             case "Pedido finalizado":
-              mensagem = "Seu pedido foi entregue! Obrigado por comprar com Mercado Connect :)"
+              mensagem = "Seu pedido foi entregue! Obrigado por comprar com Mercado Connect :)";
               break;
           }
 
-        if (pedidoData.id_mercado) {
-          try {
-            const mercadoRef = doc(db, "mercados", pedidoData.id_mercado);
-            const mercadoSnap = await getDoc(mercadoRef);
-            if (mercadoSnap.exists()) {
-              setMercado(mercadoSnap.data());
-            } else {
+          if (pedidoData.id_mercado) {
+            try {
+              const mercadoRef = doc(db, "mercados", pedidoData.id_mercado);
+              const mercadoSnap = await getDoc(mercadoRef);
+              setMercado(mercadoSnap.exists() ? mercadoSnap.data() : null);
+            } catch (err) {
+              console.error("Erro ao buscar mercado:", err);
               setMercado(null);
             }
-          } catch (err) {
-            console.error("Erro ao buscar mercado:", err);
+          } else {
             setMercado(null);
           }
         } else {
-          setMercado(null);
-        }
-      } else {
-      setPedido(null);
+          setPedido(null);
           setMercado(null);
           setUltimaAtualizacao(null);
           setErro("Pedido não encontrado.");
-    }
+        }
       },
-    (snapshotError) => {
-      console.error("Erro no snapshot:", snapshotError);
-      setErro("Erro ao escutar o pedido.");
-    }
-  );
+      (snapshotError) => {
+        console.error("Erro no snapshot:", snapshotError);
+        setErro("Erro ao escutar o pedido.");
+      }
+    );
 
-  return () => {
-    unsubscribe();
+    return () => {
+      unsubscribe();
+    };
+  }, [id]);
+
+  useEffect(() => {
+    const verificarStatusUber = async () => {
+      if (
+        pedido?.entrega === "Entrega via Uber" &&
+        pedido?.delivery_id &&
+        pedido?.status !== "Pedido finalizado"
+      ) {
+        const statusUber = await consultarEntregaUber(pedido.delivery_id);
+
+        const statusMap = {
+          pending: "Aguardando confirmação da loja",
+          accepted: "Confirmado",
+          en_route_to_pickup: "Loja está montando seu pedido",
+          picked_up: "Produto está a caminho",
+          delivered: "Pedido finalizado",
+          returned: "Pedido devolvido",
+          cancelled: "Pedido cancelado"
+        };
+
+        const statusLocal = statusMap[statusUber] || pedido.status;
+
+        if (statusLocal !== pedido.status) {
+          await atualizarPedido(id, { status: statusLocal });
+          console.log(`🔄 Status sincronizado com Uber: ${statusUber} → ${statusLocal}`);
+        }
+      }
+    };
+
+    const interval = setInterval(verificarStatusUber, 30000);
+    return () => clearInterval(interval);
+  }, [pedido]);
+
+  const progresso = () => {
+    if (!pedido || !pedido.status) return 0;
+    const index = statusEtapas.indexOf(pedido.status);
+    return index >= 0 ? ((index + 1) / statusEtapas.length) * 100 : 100;
   };
-}, [id]);
 
-const progresso = () => {
-  if (!pedido || !pedido.status) return 0;
-  const index = statusEtapas.indexOf(pedido.status);
-  if (index >= 0) {
-    return ((index + 1) / statusEtapas.length) * 100;
-  }
-  return 100;
-};
+  const formatarValor = (valor) => {
+    if (typeof valor === "number") return `R$ ${valor.toFixed(2)}`;
+    if (typeof valor === "string" && !isNaN(valor)) return `R$ ${parseFloat(valor).toFixed(2)}`;
+    return "A calcular";
+  };
 
-const formatarValor = (valor) => {
-  if (typeof valor === "number") {
-    return `R$ ${valor.toFixed(2)}`;
-  }
-  if (typeof valor === "string" && !isNaN(valor)) {
-    return `R$ ${parseFloat(valor).toFixed(2)}`;
-  }
-  return "A calcular";
-};
+  const podeConfirmarEntrega = pedido?.status === "Produto está a caminho";
 
-const podeConfirmarEntrega = pedido?.status === "Produto está a caminho";
+  const confirmarEntrega = async () => {
+    if (!id) return;
+    setConfirmando(true);
+    try {
+      await atualizarPedido(id, { status: "Pedido finalizado" });
+      navigate("/pedidos");
+    } catch (error) {
+      console.error("Erro ao confirmar entrega:", error);
+      alert("Erro ao confirmar entrega.");
+    } finally {
+      setConfirmando(false);
+    }
+  };
 
-const confirmarEntrega = async () => {
-  if (!id) return;
-  setConfirmando(true);
-  try {
-    await atualizarPedido(id, { status: "Pedido finalizado" });
-    navigate("/pedidos");
-  } catch (error) {
-    console.error("Erro ao confirmar entrega:", error);
-    alert("Erro ao confirmar entrega.");
-  } finally {
-    setConfirmando(false);
-  }
-};
+  return (
+    <Container className={styles.container}>
+      <div className={styles.backButtonWrapper}>
+        <Button variant="secondary" onClick={() => navigate("/home")}>
+          ← Voltar para Home
+        </Button>
+      </div>
 
-return (
-  <Container className={styles.container}>
-    <div className={styles.backButtonWrapper}>
-      <Button variant="secondary" onClick={() => navigate("/home")}>
-        ← Voltar para Home
-      </Button>
-    </div>
+      <h2 className={styles.title}>Acompanhamento do Pedido</h2>
 
-    <h2 className={styles.title}>Acompanhamento do Pedido</h2>
-
-    {erro ? (
-      <p>{erro}</p>
-    ) : !pedido ? (
-      <p>Buscando pedido...</p>
-    ) : (
-      <Card className={styles.card}>
-        <Card.Body>
-          {mercado && (
-            <div className={styles.mercadoInfo}>
-              <img
-                src={mercado.logo?.url || "https://via.placeholder.com/50"}
-                alt={mercado.estabelecimento || "Logo do mercado"}
-                className={styles.mercadoLogo}
-              />
-              <div className={styles.mercadoNome}>
-                <strong>{mercado.estabelecimento || "Mercado"}</strong>
+      {erro ? (
+        <p>{erro}</p>
+      ) : !pedido ? (
+        <p>Buscando pedido...</p>
+      ) : (
+        <Card className={styles.card}>
+          <Card.Body>
+            {mercado && (
+              <div className={styles.mercadoInfo}>
+                <img
+                  src={mercado.logo?.url || "https://via.placeholder.com/50"}
+                  alt={mercado.estabelecimento || "Logo do mercado"}
+                  className={styles.mercadoLogo}
+                />
+                <div className={styles.mercadoNome}>
+                  <strong>{mercado.estabelecimento || "Mercado"}</strong>
+                </div>
               </div>
-            </div>
-          )}
-
-          <Card.Text>
-            <strong>Status atual:</strong> {pedido.status}
-          </Card.Text>
-          <Card.Text>
-            <strong>Valor total:</strong> {formatarValor(pedido.valor_total)}
-          </Card.Text>
-          <Card.Text>
-            <strong>Data do pedido:</strong> {pedido.data_pedido}
-          </Card.Text>
-
-          <ProgressBar
-            now={progresso()}
-            label={`${Math.round(progresso())}%`}
-            className={styles.progress}
-          />
-
-          <ul className={styles.etapas}>
-            {statusEtapas.map((etapa, index) => (
-              <li
-                key={index}
-                className={pedido.status === etapa ? styles.ativo : ""}
-              >
-                {etapa}
-              </li>
-            ))}
-            {pedido.status && !statusEtapas.includes(pedido.status) && (
-              <li className={styles.ativo}>{pedido.status}</li>
             )}
-          </ul>
 
-          {podeConfirmarEntrega && (
-            <Button
-              variant="success"
-              className="mt-3"
-              onClick={confirmarEntrega}
-              disabled={confirmando}
-            >
-              {confirmando ? "Confirmando..." : "Confirmar entrega"}
-            </Button>
-          )}
+            <Card.Text>
+              <strong>Status atual:</strong> {pedido.status}
+            </Card.Text>
+            <Card.Text>
+              <strong>Valor total:</strong> {formatarValor(pedido.valor_total)}
+            </Card.Text>
+            <Card.Text>
+              <strong>Data do pedido:</strong> {pedido.data_pedido}
+            </Card.Text>
 
-          {pedido.tracking_url && (
-            <div className="mt-3">
-              <h6>Entrega em tempo real:</h6>
+            <ProgressBar
+              now={progresso()}
+              label={`${Math.round(progresso())}%`}
+              className={styles.progress}
+            />
+
+            <ul className={styles.etapas}>
+              {statusEtapas.map((etapa, index) => (
+                <li key={index} className={pedido.status === etapa ? styles.ativo : ""}>
+                  {etapa}
+                </li>
+              ))}
+              {pedido.status && !statusEtapas.includes(pedido.status) && (
+                <li className={styles.ativo}>{pedido.status}</li>
+              )}
+            </ul>
+
+            {podeConfirmarEntrega && (
               <Button
-                variant="outline-primary"
-                href={pedido.tracking_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.linkEntrega}
+                variant="success"
+                className="mt-3"
+                onClick={confirmarEntrega}
+                disabled={confirmando}
               >
-                Ver rastreamento da entrega
+                {confirmando ? "Confirmando..." : "Confirmar entrega"}
               </Button>
-            </div>
-          )}
+            )}
 
+            {pedido.tracking_url && (
+              <div className="mt-3">
+                <h6>Entrega em tempo real:</h6>
+                <Button
+                  variant="outline-primary"
+                  href={pedido.tracking_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.linkEntrega}
+                >
+                  Ver rastreamento da entrega
+                </Button>
+              </div>
+            )}
 
-          {ultimaAtualizacao && (
-            <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#666" }}>
-              Última atualização: {ultimaAtualizacao.toLocaleTimeString("pt-BR")}
-            </p>
-          )}
-        </Card.Body>
-      </Card>
-    )}
-  </Container>
-);
+            {ultimaAtualizacao && (
+              <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#666" }}>
+                Última atualização: {ultimaAtualizacao.toLocaleTimeString("pt-BR")}
+              </p>
+            )}
+          </Card.Body>
+        </Card>
+      )}
+    </Container>
+  );
 }
