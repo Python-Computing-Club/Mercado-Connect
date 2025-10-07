@@ -1,5 +1,15 @@
 export async function generateQuote(payload) {
-  const baseURL = process.env.REACT_APP_API_BASE || ""; // Define no .env.local para uso local
+  if (!payload || typeof payload !== "object") {
+    console.warn("⚠️ Payload inválido ou ausente:", payload);
+    return null;
+  }
+
+  const baseURL = process.env.REACT_APP_UBER_QUOTE || ""; // ← use variável específica para o serviço
+
+  if (!baseURL) {
+    console.error("❌ REACT_APP_UBER_QUOTE não definida no .env.local");
+    return null;
+  }
 
   try {
     const res = await fetch(`${baseURL}/api/uber-quote`, {
@@ -9,9 +19,9 @@ export async function generateQuote(payload) {
     });
 
     const data = await res.json();
-    console.log("📬 Resposta da Uber:", data);
+    console.log("📬 Resposta da Uber Quote Service:", data);
 
-    if (data.id && data.fee) {
+    if (res.ok && data.id && data.fee) {
       return {
         quoteId: data.id,
         fee: data.fee,
@@ -19,11 +29,11 @@ export async function generateQuote(payload) {
         storeId: data.external_store_id
       };
     } else {
-      console.warn("⚠️ Cotação Uber inválida:", data);
+      console.warn("⚠️ Cotação Uber inválida ou incompleta:", data);
       return null;
     }
   } catch (err) {
-    console.error("❌ Falha ao gerar cotação Uber:", err);
+    console.error("❌ Erro ao gerar cotação Uber:", err);
     return null;
   }
 }
