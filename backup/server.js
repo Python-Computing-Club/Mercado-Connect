@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 import { v2 as cloudinary } from "cloudinary";
-import cloudinaryDeleteRouter from "./cloudinaryDelete.js";
+import cloudinaryDeleteRouter from "./cloudinaty-service/routes/cloudinaryDelete.js";
 
 dotenv.config({ path: ".env" });
 
