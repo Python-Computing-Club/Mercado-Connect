@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./gerenciar-estoque.module.css";
 import FormProduto from "../../components/CadastroProdutosForm/index";
-import {criarProduto,atualizarProduto,atualizarStatusProduto,excluirProduto,escutarProdutosPorMercado,
-} from "../../services/firestore/produtos";
+import {criarProduto,atualizarProduto,atualizarStatusProduto,excluirProduto,escutarProdutosPorMercado,} from "../../services/firestore/produtos";
 import { useMarket } from "../../Context/MarketContext";
 import { useNavigate } from "react-router-dom";
 
@@ -14,18 +13,21 @@ export default function GerenciarEstoquePage() {
   const [queryText, setQueryText] = useState("");
   const [sort, setSort] = useState("nome");
   const [modoExclusao, setModoExclusao] = useState(false);
+  const [modoAlerta, setModoAlerta] = useState(false);
+  const [etapaAlerta, setEtapaAlerta] = useState("selecionar");
   const [selecionados, setSelecionados] = useState([]);
+  const [limiteEstoque, setLimiteEstoque] = useState(10);
+  const [alertasEstoque, setAlertasEstoque] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
-  if (!loading && marketId) {
-    const unsubscribe = escutarProdutosPorMercado(marketId, (lista) => {
-      setProdutos(lista);
-    });
-    return () => unsubscribe();
-  }
-}, [marketId, loading]);
-
+    if (!loading && marketId) {
+      const unsubscribe = escutarProdutosPorMercado(marketId, (lista) => {
+        setProdutos(lista);
+      });
+      return () => unsubscribe();
+    }
+  }, [marketId, loading]);
 
   const handleSubmit = async (dados, imagemFile, isToggleDisponivel = false) => {
     try {
@@ -73,6 +75,23 @@ export default function GerenciarEstoquePage() {
         alert("Erro ao excluir produtos. Veja console.");
       }
     }
+  };
+
+  const aplicarAlertasEstoque = () => {
+    if (selecionados.length === 0) {
+      alert("Nenhum produto selecionado.");
+      return;
+    }
+
+    const novosAlertas = { ...alertasEstoque };
+    selecionados.forEach((id) => {
+      novosAlertas[id] = limiteEstoque;
+    });
+
+    setAlertasEstoque(novosAlertas);
+    setSelecionados([]);
+    setModoAlerta(false);
+    setEtapaAlerta("selecionar");
   };
 
   const filtered = produtos
@@ -165,6 +184,33 @@ export default function GerenciarEstoquePage() {
               ? `Excluir (${selecionados.length})`
               : "Excluir Produtos"}
           </button>
+
+          <button
+            className={etapaAlerta === "confirmar" ? styles.alertConfirm : styles.alertButton}
+            onClick={() => {
+              if (!modoAlerta) {
+                setModoAlerta(true);
+                setSelecionados([]);
+                setEtapaAlerta("selecionar");
+              } else if (etapaAlerta === "selecionar") {
+                if (selecionados.length === 0) {
+                  alert("Selecione ao menos um produto para definir alerta.");
+                  return;
+                }
+                setEtapaAlerta("confirmar");
+              } else {
+                setModoAlerta(false);
+                setSelecionados([]);
+                setEtapaAlerta("selecionar");
+              }
+            }}
+          >
+            {modoAlerta
+              ? etapaAlerta === "confirmar"
+                ? `Confirmar alerta (${selecionados.length})`
+                : `Selecionando (${selecionados.length})`
+              : "Alerta de Estoque"}
+          </button>
         </div>
       </header>
 
@@ -172,14 +218,16 @@ export default function GerenciarEstoquePage() {
         <div className={styles.grid}>
           {filtered.map((p) => {
             const isSelected = selecionados.includes(p.id);
+            const estoqueBaixo = alertasEstoque[p.id] !== undefined && p.volume <= alertasEstoque[p.id];
             return (
               <article
                 key={p.id}
-                className={`${styles.card} ${
-                  modoExclusao && isSelected ? styles.cardSelected : ""
-                }`}
+                className={`${styles.card} 
+                  ${(modoExclusao || modoAlerta) && isSelected ? styles.cardSelected : ""} 
+                  ${estoqueBaixo ? styles.cardAlerta : ""}
+                `}
                 onClick={() => {
-                  if (modoExclusao) {
+                  if (modoExclusao || modoAlerta) {
                     setSelecionados((prev) =>
                       prev.includes(p.id)
                         ? prev.filter((x) => x !== p.id)
@@ -188,7 +236,7 @@ export default function GerenciarEstoquePage() {
                   }
                 }}
               >
-                {modoExclusao && (
+                {(modoExclusao || modoAlerta) && (
                   <div
                     className={`${styles.checkbox} ${
                       isSelected ? styles.checkboxChecked : ""
@@ -221,30 +269,12 @@ export default function GerenciarEstoquePage() {
 
                   <div className={styles.cardMeta}>
                     <div className={styles.price}>
-                      {typeof p.preco_final === "number" &&
-                      p.preco_final < p.preco ? (
-                        <>
-                          <span className={styles.oldPrice}>
-                            {Number(p.preco).toLocaleString("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
-                            })}
-                          </span>
-                          <span className={styles.discountedPrice}>
-                            {Number(p.preco_final).toLocaleString("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
-                            })}
-                          </span>
-                        </>
-                      ) : (
-                        <span className={styles.discountedPrice}>
-                          {Number(p.preco).toLocaleString("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          })}
-                        </span>
-                      )}
+                      <span className={styles.discountedPrice}>
+                        {Number(p.preco).toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </span>
                     </div>
                     <div className={styles.qty}>
                       {p.volume} {p.unidade_de_medida}
@@ -253,7 +283,14 @@ export default function GerenciarEstoquePage() {
 
                   <p className={styles.descricao}>{p.descricao}</p>
 
-                  {!modoExclusao && (
+                  {alertasEstoque[p.id] !== undefined &&
+                    p.volume <= alertasEstoque[p.id] && (
+                      <div className={styles.alertaEstoque}>
+                        ⚠️ Estoque baixo (≤ {alertasEstoque[p.id]})
+                      </div>
+                    )}
+
+                  {!modoExclusao && !modoAlerta && (
                     <div className={styles.cardActions}>
                       <button
                         className={styles.edit}
@@ -280,6 +317,44 @@ export default function GerenciarEstoquePage() {
           })}
         </div>
       </main>
+
+      {modoAlerta && etapaAlerta === "confirmar" && (
+        <div className={styles.alertPanelOverlay}>
+          <div className={styles.alertPanel}>
+            <h3>🔔 Definir Alerta de Estoque</h3>
+            <p>Defina a quantidade mínima de estoque para os produtos selecionados.</p>
+
+            <label htmlFor="limiteEstoque">Quantidade mínima:</label>
+            <input
+              id="limiteEstoque"
+              type="number"
+              min={1}
+              value={limiteEstoque}
+              onChange={(e) => setLimiteEstoque(Number(e.target.value))}
+              className={styles.alertInput}
+            />
+
+            <div className={styles.alertPanelButtons}>
+              <button
+                className={styles.alertConfirm}
+                onClick={aplicarAlertasEstoque}
+              >
+                Aplicar alerta
+              </button>
+              <button
+                className={styles.close}
+                onClick={() => {
+                  setModoAlerta(false);
+                  setSelecionados([]);
+                  setEtapaAlerta("selecionar");
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {openForm && (
         <div className={styles.modalOverlay}>

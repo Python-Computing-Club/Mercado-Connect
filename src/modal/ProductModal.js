@@ -4,6 +4,7 @@ import styles from "./productmodal.module.css";
 export default function ProductModal({ produto, onClose, onAddToCart }) {
   const [quantidade, setQuantidade] = useState(1);
   const estoqueDisponivel = produto.quantidade || 1;
+  const isInativo = produto.disponivel === false;
 
   const handleChange = (e) => {
     const value = parseInt(e.target.value);
@@ -17,6 +18,10 @@ export default function ProductModal({ produto, onClose, onAddToCart }) {
   };
 
   const handleAdicionar = () => {
+    if (isInativo) {
+      alert("Este produto está em reestocagem e não pode ser adicionado ao carrinho.");
+      return;
+    }
     onAddToCart(produto, quantidade);
     onClose();
   };
@@ -45,6 +50,10 @@ export default function ProductModal({ produto, onClose, onAddToCart }) {
         />
 
         <h2>{produto.nome}</h2>
+
+        {isInativo && (
+          <p className={styles.reestocagem}>🛒 Produto em reestocagem</p>
+        )}
 
         {produto.marca && (
           <p className={styles.details}>
@@ -93,9 +102,14 @@ export default function ProductModal({ produto, onClose, onAddToCart }) {
             max={estoqueDisponivel}
             value={quantidade}
             onChange={handleChange}
+            disabled={isInativo}
           />
-          <button className={styles.addButton} onClick={handleAdicionar}>
-            Adicionar ao Carrinho
+          <button
+            className={`${styles.addButton} ${isInativo ? styles.addButtonDisabled : ""}`}
+            onClick={handleAdicionar}
+            disabled={isInativo}
+          >
+            {isInativo ? "Indisponível" : "Adicionar ao Carrinho"}
           </button>
         </div>
       </div>

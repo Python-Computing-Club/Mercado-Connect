@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./cardhome.module.css";
 import { FiPlus, FiHeart } from "react-icons/fi";
@@ -47,8 +48,13 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
       ? item.nome || "Produto"
       : `Logo de ${item.estabelecimento || "Mercado"}`;
 
+  const isInativo = type === "produto" && item.disponivel === false;
+
   return (
-    <div className={styles.card} onClick={handleClick}>
+    <div
+      className={`${styles.card} ${isInativo ? styles.cardInativo : ""}`}
+      onClick={handleClick}
+    >
       <button
         className={styles.favoriteButton}
         onClick={(e) => {
@@ -67,7 +73,7 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
             : <FiHeart color="gray" />}
       </button>
 
-      {type === "produto" && (
+      {type === "produto" && item.disponivel !== false && (
         <button
           className={styles.addButton}
           onClick={(e) => {
@@ -85,7 +91,13 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
         {type === "produto" ? (
           <>
             <p className={styles.name}>{item.nome || "Produto sem nome"}</p>
+
+            {item.disponivel === false && (
+              <p className={styles.reestocagem}>🛒 Produto em reestocagem</p>
+            )}
+
             {item.marca && <p className={styles.marca}>{item.marca}</p>}
+
             {item.descricao && (
               <p className={styles.description}>
                 {item.descricao.length > 60
@@ -93,6 +105,7 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
                   : item.descricao}
               </p>
             )}
+
             <div className={styles.priceBlock}>
               {item.preco_final &&
               item.preco_final > 0 &&

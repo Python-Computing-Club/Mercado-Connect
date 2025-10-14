@@ -27,7 +27,7 @@ export default function useProdutos() {
         return;
       }
 
-      const disponiveis = todos.filter(p => p.disponivel);
+      const disponiveis = todos;
 
       const shuffle = (arr) => [...arr].sort(() => 0.5 - Math.random());
 

@@ -348,6 +348,111 @@
   box-shadow: 0 0 8px rgba(37, 211, 102, 0.6);
 }
 
+.alertButton {
+  background: #f0ad4e;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(240, 173, 78, 0.3);
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.alertButton:hover {
+  background: #ec9f2e;
+}
+
+.alertConfirm {
+  background: #0275d8;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(2, 117, 216, 0.3);
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.alertConfirm:hover {
+  background: #0256a3;
+}
+
+.cardAlerta {
+  background-color: #fff5f5;
+  border: 2px solid #f5c2c2;
+}
+
+.alertaEstoque {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.alertPanelOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.alertPanel {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: min(400px, 90%);
+  box-shadow: 0 12px 40px rgba(1, 46, 13, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 9999;
+}
+
+.alertPanel h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #012E0D;
+}
+
+.alertPanel p {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.alertPanel label {
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.alertInput {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e6e6e6;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.alertPanelButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+
 @media (max-width: 960px) {
   .page {
     padding: 16px;
