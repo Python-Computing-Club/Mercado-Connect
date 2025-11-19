@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../../services/firebase";
-import { atualizarPedido } from "../../services/firestore/pedidos";
+import { atualizarEstoque, atualizarPedido } from "../../services/firestore/pedidos";
 import { Container, ProgressBar, Card, Button } from "react-bootstrap";
 import { useTextBeeSms } from "../../hooks/useTextBeeSms";
 import styles from "./acompanhar-pedido.module.css";
@@ -84,12 +84,12 @@ export default function AcompanhamentoPedido() {
           const pedidoData = snapshot.data();
           setPedido(pedidoData);
           setUltimaAtualizacao(new Date());
-
           let mensagem = "";
           switch (pedidoData.status) {
             case "Confirmado":
               mensagem = "Seu pedido já foi confirmado pela loja!";
               emiteNFE(pedidoData, snapshot.id);
+              atualizarEstoque(pedidoData);
               enviarAtualizacaoPedido(mensagem);
               break;
             case "Loja está montando seu pedido":

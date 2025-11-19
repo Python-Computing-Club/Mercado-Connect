@@ -81,6 +81,7 @@ export const criarProduto = async (dados, imagemFile) => {
       preco_final,
       disponivel: dados.disponivel === undefined ? true : !!dados.disponivel,
       unidade_de_medida: dados.unidade_de_medida,
+      vendidos: 0,
       imagemUrl,
       imagemId,
       volume: dados.volume ? Number(dados.volume) : null,

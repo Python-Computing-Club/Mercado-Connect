@@ -1,5 +1,6 @@
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, increment } from "firebase/firestore";
 import { db } from "../firebase";
+import { updateCardToken } from "@mercadopago/sdk-react";
 
 const pedidosRef = collection(db, "pedidos");
 
@@ -48,3 +49,19 @@ export const excluirPedido = async (id) => {
     return false;
   }
 };
+
+export const atualizarEstoque = async (pedido) => {
+  const itens = pedido.itens;
+
+  const updatePromises = itens.map(item => {
+    const refProd = doc(db, "produtos", item.id_produto);
+
+    return updateDoc(refProd, {
+      quantidade: increment(-item.quantidade),
+      vendidos: increment(item.quantidade)
+    })
+  })
+
+  await Promise.all(updatePromises);
+  console.log("Estoque atualizado com sucesso");
+}
