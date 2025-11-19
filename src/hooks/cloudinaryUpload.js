@@ -30,7 +30,7 @@ export const uploadParaCloudinary = async (file) => {
 };
 
 export const excluirImagemCloudinary = async (publicId) => {
-  const baseURL = process.env.REACT_APP_API_BASE || ""; // Define no .env.local para uso local
+  const baseURL = process.env.REACT_APP_CLOUDINARY || "";
 
   try {
     console.log("Iniciando exclusão da imagem:", publicId);

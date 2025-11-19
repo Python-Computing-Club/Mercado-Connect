@@ -38,28 +38,33 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
   }
 
   const now = new Date();
-  const pickupReady = new Date(now.getTime() + 5 * 60000);
+  const pickupReady = new Date(); // imediatamente
   const pickupDeadline = new Date(now.getTime() + 30 * 60000);
   const dropoffReady = new Date(now.getTime() + 10 * 60000);
   const dropoffDeadline = new Date(dropoffReady.getTime() + 60 * 60000);
+
+  const manifestItems = (pedido.itens || []).map(item => {
+    const peso = calcularPeso(item.volume, item.unidade_de_medida);
+    return {
+      name: item.nome,
+      quantity: item.quantidade,
+      size: "medium",
+      dimensions: { length: 30, height: 20, depth: 10 },
+      price: item.preco_unitario > 0 ? item.preco_unitario : 1,
+      must_be_upright: false,
+      weight: peso,
+      vat_percentage: 12
+    };
+  });
+
+  const valorTotal = manifestItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const manifestTotalValue = Math.max(Number(valorTotal), 1);
 
   const body = {
     dropoff_address: `${enderecoUsuario.rua}, ${enderecoUsuario.numero}, ${enderecoUsuario.bairro}, ${enderecoUsuario.cidade} - ${enderecoUsuario.estado}`,
     dropoff_name: enderecoUsuario.nome,
     dropoff_phone_number: enderecoUsuario.telefone,
-    manifest_items: (pedido.itens || []).map(item => {
-      const peso = calcularPeso(item.volume, item.unidade_de_medida);
-      return {
-        name: item.nome,
-        quantity: item.quantidade,
-        size: "medium",
-        dimensions: { length: 30, height: 20, depth: 10 },
-        price: item.preco_unitario,
-        must_be_upright: false,
-        weight: peso,
-        vat_percentage: 12
-      };
-    }),
+    manifest_items: manifestItems,
     pickup_address: `${mercado.endereco.logradouro}, ${mercado.endereco.numero}, ${mercado.endereco.bairro}, ${mercado.endereco.cidade} - ${mercado.endereco.estado}`,
     pickup_name: mercado.estabelecimento || "Mercado Connect",
     pickup_phone_number: mercado.telefone || "+5511944806873",
@@ -101,11 +106,11 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
       picture: true
     },
     deliverable_action: "deliverable_action_meet_at_door",
-    manifest_reference: pedido.id || "ORD-20251003-SP",
-    manifest_total_value: Number(pedido.valor_total),
+    manifest_reference: pedido.id || "ORD-TEST",
+    manifest_total_value: manifestTotalValue,
     quote_id: quoteId,
     undeliverable_action: "return",
-    pickup_ready_dt: pickupReady.toISOString(),
+    pickup_ready_dt: new Date().toISOString(),
     pickup_deadline_dt: pickupDeadline.toISOString(),
     dropoff_ready_dt: dropoffReady.toISOString(),
     dropoff_deadline_dt: dropoffDeadline.toISOString(),
@@ -146,9 +151,13 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
 
   console.log("📦 Payload enviado para o backend:", JSON.stringify(body, null, 2));
 
-  const baseURL = process.env.REACT_APP_API_BASE || ""; // ← define no .env.local para uso local
+  const baseURL = process.env.REACT_APP_UBER_DELIVERY || "";
 
   try {
+    // ✅ Acorda a API da Render antes de enviar
+    await fetch(`${baseURL}/`);
+
+    // ✅ Envia a entrega
     const res = await fetch(`${baseURL}/api/uber-delivery`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -157,16 +166,35 @@ export async function createDelivery({ pedido, mercado, enderecoUsuario, quoteId
 
     const data = await res.json();
 
-    if (res.ok && data.id && data.tracking_url) {
-      return {
-        deliveryId: data.id,
-        trackingUrl: data.tracking_url,
-        status: data.status
-      };
-    } else {
+    if (!res.ok || !data.id || !data.tracking_url) {
       console.warn("❌ Erro ao criar entrega Uber:", data);
-      return null;
+
+      // ⏳ Retry após 2 segundos
+      await new Promise(r => setTimeout(r, 2000));
+      const retryRes = await fetch(`${baseURL}/api/uber-delivery`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const retryData = await retryRes.json();
+
+      if (!retryRes.ok || !retryData.id || !retryData.tracking_url) {
+        console.warn("❌ Retry também falhou:", retryData);
+        return null;
+      }
+
+      return {
+        deliveryId: retryData.id,
+        trackingUrl: retryData.tracking_url,
+        status: retryData.status
+      };
     }
+
+    return {
+      deliveryId: data.id,
+      trackingUrl: data.tracking_url,
+      status: data.status
+    };
   } catch (err) {
     console.error("❌ Erro na criação da entrega Uber:", err);
     return null;

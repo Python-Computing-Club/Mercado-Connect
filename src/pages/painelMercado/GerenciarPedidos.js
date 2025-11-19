@@ -4,7 +4,9 @@ import {
   Container,
   Spinner,
   Tabs,
-  Tab
+  Tab,
+  Card,
+  Button,
 } from "react-bootstrap";
 import {
   collection,
@@ -13,14 +15,15 @@ import {
   query,
   where,
   onSnapshot,
-  getDoc
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import PedidoCard from "../../components/Cards/PedidoCards";
 import styles from "./gerenciar-pedido.module.css";
 import { criarReembolso } from "../../services/MercadoPago";
-
 import { createDelivery } from "../../hooks/createDelivery";
+import { consultarEntregaUber } from "../../hooks/consultarEntregaUber";
+import { atualizarPedido } from "../../services/firestore/pedidos";
 
 export default function GerenciarPedidos() {
   const [pedidos, setPedidos] = useState([]);
@@ -28,6 +31,7 @@ export default function GerenciarPedidos() {
   const [activeTab, setActiveTab] = useState("ativos");
   const [loading, setLoading] = useState(true);
   const [mercado, setMercado] = useState(null);
+  const [chamandoMotorista, setChamandoMotorista] = useState(null);
 
   const navigate = useNavigate();
 
@@ -51,20 +55,22 @@ export default function GerenciarPedidos() {
 
       const mercadoRef = doc(db, "mercados", entidade.id);
 
-      getDoc(mercadoRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          const mercadoData = snapshot.data();
-          setMercado({ id: snapshot.id, ...mercadoData });
-        } else {
-          console.warn("⚠️ Mercado não encontrado no Firestore.");
-          setMercado(null);
-        }
-      }).catch((err) => {
-        console.error("❌ Erro ao buscar mercado do Firestore:", err);
-      }).finally(() => {
-        setLoading(false);
-      });
-
+      getDoc(mercadoRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const mercadoData = snapshot.data();
+            setMercado({ id: snapshot.id, ...mercadoData });
+          } else {
+            console.warn("⚠️ Mercado não encontrado no Firestore.");
+            setMercado(null);
+          }
+        })
+        .catch((err) => {
+          console.error("❌ Erro ao buscar mercado do Firestore:", err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } catch (err) {
       console.error("❌ Erro ao parsear entidade:", err);
       setLoading(false);
@@ -77,26 +83,82 @@ export default function GerenciarPedidos() {
     const pedidosRef = collection(db, "pedidos");
     const q = query(pedidosRef, where("id_mercado", "==", mercado.id));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const lista = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log("📦 Pedidos recebidos do Firestore:", lista);
-      setPedidos(lista);
-      setLoading(false);
-    }, (error) => {
-      console.error("❌ Erro ao escutar pedidos:", error);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const lista = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log("📦 Pedidos recebidos do Firestore:", lista);
+        setPedidos(lista);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("❌ Erro ao escutar pedidos:", error);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [mercado?.id]);
 
   useEffect(() => {
-    const historicos = pedidos.filter((pedido) =>
-      pedido.status === "Pedido recusado — reembolso iniciado" ||
-      pedido.status === "Entregue" ||
-      pedido.status === "Pedido finalizado"
+    const historicos = pedidos.filter(
+      (pedido) =>
+        pedido.status === "Pedido recusado — reembolso iniciado" ||
+        pedido.status === "Entregue" ||
+        pedido.status === "Pedido finalizado" ||
+        pedido.status === "Entregador aceitou a corrida" ||
+        pedido.status === "Entregador saiu para entrega" ||
+        pedido.status === "Produto está a caminho"
     );
     setHistorico(historicos);
+  }, [pedidos]);
+
+  useEffect(() => {
+    const sincronizarTodosPedidosUber = async () => {
+      const statusMap = {
+        accepted: "Entregador aceitou a corrida",
+        en_route_to_pickup: "Entregador saiu para entrega",
+        delivered: "Pedido finalizado",
+      };
+
+      const pedidosUber = pedidos.filter(
+        (p) =>
+          p.entrega === "Entrega via Uber" &&
+          p.delivery_id &&
+          p.status !== "Pedido finalizado"
+      );
+
+      for (const pedido of pedidosUber) {
+        const statusUber = await consultarEntregaUber(pedido.delivery_id);
+
+        if (!statusUber || !statusMap[statusUber]) {
+          console.log(`🔒 Status da Uber ignorado: ${statusUber}`);
+          continue;
+        }
+
+        const statusTraduzido = statusMap[statusUber];
+
+        if (statusTraduzido !== pedido.status) {
+          await atualizarPedido(pedido.id, {
+            status: statusTraduzido,
+            logs: [
+              ...(pedido.logs || []),
+              `[${new Date().toLocaleString()}] ${statusTraduzido}`,
+            ],
+          });
+          console.log(
+            `🔄 Pedido ${pedido.id} sincronizado: ${statusUber} → ${statusTraduzido}`
+          );
+        }
+      }
+    };
+
+    if (pedidos.length > 0) {
+      sincronizarTodosPedidosUber();
+    }
   }, [pedidos]);
 
   const atualizarStatus = async (idPedido, novoStatus) => {
@@ -110,7 +172,7 @@ export default function GerenciarPedidos() {
   };
 
   const validarCampos = (obj, campos) => {
-    return campos.filter(campo => {
+    return campos.filter((campo) => {
       const valor = obj[campo];
       if (typeof valor === "number") return isNaN(valor);
       return valor === undefined || valor === null || valor === "";
@@ -121,19 +183,18 @@ export default function GerenciarPedidos() {
     try {
       console.log("🟢 Aceitar pedido:", pedido.id, pedido.status);
 
-      if (pedido.status === "Aguardando confirmação" || pedido.status === "Aguardando confirmação da loja") {
+      if (
+        pedido.status === "Aguardando confirmação" ||
+        pedido.status === "Aguardando confirmação da loja"
+      ) {
         await atualizarStatus(pedido.id, "Confirmado");
       } else if (pedido.status === "Confirmado") {
         await atualizarStatus(pedido.id, "Loja está montando seu pedido");
       } else if (pedido.status === "Loja está montando seu pedido") {
-        await atualizarStatus(pedido.id, "Produto está a caminho");
-
         const enderecoUsuario = pedido.endereco_usuario;
 
         if (!mercado || !mercado.endereco || !enderecoUsuario) {
           console.warn("❌ Dados ausentes: mercado ou endereço do cliente não disponíveis.");
-          console.log("mercado:", mercado);
-          console.log("enderecoUsuario:", enderecoUsuario);
           return;
         }
 
@@ -159,26 +220,35 @@ export default function GerenciarPedidos() {
           return;
         }
 
+        setChamandoMotorista(pedido.id);
+
         const entrega = await createDelivery({
           pedido,
           mercado,
           enderecoUsuario,
-          quoteId: pedido.quote_id
+          quoteId: pedido.quote_id,
         });
 
         if (entrega) {
           await updateDoc(doc(db, "pedidos", pedido.id), {
             delivery_id: entrega.deliveryId,
-            tracking_url: entrega.trackingUrl,
-            status_entrega: entrega.status
+            status_entrega: entrega.status,
+            status: "Entregador aceitou a corrida",
+            logs: [
+              ...(pedido.logs || []),
+              `[${new Date().toLocaleString()}] Entregador aceitou a corrida`,
+            ],
           });
           console.log("🚚 Entrega criada com sucesso:", entrega);
         } else {
           console.warn("❌ Falha ao criar entrega Uber.");
         }
+
+        setChamandoMotorista(null);
       }
     } catch (error) {
       console.error("❌ Erro no handleAceitar:", error);
+      setChamandoMotorista(null);
     }
   };
 
@@ -186,7 +256,10 @@ export default function GerenciarPedidos() {
     try {
       console.log("🔴 Recusar pedido:", pedido.id, pedido.status);
 
-      if (pedido.status === "Aguardando confirmação" || pedido.status === "Aguardando confirmação da loja") {
+      if (
+        pedido.status === "Aguardando confirmação" ||
+        pedido.status === "Aguardando confirmação da loja"
+      ) {
         if (pedido.payment_id) {
           await criarReembolso(pedido.payment_id);
           console.log("💸 Reembolso iniciado para:", pedido.payment_id);
@@ -198,16 +271,36 @@ export default function GerenciarPedidos() {
     }
   };
 
-  const pedidosAtivos = pedidos.filter((pedido) =>
-    pedido.status !== "Pedido recusado — reembolso iniciado" &&
-    pedido.status !== "Pedido finalizado" &&
-    pedido.status !== "Entregue"
-  );
+  const pedidosAtivos = pedidos.filter((pedido) => {
+    const status = pedido.status?.toLowerCase();
+    const statusUber = [
+      "entregador aceitou a corrida",
+      "entregador saiu para entrega",
+      "pedido finalizado",
+      "entregue",
+    ];
+    return (
+      !statusUber.includes(status) &&
+      status !== "pedido recusado — reembolso iniciado"
+    );
+  });
+
+  const statusMensagens = {
+    "Entregador aceitou a corrida": "O entregador parceiro aceitou a corrida.",
+    "Entregador saiu para entrega": "O entregador saiu para buscar o pedido.",
+    "Produto está a caminho": "O pedido está a caminho do cliente.",
+    "Pedido finalizado": "O cliente recebeu o pedido com sucesso.",
+    "Pedido recusado — reembolso iniciado": "O pedido foi recusado e o reembolso está em andamento.",
+    Entregue: "O pedido foi entregue.",
+  };
 
   return (
     <Container className={styles.container}>
       <div className={styles.backButtonWrapper}>
-        <button onClick={() => navigate("/painel-mercado")} className={styles.backButton}>
+        <button
+          onClick={() => navigate("/painel-mercado")}
+          className={styles.backButton}
+        >
           ← Voltar para Painel do Mercado
         </button>
       </div>
@@ -227,6 +320,7 @@ export default function GerenciarPedidos() {
                 pedido={pedido}
                 onAceitar={handleAceitar}
                 onRecusar={handleRecusar}
+                chamandoMotorista={chamandoMotorista === pedido.id}
               />
             ))
           )}
@@ -236,9 +330,45 @@ export default function GerenciarPedidos() {
           {historico.length === 0 ? (
             <p>Sem pedidos finalizados ou recusados.</p>
           ) : (
-            historico.map((pedido) => (
-              <PedidoCard key={pedido.id} pedido={pedido} historico />
-            ))
+            historico.map((pedido) => {
+              const status = pedido.status;
+              const resumo = statusMensagens[status] || "Status não identificado.";
+
+              return (
+                <Card key={pedido.id} className={styles.card}>
+                  <Card.Body>
+                    <Card.Title className={styles.cardTitle}>
+                      Pedido de {pedido.id_usuario}
+                    </Card.Title>
+                    <Card.Text>
+                      <strong>Status:</strong> {status}
+                    </Card.Text>
+                    <Card.Text>
+                      <strong>Resumo:</strong> {resumo}
+                    </Card.Text>
+                    <Card.Text>
+                      <strong>Data:</strong> {pedido.data_pedido}
+                    </Card.Text>
+                    <Card.Text>
+                      <strong>Valor:</strong>{" "}
+                      {typeof pedido.valor_total === "number"
+                        ? `R$ ${pedido.valor_total.toFixed(2)}`
+                        : pedido.valor_total}
+                    </Card.Text>
+                    {pedido.logs && pedido.logs.length > 0 && (
+                      <Card.Text>
+                        <strong>Atualizações da Uber:</strong>
+                        <ul style={{ paddingLeft: "1.2rem" }}>
+                          {pedido.logs.map((log, idx) => (
+                            <li key={idx}>{log}</li>
+                          ))}
+                        </ul>
+                      </Card.Text>
+                    )}
+                  </Card.Body>
+                </Card>
+              );
+            })
           )}
         </Tab>
       </Tabs>
