@@ -88,6 +88,18 @@
   white-space: nowrap;
 }
 
+.relatorioButton {
+  background: blue;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(1, 46, 13, 0.12);
+  white-space: nowrap;
+}
+
 .deleteButton {
   background: #e21b1b;
   color: white;

@@ -165,6 +165,45 @@ export default function GerenciarEstoquePage() {
               ? `Excluir (${selecionados.length})`
               : "Excluir Produtos"}
           </button>
+          <button
+            className={styles.relatorioButton}
+            onClick={() => {
+              if(!produtos || produtos.length == 0){
+                alert("Nenhum produto cadastrado para gerar o relatório.");
+                return;
+              }
+              const cabecalho = [
+                {label: "Mercado", key: "mercado"},
+                {label: "Produto", key: "nome"},
+                {label: "Preço Unitario", key: "preco_final"},
+                {label: "Estoque", key: "quantidade"},
+                {label: "Total de Itens Vendidos", key: "vendidos"},
+                {label: "Receita Total", key: "receita"}
+              ];
+
+              const header = cabecalho.map(c => c.label).join(",");
+
+              const rows = produtos.map(prod => {
+                return cabecalho.map(c => {
+                  if (c.key === "mercado") return market?.nome;
+                  if (c.key === "receita") return (prod.vendidos * (prod?.preco_final || prod.preco)).toFixed(2);
+                  if (c.key === "preco_final") return prod?.preco_final || prod.preco;
+                  return prod[c.key] ?? "";
+                }).join(",");
+              });
+
+              const csvContent = "\uFEFF" + [header, ...rows].join("\n");
+
+              const blob = new Blob([csvContent], {type: "text/csv;charset=utf-8;"});
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "relatorio_estoque.csv";
+              link.click();
+            }}
+          >
+            Gerar Relatório de Estoque
+          </button>
         </div>
       </header>
 
