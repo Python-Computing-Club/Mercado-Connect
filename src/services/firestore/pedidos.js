@@ -1,6 +1,5 @@
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, increment } from "firebase/firestore";
 import { db } from "../firebase";
-import { updateCardToken } from "@mercadopago/sdk-react";
 
 const pedidosRef = collection(db, "pedidos");
 
