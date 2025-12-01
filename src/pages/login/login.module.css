@@ -156,6 +156,17 @@
   max-width: 400px;
   margin-bottom: 20px;
   text-align: center;
+  background: #fff;
+}
+
+.modal button {
+  background-color: #d8000c;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
 }
 
 .modal.error {
