@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./cardhome.module.css";
 import { FiPlus, FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { useFavoritos } from "../../Context/FavoritosContext";
+import { buscarMercadoPorId } from "../../services/firestore/mercados";
 
 export default function CardHome({ item, type, onClick, onAddClick }) {
   const navigate = useNavigate();
@@ -12,6 +14,38 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
     isFavoritoProduto,
     isFavoritoMercado,
   } = useFavoritos();
+
+  const [mercadoProduto, setMercadoProduto] = useState(null);
+
+  // Carrega dados do estabelecimento quando o card é de produto
+  useEffect(() => {
+    if (!item || type !== "produto") return;
+
+    const idMercado =
+      item.id_mercado ||
+      item.mercadoId ||
+      item.idMercado ||
+      item.market_id;
+
+    if (!idMercado) return;
+
+    let cancelado = false;
+
+    const carregar = async () => {
+      try {
+        const dados = await buscarMercadoPorId(idMercado);
+        if (!cancelado) setMercadoProduto(dados);
+      } catch (e) {
+        console.error("Erro ao buscar mercado do produto:", e);
+      }
+    };
+
+    carregar();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [item, type]);
 
   if (!item) {
     return (
@@ -46,6 +80,21 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
     type === "produto"
       ? item.nome || "Produto"
       : `Logo de ${item.estabelecimento || "Mercado"}`;
+
+  // Logo pequena do estabelecimento (vem da coleção de mercados)
+  const logoMercadoSrc =
+    mercadoProduto?.logo?.url ||
+    mercadoProduto?.logoUrl ||
+    mercadoProduto?.logo ||
+    null;
+
+  const nomeEstabelecimentoProduto =
+    item.estabelecimento ||
+    mercadoProduto?.estabelecimento ||
+    mercadoProduto?.nome ||
+    mercadoProduto?.nome_fantasia ||
+    mercadoProduto?.razao_social ||
+    "Estabelecimento";
 
   return (
     <div className={styles.card} onClick={handleClick}>
@@ -85,7 +134,26 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
         {type === "produto" ? (
           <>
             <p className={styles.name}>{item.nome || "Produto sem nome"}</p>
+
+            {/* Logo pequena do estabelecimento + nome */}
+            <div className={styles.marketRow}>
+              {logoMercadoSrc && (
+                <img
+                  src={logoMercadoSrc}
+                  alt={`Logo de ${nomeEstabelecimentoProduto}`}
+                  className={styles.marketLogo}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                />
+              )}
+              <span className={styles.marketName}>
+                {nomeEstabelecimentoProduto}
+              </span>
+            </div>
+
             {item.marca && <p className={styles.marca}>{item.marca}</p>}
+
             {item.descricao && (
               <p className={styles.description}>
                 {item.descricao.length > 60
@@ -93,6 +161,7 @@ export default function CardHome({ item, type, onClick, onAddClick }) {
                   : item.descricao}
               </p>
             )}
+
             <div className={styles.priceBlock}>
               {item.preco_final &&
               item.preco_final > 0 &&

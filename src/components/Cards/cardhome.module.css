@@ -241,3 +241,23 @@
     left: 6px;
   }
 }
+.marketRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.marketLogo {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.marketName {
+  font-size: 0.78rem;
+  color: #555;
+}

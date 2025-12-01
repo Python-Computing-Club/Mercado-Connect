@@ -257,6 +257,112 @@ body,
   margin-top: 4px;
 }
 
+/* ===== Modal de alerta de recompra ===== */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+}
+
+.modalBox {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 16px;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  padding: 18px 20px 16px;
+  box-sizing: border-box;
+}
+
+.modalBox h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #004d00;
+}
+
+.modalBox p {
+  margin: 0;
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.modalPrimary,
+.modalSecondary {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.05s ease;
+}
+
+/* Botão "Limpar carrinho" – verde padrão do site */
+.modalPrimary {
+  background-color: #004d00;
+  color: #ffffff;
+}
+
+.modalPrimary:hover {
+  background-color: #003300;
+  transform: translateY(-1px);
+}
+
+/* Botão "Deixar para lá" – cinza claro */
+.modalSecondary {
+  background-color: #f1f3f5;
+  color: #333;
+}
+
+.modalSecondary:hover {
+  background-color: #e0e3e7;
+  transform: translateY(-1px);
+}
+
+/* Responsividade do modal */
+@media (max-width: 480px) {
+  .modalBox {
+    margin: 0 12px;
+    padding: 16px 14px 14px;
+  }
+
+  .modalBox h3 {
+    font-size: 1rem;
+  }
+
+  .modalBox p {
+    font-size: 0.9rem;
+  }
+
+  .modalButtons {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .modalPrimary,
+  .modalSecondary {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 /* ✅ Responsividade */
 @media (max-width: 600px) {
   .cartContainer {
