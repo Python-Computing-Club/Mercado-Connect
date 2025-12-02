@@ -1,6 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";
 import fetch from "node-fetch";
 import { v2 as cloudinary } from "cloudinary";
 import cloudinaryDeleteRouter from "./cloudinaryDelete.js";
@@ -15,21 +14,35 @@ console.log("Cloudinary env:", {
 
 const app = express();
 
+// 🌍 CORS totalmente liberado — precisa vir antes de qualquer outro middleware
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*"); // Libera para qualquer origem
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization"); // Corrigido
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204); // Preflight resolvido
+  }
+
+  next();
+});
+
+// 🧠 JSON parser depois do CORS
+app.use(express.json());
+
+// ☁️ Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-app.use(cors());
-app.use(express.json());
-
 // 🌩️ Cloudinary delete
 app.use("/api/cloudinary", cloudinaryDeleteRouter);
 
 // 🔍 Rota raiz
 app.get("/", (req, res) => {
-  res.send("✅ Backend rodando e CORS habilitado!");
+  res.send("✅ Backend rodando e CORS habilitado para todos!");
 });
 
 // 💰 Cotação Uber
@@ -98,7 +111,8 @@ app.post("/api/uber-delivery", async (req, res) => {
   }
 });
 
+// 🟢 Inicializa servidor
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
